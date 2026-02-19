@@ -1,0 +1,15 @@
+{
+  "name": "backpack-crm",
+  "version": "1.0.0",
+  "description": "Backpack CRM - Learning Centre Management System",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ejs": "^3.1.9",
+    "uuid": "^9.0.0"
+  }
+}

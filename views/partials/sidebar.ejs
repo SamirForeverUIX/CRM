@@ -1,0 +1,19 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <a href="/">Backpack CRM</a>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/" class="nav-link<%= page === 'dashboard' ? ' active' : '' %>">
+      <span class="nav-icon">&#9632;</span> Dashboard
+    </a>
+    <a href="/teachers" class="nav-link<%= page === 'teachers' ? ' active' : '' %>">
+      <span class="nav-icon">&#9670;</span> Teachers
+    </a>
+    <a href="/groups" class="nav-link<%= page === 'groups' ? ' active' : '' %>">
+      <span class="nav-icon">&#9654;</span> Groups
+    </a>
+    <a href="/students" class="nav-link<%= page === 'students' ? ' active' : '' %>">
+      <span class="nav-icon">&#9679;</span> Students
+    </a>
+  </nav>
+</aside>
