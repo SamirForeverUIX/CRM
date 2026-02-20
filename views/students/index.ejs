@@ -3,11 +3,74 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <h1>Students</h1>
-    <div class="empty-state">
-      <p>Students module coming soon.</p>
-      <p>You will be able to manage students, track payments, and view attendance records.</p>
+    <div class="page-header">
+      <h1>Students</h1>
+      <a href="/students/add" class="btn btn-primary">+ Add Student</a>
     </div>
+
+    <div class="filter-bar">
+      <form action="/students" method="GET" class="filter-form">
+        <input type="text" name="search" placeholder="Search by name or phone..." value="<%= search %>">
+        <select name="group">
+          <option value="">All Groups</option>
+          <% groups.forEach(g => { %>
+            <option value="<%= g.id %>" <%= filterGroup === g.id ? 'selected' : '' %>><%= g.name %></option>
+          <% }) %>
+        </select>
+        <select name="debt">
+          <option value="">All Payment Status</option>
+          <option value="unpaid" <%= filterDebt === 'unpaid' ? 'selected' : '' %>>Has Unpaid/Partial</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-small">Filter</button>
+        <a href="/students" class="btn btn-secondary btn-small">Clear</a>
+      </form>
+    </div>
+
+    <% if (students.length === 0) { %>
+      <div class="empty-state">
+        <p>No students found.</p>
+        <a href="/students/add" class="btn btn-primary">Add your first student</a>
+      </div>
+    <% } else { %>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Phone</th>
+            <th>Groups</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% students.forEach((student, i) => { %>
+            <tr>
+              <td><%= i + 1 %></td>
+              <td><a href="/students/view/<%= student.id %>" class="table-link"><%= student.firstName %></a></td>
+              <td><%= student.lastName %></td>
+              <td><%= student.phone %></td>
+              <td>
+                <% if (student.groupNames.length > 0) { %>
+                  <% student.groupNames.forEach(name => { %>
+                    <span class="tag"><%= name %></span>
+                  <% }) %>
+                <% } else { %>
+                  <span class="muted">None</span>
+                <% } %>
+              </td>
+              <td class="actions-cell">
+                <a href="/students/view/<%= student.id %>" class="btn btn-small btn-secondary">View</a>
+                <a href="/students/edit/<%= student.id %>" class="btn btn-small btn-edit">Edit</a>
+                <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this student?')">
+                  <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
   </div>
 </main>
 <%- include('../partials/footer') %>

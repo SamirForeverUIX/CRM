@@ -1,0 +1,51 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<main class="main-content">
+  <%- include('../partials/header') %>
+  <div class="content-area">
+    <div class="page-header">
+      <h1>Courses</h1>
+      <a href="/courses/add" class="btn btn-primary">+ Add Course</a>
+    </div>
+
+    <% if (search) { %>
+      <p class="search-info">Search results for "<strong><%= search %></strong>" — <a href="/courses">Clear</a></p>
+    <% } %>
+
+    <% if (courses.length === 0) { %>
+      <div class="empty-state">
+        <p>No courses found.</p>
+        <a href="/courses/add" class="btn btn-primary">Add your first course</a>
+      </div>
+    <% } else { %>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Course Name</th>
+            <th>Level</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% courses.forEach((course, i) => { %>
+            <tr>
+              <td><%= i + 1 %></td>
+              <td><%= course.name %></td>
+              <td><%= course.level || '—' %></td>
+              <td><%= course.description ? course.description.substring(0, 60) + (course.description.length > 60 ? '...' : '') : '—' %></td>
+              <td class="actions-cell">
+                <a href="/courses/edit/<%= course.id %>" class="btn btn-small btn-edit">Edit</a>
+                <form action="/courses/delete/<%= course.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this course?')">
+                  <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</main>
+<%- include('../partials/footer') %>

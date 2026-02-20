@@ -1,11 +1,14 @@
 <header class="top-header">
   <div class="header-left">
-    <form class="search-form" action="/teachers" method="GET">
-      <input type="text" name="search" placeholder="Search teachers..." value="">
+    <form class="search-form" action="/search" method="GET">
+      <input type="text" name="q" placeholder="Search students, teachers, groups..." value="">
       <button type="submit">Search</button>
     </form>
   </div>
   <div class="header-right">
-    <a href="/teachers/add" class="btn btn-primary">+ Add Teacher</a>
+    <a href="/settings" class="profile-btn">
+      <span class="profile-icon">&#9787;</span>
+      <span class="profile-label">Admin</span>
+    </a>
   </div>
 </header>

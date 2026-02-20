@@ -1,0 +1,50 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<main class="main-content">
+  <%- include('../partials/header') %>
+  <div class="content-area">
+    <div class="page-header">
+      <h1>Add Student</h1>
+      <a href="/students" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="/students/add" method="POST" class="form-card">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" name="firstName" required placeholder="Enter first name">
+      </div>
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" name="lastName" required placeholder="Enter last name">
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="text" id="phone" name="phone" required placeholder="Enter phone number">
+      </div>
+      <div class="form-group">
+        <label>Assign to Groups</label>
+        <% if (groups.length === 0) { %>
+          <p class="muted">No groups available. <a href="/groups/add">Create a group first.</a></p>
+        <% } else { %>
+          <div class="checkbox-group">
+            <% groups.forEach(g => { %>
+              <label class="checkbox-label">
+                <input type="checkbox" name="groupIds" value="<%= g.id %>">
+                <%= g.name %>
+              </label>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add Student</button>
+        <a href="/students" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</main>
+<%- include('../partials/footer') %>

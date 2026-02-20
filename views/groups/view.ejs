@@ -1,0 +1,82 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<main class="main-content">
+  <%- include('../partials/header') %>
+  <div class="content-area">
+    <div class="page-header">
+      <h1><%= group.name %></h1>
+      <div>
+        <a href="/groups/edit/<%= group.id %>" class="btn btn-primary">Edit Group</a>
+        <a href="/groups" class="btn btn-secondary">Back to List</a>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>Group Info</h3>
+        <div class="detail-row">
+          <span class="detail-label">Course:</span>
+          <span><%= course ? course.name : '—' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Teacher:</span>
+          <span><%= teacher ? teacher.firstName + ' ' + teacher.lastName : '—' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Start Date:</span>
+          <span><%= group.startDate || '—' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Schedule:</span>
+          <span><%= group.schedule || '—' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Duration:</span>
+          <span><%= group.duration || '—' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Price/Month:</span>
+          <span>$<%= (group.price || 0).toFixed(2) %></span>
+        </div>
+      </div>
+
+      <% if (group.notes) { %>
+        <div class="detail-card">
+          <h3>Notes</h3>
+          <p><%= group.notes %></p>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="section-block">
+      <h2>Students in this Group (<%= students.length %>)</h2>
+      <% if (students.length === 0) { %>
+        <p class="muted">No students assigned to this group yet.</p>
+      <% } else { %>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Phone</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% students.forEach((s, i) => { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= s.firstName %></td>
+                <td><%= s.lastName %></td>
+                <td><%= s.phone %></td>
+                <td><a href="/students/view/<%= s.id %>" class="btn btn-small btn-secondary">View</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

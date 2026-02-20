@@ -1,0 +1,90 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<main class="main-content">
+  <%- include('../partials/header') %>
+  <div class="content-area">
+    <div class="page-header">
+      <h1><%= student.firstName %> <%= student.lastName %></h1>
+      <div>
+        <a href="/students/edit/<%= student.id %>" class="btn btn-primary">Edit Student</a>
+        <a href="/students" class="btn btn-secondary">Back to List</a>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>Student Info</h3>
+        <div class="detail-row">
+          <span class="detail-label">Phone:</span>
+          <span><%= student.phone %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Groups:</span>
+          <span>
+            <% if (studentGroups.length > 0) { %>
+              <% studentGroups.forEach(g => { %>
+                <a href="/groups/view/<%= g.id %>" class="tag"><%= g.name %></a>
+              <% }) %>
+            <% } else { %>
+              <span class="muted">Not assigned to any group</span>
+            <% } %>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-header">
+        <h2>Payments</h2>
+      </div>
+
+      <form action="/students/payment/<%= student.id %>" method="POST" class="payment-form">
+        <input type="number" name="amount" step="0.01" min="0" placeholder="Amount" required>
+        <input type="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>">
+        <select name="status">
+          <option value="paid">Paid</option>
+          <option value="partial">Partial</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-small">Add Payment</button>
+      </form>
+
+      <% const payments = student.payments || []; %>
+      <% if (payments.length === 0) { %>
+        <p class="muted" style="margin-top: 16px;">No payments recorded yet.</p>
+      <% } else { %>
+        <table class="data-table" style="margin-top: 16px;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach((p, i) => { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= p.date %></td>
+                <td>$<%= (p.amount || 0).toFixed(2) %></td>
+                <td>
+                  <span class="status-badge status-<%= p.status %>"><%= p.status %></span>
+                </td>
+                <td>
+                  <form action="/students/payment/<%= student.id %>/delete/<%= p.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this payment?')">
+                    <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% const totalPaid = payments.filter(p => p.status === 'paid' || p.status === 'partial').reduce((sum, p) => sum + (p.amount || 0), 0); %>
+        <p class="payment-total">Total Paid: <strong>$<%= totalPaid.toFixed(2) %></strong></p>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

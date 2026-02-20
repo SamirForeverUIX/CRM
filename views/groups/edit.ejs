@@ -1,0 +1,65 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<main class="main-content">
+  <%- include('../partials/header') %>
+  <div class="content-area">
+    <div class="page-header">
+      <h1>Edit Group</h1>
+      <a href="/groups" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="/groups/edit/<%= group.id %>" method="POST" class="form-card">
+      <div class="form-group">
+        <label for="name">Group Name</label>
+        <input type="text" id="name" name="name" required value="<%= group.name %>">
+      </div>
+      <div class="form-group">
+        <label for="courseId">Course</label>
+        <select id="courseId" name="courseId">
+          <option value="">— Select Course —</option>
+          <% courses.forEach(c => { %>
+            <option value="<%= c.id %>" <%= group.courseId === c.id ? 'selected' : '' %>><%= c.name %> (<%= c.level %>)</option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="teacherId">Assigned Teacher</label>
+        <select id="teacherId" name="teacherId">
+          <option value="">— Select Teacher —</option>
+          <% teachers.forEach(t => { %>
+            <option value="<%= t.id %>" <%= group.teacherId === t.id ? 'selected' : '' %>><%= t.firstName %> <%= t.lastName %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="startDate">Start Date</label>
+        <input type="date" id="startDate" name="startDate" value="<%= group.startDate %>">
+      </div>
+      <div class="form-group">
+        <label for="schedule">Schedule</label>
+        <input type="text" id="schedule" name="schedule" value="<%= group.schedule %>">
+      </div>
+      <div class="form-group">
+        <label for="duration">Duration</label>
+        <input type="text" id="duration" name="duration" value="<%= group.duration %>">
+      </div>
+      <div class="form-group">
+        <label for="price">Price per Month ($)</label>
+        <input type="number" id="price" name="price" step="0.01" min="0" value="<%= group.price %>">
+      </div>
+      <div class="form-group">
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Lesson notes, group info..."><%= group.notes || '' %></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="/groups" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</main>
+<%- include('../partials/footer') %>

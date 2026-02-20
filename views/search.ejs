@@ -1,0 +1,107 @@
+<%- include('partials/head') %>
+<%- include('partials/sidebar') %>
+<main class="main-content">
+  <%- include('partials/header') %>
+  <div class="content-area">
+    <h1>Search Results</h1>
+
+    <% if (!query) { %>
+      <div class="empty-state">
+        <p>Enter a search term in the header to find teachers, students, groups, or courses.</p>
+      </div>
+    <% } else { %>
+      <p class="search-info">Results for "<strong><%= query %></strong>"</p>
+
+      <% const r = results; %>
+      <% const totalResults = r.teachers.length + r.groups.length + r.students.length + r.courses.length; %>
+
+      <% if (totalResults === 0) { %>
+        <div class="empty-state">
+          <p>No results found for "<%= query %>".</p>
+        </div>
+      <% } else { %>
+
+        <% if (r.teachers.length > 0) { %>
+          <div class="search-section">
+            <h2>Teachers (<%= r.teachers.length %>)</h2>
+            <table class="data-table">
+              <thead>
+                <tr><th>Name</th><th>Phone</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <% r.teachers.forEach(t => { %>
+                  <tr>
+                    <td><%= t.firstName %> <%= t.lastName %></td>
+                    <td><%= t.phone %></td>
+                    <td><a href="/teachers/edit/<%= t.id %>" class="btn btn-small btn-edit">Edit</a></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+
+        <% if (r.students.length > 0) { %>
+          <div class="search-section">
+            <h2>Students (<%= r.students.length %>)</h2>
+            <table class="data-table">
+              <thead>
+                <tr><th>Name</th><th>Phone</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <% r.students.forEach(s => { %>
+                  <tr>
+                    <td><%= s.firstName %> <%= s.lastName %></td>
+                    <td><%= s.phone %></td>
+                    <td><a href="/students/view/<%= s.id %>" class="btn btn-small btn-secondary">View</a></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+
+        <% if (r.groups.length > 0) { %>
+          <div class="search-section">
+            <h2>Groups (<%= r.groups.length %>)</h2>
+            <table class="data-table">
+              <thead>
+                <tr><th>Group Name</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <% r.groups.forEach(g => { %>
+                  <tr>
+                    <td><%= g.name %></td>
+                    <td><a href="/groups/view/<%= g.id %>" class="btn btn-small btn-secondary">View</a></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+
+        <% if (r.courses.length > 0) { %>
+          <div class="search-section">
+            <h2>Courses (<%= r.courses.length %>)</h2>
+            <table class="data-table">
+              <thead>
+                <tr><th>Name</th><th>Level</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <% r.courses.forEach(c => { %>
+                  <tr>
+                    <td><%= c.name %></td>
+                    <td><%= c.level || '—' %></td>
+                    <td><a href="/courses/edit/<%= c.id %>" class="btn btn-small btn-edit">Edit</a></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+
+      <% } %>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/footer') %>
