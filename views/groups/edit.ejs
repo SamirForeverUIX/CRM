@@ -20,7 +20,7 @@
       <div class="form-group">
         <label for="courseId">Course</label>
         <select id="courseId" name="courseId">
-          <option value="">— Select Course —</option>
+          <option value="">-- Select Course --</option>
           <% courses.forEach(c => { %>
             <option value="<%= c.id %>" <%= group.courseId === c.id ? 'selected' : '' %>><%= c.name %> (<%= c.level %>)</option>
           <% }) %>
@@ -29,7 +29,7 @@
       <div class="form-group">
         <label for="teacherId">Assigned Teacher</label>
         <select id="teacherId" name="teacherId">
-          <option value="">— Select Teacher —</option>
+          <option value="">-- Select Teacher --</option>
           <% teachers.forEach(t => { %>
             <option value="<%= t.id %>" <%= group.teacherId === t.id ? 'selected' : '' %>><%= t.firstName %> <%= t.lastName %></option>
           <% }) %>

@@ -3,10 +3,16 @@
 <main class="main-content">
   <%- include('partials/header') %>
   <div class="content-area">
-    <h1>Search Results</h1>
+    <h1 style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search Results
+    </h1>
 
     <% if (!query) { %>
       <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
         <p>Enter a search term in the header to find teachers, students, groups, or courses.</p>
       </div>
     <% } else { %>
@@ -17,21 +23,27 @@
 
       <% if (totalResults === 0) { %>
         <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
           <p>No results found for "<%= query %>".</p>
         </div>
       <% } else { %>
 
         <% if (r.teachers.length > 0) { %>
           <div class="search-section">
-            <h2>Teachers (<%= r.teachers.length %>)</h2>
+            <h2>Teachers <span class="count-badge"><%= r.teachers.length %></span></h2>
             <table class="data-table">
               <thead>
                 <tr><th>Name</th><th>Phone</th><th>Actions</th></tr>
               </thead>
               <tbody>
-                <% r.teachers.forEach(t => { %>
+                <% r.teachers.forEach(function(t, i) { %>
                   <tr>
-                    <td><%= t.firstName %> <%= t.lastName %></td>
+                    <td style="display:flex;align-items:center;gap:10px;">
+                      <div class="avatar avatar-sm avatar-gradient-<%= (i % 6) + 1 %>"><%= t.firstName.charAt(0) %><%= t.lastName.charAt(0) %></div>
+                      <%= t.firstName %> <%= t.lastName %>
+                    </td>
                     <td><%= t.phone %></td>
                     <td><a href="/teachers/edit/<%= t.id %>" class="btn btn-small btn-edit">Edit</a></td>
                   </tr>
@@ -43,15 +55,18 @@
 
         <% if (r.students.length > 0) { %>
           <div class="search-section">
-            <h2>Students (<%= r.students.length %>)</h2>
+            <h2>Students <span class="count-badge"><%= r.students.length %></span></h2>
             <table class="data-table">
               <thead>
                 <tr><th>Name</th><th>Phone</th><th>Actions</th></tr>
               </thead>
               <tbody>
-                <% r.students.forEach(s => { %>
+                <% r.students.forEach(function(s, i) { %>
                   <tr>
-                    <td><%= s.firstName %> <%= s.lastName %></td>
+                    <td style="display:flex;align-items:center;gap:10px;">
+                      <div class="avatar avatar-sm avatar-gradient-<%= (i % 6) + 1 %>"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
+                      <%= s.firstName %> <%= s.lastName %>
+                    </td>
                     <td><%= s.phone %></td>
                     <td><a href="/students/view/<%= s.id %>" class="btn btn-small btn-secondary">View</a></td>
                   </tr>
@@ -63,13 +78,13 @@
 
         <% if (r.groups.length > 0) { %>
           <div class="search-section">
-            <h2>Groups (<%= r.groups.length %>)</h2>
+            <h2>Groups <span class="count-badge"><%= r.groups.length %></span></h2>
             <table class="data-table">
               <thead>
                 <tr><th>Group Name</th><th>Actions</th></tr>
               </thead>
               <tbody>
-                <% r.groups.forEach(g => { %>
+                <% r.groups.forEach(function(g) { %>
                   <tr>
                     <td><%= g.name %></td>
                     <td><a href="/groups/view/<%= g.id %>" class="btn btn-small btn-secondary">View</a></td>
@@ -82,16 +97,16 @@
 
         <% if (r.courses.length > 0) { %>
           <div class="search-section">
-            <h2>Courses (<%= r.courses.length %>)</h2>
+            <h2>Courses <span class="count-badge"><%= r.courses.length %></span></h2>
             <table class="data-table">
               <thead>
                 <tr><th>Name</th><th>Level</th><th>Actions</th></tr>
               </thead>
               <tbody>
-                <% r.courses.forEach(c => { %>
+                <% r.courses.forEach(function(c) { %>
                   <tr>
                     <td><%= c.name %></td>
-                    <td><%= c.level || '—' %></td>
+                    <td><%= c.level || '<span class="muted">--</span>' %></td>
                     <td><a href="/courses/edit/<%= c.id %>" class="btn btn-small btn-edit">Edit</a></td>
                   </tr>
                 <% }) %>

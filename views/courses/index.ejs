@@ -4,7 +4,7 @@
   <%- include('../partials/header') %>
   <div class="content-area">
     <div class="page-header">
-      <h1>Courses</h1>
+      <h1>Courses <span class="count-badge"><%= courses.length %></span></h1>
       <a href="/courses/add" class="btn btn-primary">+ Add Course</a>
     </div>
 
@@ -14,6 +14,9 @@
 
     <% if (courses.length === 0) { %>
       <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
         <p>No courses found.</p>
         <a href="/courses/add" class="btn btn-primary">Add your first course</a>
       </div>
@@ -32,9 +35,15 @@
           <% courses.forEach((course, i) => { %>
             <tr>
               <td><%= i + 1 %></td>
-              <td><%= course.name %></td>
-              <td><%= course.level || '—' %></td>
-              <td><%= course.description ? course.description.substring(0, 60) + (course.description.length > 60 ? '...' : '') : '—' %></td>
+              <td style="font-weight:600;color:var(--primary-light);"><%= course.name %></td>
+              <td>
+                <% if (course.level) { %>
+                  <span class="tag"><%= course.level %></span>
+                <% } else { %>
+                  <span class="muted">--</span>
+                <% } %>
+              </td>
+              <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= course.description ? course.description.substring(0, 60) + (course.description.length > 60 ? '...' : '') : '<span class="muted">--</span>' %></td>
               <td class="actions-cell">
                 <a href="/courses/edit/<%= course.id %>" class="btn btn-small btn-edit">Edit</a>
                 <form action="/courses/delete/<%= course.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this course?')">

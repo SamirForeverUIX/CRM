@@ -150,6 +150,35 @@ router.post('/edit/:id', (req, res) => {
   res.redirect('/groups');
 });
 
+// Save attendance
+router.post('/:id/attendance', (req, res) => {
+  const groupId = req.params.id;
+  const { date } = req.body;
+  let { present } = req.body;
+
+  if (!present) present = [];
+  else if (!Array.isArray(present)) present = [present];
+
+  const groups = readGroups();
+  const group = groups.find(g => g.id === groupId);
+  if (!group) return res.redirect('/groups');
+
+  if (!group.attendance) group.attendance = [];
+
+  // Remove existing record for same date
+  group.attendance = group.attendance.filter(a => a.date !== date);
+  group.attendance.push({
+    date: date || new Date().toISOString().split('T')[0],
+    present
+  });
+
+  const index = groups.findIndex(g => g.id === groupId);
+  groups[index] = group;
+  writeGroups(groups);
+
+  res.redirect('/groups/view/' + groupId);
+});
+
 // Delete group
 router.post('/delete/:id', (req, res) => {
   let groups = readGroups();
