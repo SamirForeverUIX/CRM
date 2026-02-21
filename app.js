@@ -16,6 +16,9 @@ app.use('/', require('./routes/dashboard'));
 app.use('/teachers', require('./routes/teachers'));
 app.use('/groups', require('./routes/groups'));
 app.use('/students', require('./routes/students'));
+app.use('/courses', require('./routes/courses'));
+app.use('/settings', require('./routes/settings'));
+app.use('/search', require('./routes/search'));
 
 app.listen(PORT, () => {
   console.log(`CRM running on http://localhost:${PORT}`);

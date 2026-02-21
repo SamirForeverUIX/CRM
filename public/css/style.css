@@ -82,6 +82,12 @@ a {
   text-align: center;
 }
 
+.nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 24px;
+}
+
 /* === Main Content === */
 .main-content {
   margin-left: 250px;
@@ -120,7 +126,7 @@ a {
   border: 1px solid #d0d0d0;
   border-radius: 6px;
   font-size: 14px;
-  width: 260px;
+  width: 300px;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -150,6 +156,32 @@ a {
   gap: 12px;
 }
 
+/* === Profile Button === */
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f4f5f7;
+  border-radius: 20px;
+  transition: background 0.2s;
+}
+
+.profile-btn:hover {
+  background: #e0e4e4;
+}
+
+.profile-icon {
+  font-size: 20px;
+  color: #2f4f4f;
+}
+
+.profile-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2f4f4f;
+}
+
 /* === Content Area === */
 .content-area {
   padding: 32px;
@@ -167,6 +199,11 @@ a {
 .page-header h1 {
   font-size: 24px;
   color: #2f4f4f;
+}
+
+.page-header div {
+  display: flex;
+  gap: 8px;
 }
 
 /* === Buttons === */
@@ -271,6 +308,15 @@ a {
   padding: 0;
 }
 
+.table-link {
+  color: #2f4f4f;
+  font-weight: 600;
+}
+
+.table-link:hover {
+  text-decoration: underline;
+}
+
 /* === Forms === */
 .form-card {
   background: #fff;
@@ -300,6 +346,7 @@ a {
   border: 1px solid #d0d0d0;
   border-radius: 6px;
   font-size: 14px;
+  font-family: inherit;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -316,6 +363,27 @@ a {
   margin-top: 24px;
 }
 
+/* === Checkbox Group === */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
 /* === Alerts === */
 .alert {
   padding: 12px 18px;
@@ -330,10 +398,16 @@ a {
   border: 1px solid #f5c6cb;
 }
 
+.alert-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
 /* === Stats Grid (Dashboard) === */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 24px;
   margin-bottom: 40px;
 }
@@ -344,6 +418,15 @@ a {
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   text-align: center;
+}
+
+.stat-card-link {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.stat-card-link:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .stat-number {
@@ -368,6 +451,7 @@ a {
 .actions-row {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .action-card {
@@ -413,4 +497,177 @@ a {
 
 .search-info a:hover {
   text-decoration: underline;
+}
+
+/* === Filter Bar === */
+.filter-bar {
+  margin-bottom: 20px;
+}
+
+.filter-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-form input,
+.filter-form select {
+  padding: 8px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.filter-form input {
+  width: 220px;
+}
+
+.filter-form input:focus,
+.filter-form select:focus {
+  border-color: #2f4f4f;
+}
+
+/* === Tags === */
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  background: #e8ecec;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #2f4f4f;
+  margin: 2px 4px 2px 0;
+}
+
+a.tag:hover {
+  background: #2f4f4f;
+  color: #fff;
+}
+
+/* === Muted text === */
+.muted {
+  color: #999;
+  font-size: 13px;
+}
+
+/* === Detail Grid (View pages) === */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.detail-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.detail-card h3 {
+  font-size: 16px;
+  color: #2f4f4f;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row {
+  display: flex;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.detail-label {
+  font-weight: 600;
+  min-width: 120px;
+  color: #555;
+}
+
+/* === Section Block === */
+.section-block {
+  margin-top: 32px;
+}
+
+.section-block h2 {
+  font-size: 18px;
+  color: #2f4f4f;
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+/* === Payment Form === */
+.payment-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.payment-form input,
+.payment-form select {
+  padding: 8px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.payment-form input:focus,
+.payment-form select:focus {
+  border-color: #2f4f4f;
+}
+
+.payment-form input[type="number"] {
+  width: 120px;
+}
+
+.payment-total {
+  margin-top: 16px;
+  font-size: 15px;
+  color: #2f4f4f;
+}
+
+/* === Status Badges === */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-paid {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-partial {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.status-unpaid {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+/* === Search Results Sections === */
+.search-section {
+  margin-bottom: 32px;
+}
+
+.search-section h2 {
+  font-size: 18px;
+  color: #2f4f4f;
+  margin-bottom: 12px;
 }

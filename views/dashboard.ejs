@@ -5,17 +5,25 @@
   <div class="content-area">
     <h1>Dashboard</h1>
     <div class="stats-grid">
-      <div class="stat-card">
+      <a href="/teachers" class="stat-card stat-card-link">
         <div class="stat-number"><%= teacherCount %></div>
         <div class="stat-label">Teachers</div>
-      </div>
-      <div class="stat-card">
+      </a>
+      <a href="/groups" class="stat-card stat-card-link">
         <div class="stat-number"><%= groupCount %></div>
         <div class="stat-label">Groups</div>
-      </div>
-      <div class="stat-card">
+      </a>
+      <a href="/students" class="stat-card stat-card-link">
         <div class="stat-number"><%= studentCount %></div>
         <div class="stat-label">Students</div>
+      </a>
+      <a href="/courses" class="stat-card stat-card-link">
+        <div class="stat-number"><%= courseCount %></div>
+        <div class="stat-label">Courses</div>
+      </a>
+      <div class="stat-card">
+        <div class="stat-number">$<%= totalIncome.toFixed(2) %></div>
+        <div class="stat-label">Total Income</div>
       </div>
     </div>
 
@@ -23,8 +31,9 @@
       <h2>Quick Actions</h2>
       <div class="actions-row">
         <a href="/teachers/add" class="action-card">+ Add Teacher</a>
-        <a href="/groups" class="action-card">View Groups</a>
-        <a href="/students" class="action-card">View Students</a>
+        <a href="/groups/add" class="action-card">+ Add Group</a>
+        <a href="/students/add" class="action-card">+ Add Student</a>
+        <a href="/courses/add" class="action-card">+ Add Course</a>
       </div>
     </div>
   </div>
