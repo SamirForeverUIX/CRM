@@ -4,7 +4,7 @@
   <%- include('../partials/header') %>
   <div class="content-area">
     <div class="page-header">
-      <h1>Students</h1>
+      <h1>Students <span class="count-badge"><%= students.length %></span></h1>
       <a href="/students/add" class="btn btn-primary">+ Add Student</a>
     </div>
 
@@ -28,6 +28,9 @@
 
     <% if (students.length === 0) { %>
       <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
         <p>No students found.</p>
         <a href="/students/add" class="btn btn-primary">Add your first student</a>
       </div>
@@ -36,8 +39,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>First Name</th>
-            <th>Last Name</th>
+            <th>Student</th>
             <th>Phone</th>
             <th>Groups</th>
             <th>Actions</th>
@@ -47,8 +49,12 @@
           <% students.forEach((student, i) => { %>
             <tr>
               <td><%= i + 1 %></td>
-              <td><a href="/students/view/<%= student.id %>" class="table-link"><%= student.firstName %></a></td>
-              <td><%= student.lastName %></td>
+              <td>
+                <a href="/students/view/<%= student.id %>" class="table-link" style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar avatar-sm avatar-gradient-<%= (i % 6) + 1 %>"><%= student.firstName.charAt(0) %><%= student.lastName.charAt(0) %></div>
+                  <%= student.firstName %> <%= student.lastName %>
+                </a>
+              </td>
               <td><%= student.phone %></td>
               <td>
                 <% if (student.groupNames.length > 0) { %>

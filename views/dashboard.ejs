@@ -3,25 +3,46 @@
 <main class="main-content">
   <%- include('partials/header') %>
   <div class="content-area">
-    <h1>Dashboard</h1>
+
+    <div class="welcome-banner">
+      <h1>Welcome back, Admin</h1>
+      <p>Here's what's happening at your learning centre today.</p>
+      <div class="welcome-date"><%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+    </div>
+
     <div class="stats-grid">
       <a href="/teachers" class="stat-card stat-card-link">
+        <div class="stat-icon teachers">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
         <div class="stat-number"><%= teacherCount %></div>
         <div class="stat-label">Teachers</div>
       </a>
       <a href="/groups" class="stat-card stat-card-link">
+        <div class="stat-icon groups">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
         <div class="stat-number"><%= groupCount %></div>
         <div class="stat-label">Groups</div>
       </a>
       <a href="/students" class="stat-card stat-card-link">
+        <div class="stat-icon students">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
         <div class="stat-number"><%= studentCount %></div>
         <div class="stat-label">Students</div>
       </a>
       <a href="/courses" class="stat-card stat-card-link">
+        <div class="stat-icon courses">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
         <div class="stat-number"><%= courseCount %></div>
         <div class="stat-label">Courses</div>
       </a>
       <div class="stat-card">
+        <div class="stat-icon income">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
         <div class="stat-number">$<%= totalIncome.toFixed(2) %></div>
         <div class="stat-label">Total Income</div>
       </div>
@@ -30,12 +51,90 @@
     <div class="quick-actions">
       <h2>Quick Actions</h2>
       <div class="actions-row">
-        <a href="/teachers/add" class="action-card">+ Add Teacher</a>
-        <a href="/groups/add" class="action-card">+ Add Group</a>
-        <a href="/students/add" class="action-card">+ Add Student</a>
-        <a href="/courses/add" class="action-card">+ Add Course</a>
+        <a href="/teachers/add" class="action-card">
+          <div class="action-card-icon" style="background:rgba(99,102,241,0.15);color:var(--primary-light);">+</div>
+          <span>Add Teacher</span>
+        </a>
+        <a href="/groups/add" class="action-card">
+          <div class="action-card-icon" style="background:rgba(244,114,182,0.15);color:var(--accent-light);">+</div>
+          <span>Add Group</span>
+        </a>
+        <a href="/students/add" class="action-card">
+          <div class="action-card-icon" style="background:rgba(52,211,153,0.15);color:var(--success);">+</div>
+          <span>Add Student</span>
+        </a>
+        <a href="/courses/add" class="action-card">
+          <div class="action-card-icon" style="background:rgba(96,165,250,0.15);color:var(--info);">+</div>
+          <span>Add Course</span>
+        </a>
       </div>
     </div>
+
+    <div class="dashboard-grid">
+      <div class="recent-activity">
+        <h2 class="section-title">Recent Activity</h2>
+        <% if (recentActivities.length === 0) { %>
+          <div class="activity-list">
+            <div class="activity-item">
+              <span class="activity-text"><span>No activity yet. Start by adding some data!</span></span>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="activity-list">
+            <% recentActivities.forEach(function(a) { %>
+              <div class="activity-item">
+                <div class="activity-icon <%= a.type === 'student' ? 'student-add' : a.type === 'payment' ? 'payment' : a.type === 'group' ? 'group' : 'teacher' %>">
+                  <% if (a.type === 'student') { %>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                  <% } else if (a.type === 'payment') { %>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  <% } else if (a.type === 'group') { %>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <% } else { %>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  <% } %>
+                </div>
+                <div class="activity-text">
+                  <span><%= a.text %></span>
+                </div>
+                <div class="activity-time"><%= a.timeAgo %></div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="recent-activity">
+        <h2 class="section-title">Recent Students</h2>
+        <% if (recentStudents.length === 0) { %>
+          <div class="activity-list">
+            <div class="activity-item">
+              <span class="activity-text"><span>No students yet. <a href="/students/add" style="color:var(--primary-light);">Add your first student</a></span></span>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="activity-list">
+            <% recentStudents.forEach(function(s, i) { %>
+              <a href="/students/view/<%= s.id %>" class="activity-item">
+                <div class="avatar avatar-md avatar-gradient-<%= (i % 6) + 1 %>">
+                  <%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %>
+                </div>
+                <div class="activity-text">
+                  <strong><%= s.firstName %> <%= s.lastName %></strong>
+                  <br><span style="font-size:12px;color:var(--text-muted);"><%= s.phone %></span>
+                </div>
+                <div class="activity-time">
+                  <% if (s.groupNames.length > 0) { %>
+                    <span class="tag"><%= s.groupNames[0] %></span>
+                  <% } %>
+                </div>
+              </a>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
   </div>
 </main>
 <%- include('partials/footer') %>

@@ -4,7 +4,12 @@
   <%- include('../partials/header') %>
   <div class="content-area">
     <div class="page-header">
-      <h1><%= group.name %></h1>
+      <h1 style="display:flex;align-items:center;gap:12px;">
+        <div class="stat-icon groups" style="margin-bottom:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <%= group.name %>
+      </h1>
       <div>
         <a href="/groups/edit/<%= group.id %>" class="btn btn-primary">Edit Group</a>
         <a href="/groups" class="btn btn-secondary">Back to List</a>
@@ -13,26 +18,29 @@
 
     <div class="detail-grid">
       <div class="detail-card">
-        <h3>Group Info</h3>
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Group Info
+        </h3>
         <div class="detail-row">
           <span class="detail-label">Course:</span>
-          <span><%= course ? course.name : '—' %></span>
+          <span><%= course ? course.name : '<span class="muted">--</span>' %></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Teacher:</span>
-          <span><%= teacher ? teacher.firstName + ' ' + teacher.lastName : '—' %></span>
+          <span><%= teacher ? teacher.firstName + ' ' + teacher.lastName : '<span class="muted">--</span>' %></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Start Date:</span>
-          <span><%= group.startDate || '—' %></span>
+          <span><%= group.startDate || '<span class="muted">--</span>' %></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Schedule:</span>
-          <span><%= group.schedule || '—' %></span>
+          <span><%= group.schedule || '<span class="muted">--</span>' %></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Duration:</span>
-          <span><%= group.duration || '—' %></span>
+          <span><%= group.duration || '<span class="muted">--</span>' %></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Price/Month:</span>
@@ -42,14 +50,17 @@
 
       <% if (group.notes) { %>
         <div class="detail-card">
-          <h3>Notes</h3>
-          <p><%= group.notes %></p>
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Notes
+          </h3>
+          <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;"><%= group.notes %></p>
         </div>
       <% } %>
     </div>
 
     <div class="section-block">
-      <h2>Students in this Group (<%= students.length %>)</h2>
+      <h2>Students in this Group <span class="count-badge"><%= students.length %></span></h2>
       <% if (students.length === 0) { %>
         <p class="muted">No students assigned to this group yet.</p>
       <% } else { %>
@@ -57,8 +68,7 @@
           <thead>
             <tr>
               <th>#</th>
-              <th>First Name</th>
-              <th>Last Name</th>
+              <th>Student</th>
               <th>Phone</th>
               <th>Actions</th>
             </tr>
@@ -67,14 +77,42 @@
             <% students.forEach((s, i) => { %>
               <tr>
                 <td><%= i + 1 %></td>
-                <td><%= s.firstName %></td>
-                <td><%= s.lastName %></td>
+                <td style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar avatar-sm avatar-gradient-<%= (i % 6) + 1 %>"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
+                  <%= s.firstName %> <%= s.lastName %>
+                </td>
                 <td><%= s.phone %></td>
                 <td><a href="/students/view/<%= s.id %>" class="btn btn-small btn-secondary">View</a></td>
               </tr>
             <% }) %>
           </tbody>
         </table>
+      <% } %>
+    </div>
+
+    <div class="section-block">
+      <h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Attendance
+      </h2>
+      <% if (students.length === 0) { %>
+        <p class="muted">Add students to this group to track attendance.</p>
+      <% } else { %>
+        <form action="/groups/<%= group.id %>/attendance" method="POST">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <input type="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>" style="padding:10px 14px;background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:14px;">
+            <button type="submit" class="btn btn-primary btn-small">Save Attendance</button>
+          </div>
+          <div class="attendance-grid">
+            <% students.forEach((s, i) => { %>
+              <div class="attendance-card">
+                <div class="avatar avatar-sm avatar-gradient-<%= (i % 6) + 1 %>" style="width:28px;height:28px;font-size:10px;"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
+                <span style="flex:1;font-size:13px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= s.firstName %> <%= s.lastName.charAt(0) %>.</span>
+                <input type="checkbox" name="present" value="<%= s.id %>" class="attendance-toggle" checked>
+              </div>
+            <% }) %>
+          </div>
+        </form>
       <% } %>
     </div>
   </div>
