@@ -19,6 +19,25 @@ function writeGroups(groups) {
   fs.writeFileSync(dataFile, JSON.stringify(groups, null, 2), 'utf8');
 }
 
+function readSettings() {
+  const data = JSON.parse(fs.readFileSync(path.join(dataDir, 'settings.json'), 'utf8'));
+  if (!data.rooms) data.rooms = [];
+  return data;
+}
+
+// Generate time slots from 06:00 to 00:00 in 30-min increments
+function getTimeSlots() {
+  const slots = [];
+  for (let h = 6; h < 24; h++) {
+    slots.push(String(h).padStart(2, '0') + ':00');
+    slots.push(String(h).padStart(2, '0') + ':30');
+  }
+  slots.push('00:00');
+  return slots;
+}
+
+const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 // List all groups
 router.get('/', (req, res) => {
   const groups = readGroups();
@@ -55,21 +74,31 @@ router.get('/', (req, res) => {
 router.get('/add', (req, res) => {
   const teachers = readJSON('teachers.json');
   const courses = readJSON('courses.json');
-  res.render('groups/add', { page: 'groups', teachers, courses, error: null });
+  const settings = readSettings();
+  res.render('groups/add', {
+    page: 'groups', teachers, courses,
+    rooms: settings.rooms, timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
+    error: null
+  });
 });
 
 // Create group
 router.post('/add', (req, res) => {
-  const { name, courseId, teacherId, startDate, schedule, duration, price } = req.body;
+  let { name, courseId, teacherId, startDate, days, roomId, startTime } = req.body;
 
   if (!name) {
     const teachers = readJSON('teachers.json');
     const courses = readJSON('courses.json');
+    const settings = readSettings();
     return res.render('groups/add', {
       page: 'groups', teachers, courses,
+      rooms: settings.rooms, timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
       error: 'Group name is required.'
     });
   }
+
+  if (!days) days = [];
+  else if (!Array.isArray(days)) days = [days];
 
   const groups = readGroups();
   groups.push({
@@ -77,11 +106,10 @@ router.post('/add', (req, res) => {
     name: name.trim(),
     courseId: courseId || null,
     teacherId: teacherId || null,
+    days: days,
+    room: (roomId || '').trim(),
+    startTime: (startTime || '').trim(),
     startDate: startDate || '',
-    schedule: (schedule || '').trim(),
-    duration: (duration || '').trim(),
-    price: price ? parseFloat(price) : 0,
-    notes: '',
     createdAt: new Date().toISOString()
   });
   writeGroups(groups);
@@ -116,13 +144,18 @@ router.get('/edit/:id', (req, res) => {
 
   const teachers = readJSON('teachers.json');
   const courses = readJSON('courses.json');
+  const settings = readSettings();
 
-  res.render('groups/edit', { page: 'groups', group, teachers, courses, error: null });
+  res.render('groups/edit', {
+    page: 'groups', group, teachers, courses,
+    rooms: settings.rooms, timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
+    error: null
+  });
 });
 
 // Update group
 router.post('/edit/:id', (req, res) => {
-  const { name, courseId, teacherId, startDate, schedule, duration, price, notes } = req.body;
+  let { name, courseId, teacherId, startDate, days, roomId, startTime } = req.body;
   const groups = readGroups();
   const index = groups.findIndex(g => g.id === req.params.id);
 
@@ -131,20 +164,24 @@ router.post('/edit/:id', (req, res) => {
   if (!name) {
     const teachers = readJSON('teachers.json');
     const courses = readJSON('courses.json');
+    const settings = readSettings();
     return res.render('groups/edit', {
       page: 'groups', group: groups[index], teachers, courses,
+      rooms: settings.rooms, timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
       error: 'Group name is required.'
     });
   }
 
+  if (!days) days = [];
+  else if (!Array.isArray(days)) days = [days];
+
   groups[index].name = name.trim();
   groups[index].courseId = courseId || null;
   groups[index].teacherId = teacherId || null;
+  groups[index].days = days;
+  groups[index].room = (roomId || '').trim();
+  groups[index].startTime = (startTime || '').trim();
   groups[index].startDate = startDate || '';
-  groups[index].schedule = (schedule || '').trim();
-  groups[index].duration = (duration || '').trim();
-  groups[index].price = price ? parseFloat(price) : 0;
-  groups[index].notes = (notes || '').trim();
   writeGroups(groups);
 
   res.redirect('/groups');
