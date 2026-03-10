@@ -28,9 +28,10 @@
             <th>Group Name</th>
             <th>Course</th>
             <th>Teacher</th>
-            <th>Schedule</th>
+            <th>Days</th>
+            <th>Time</th>
+            <th>Room</th>
             <th>Students</th>
-            <th>Price</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -41,9 +42,10 @@
               <td><a href="/groups/view/<%= group.id %>" class="table-link"><%= group.name %></a></td>
               <td><%= group.course ? group.course.name : '<span class="muted">--</span>' %></td>
               <td><%= group.teacher ? group.teacher.firstName + ' ' + group.teacher.lastName : '<span class="muted">--</span>' %></td>
-              <td><%= group.schedule || '<span class="muted">--</span>' %></td>
+              <td><%= group.days && group.days.length > 0 ? group.days.join(', ') : '<span class="muted">--</span>' %></td>
+              <td><%= group.startTime || '<span class="muted">--</span>' %></td>
+              <td><%= group.room || '<span class="muted">--</span>' %></td>
               <td><span class="count-badge"><%= group.studentCount %></span></td>
-              <td>$<%= (group.price || 0).toFixed(2) %></td>
               <td class="actions-cell">
                 <a href="/groups/view/<%= group.id %>" class="btn btn-small btn-secondary">View</a>
                 <a href="/groups/edit/<%= group.id %>" class="btn btn-small btn-edit">Edit</a>

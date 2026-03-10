@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
   if (search) {
     filtered = courses.filter(c =>
       c.name.toLowerCase().includes(search) ||
-      c.level.toLowerCase().includes(search)
+      (c.code || '').toLowerCase().includes(search)
     );
   }
 
@@ -37,7 +37,7 @@ router.get('/add', (req, res) => {
 
 // Create course
 router.post('/add', (req, res) => {
-  const { name, level, description } = req.body;
+  const { name, code, lessonsPerMonth, durationMinutes, durationMonths, price, description } = req.body;
 
   if (!name) {
     return res.render('courses/add', {
@@ -50,7 +50,11 @@ router.post('/add', (req, res) => {
   courses.push({
     id: uuidv4(),
     name: name.trim(),
-    level: (level || '').trim(),
+    code: (code || '').trim(),
+    lessonsPerMonth: lessonsPerMonth ? parseInt(lessonsPerMonth) : 0,
+    durationMinutes: durationMinutes ? parseInt(durationMinutes) : 0,
+    durationMonths: durationMonths ? parseInt(durationMonths) : 0,
+    price: price ? parseFloat(price) : 0,
     description: (description || '').trim(),
     createdAt: new Date().toISOString()
   });
@@ -71,7 +75,7 @@ router.get('/edit/:id', (req, res) => {
 
 // Update course
 router.post('/edit/:id', (req, res) => {
-  const { name, level, description } = req.body;
+  const { name, code, lessonsPerMonth, durationMinutes, durationMonths, price, description } = req.body;
   const courses = readCourses();
   const index = courses.findIndex(c => c.id === req.params.id);
 
@@ -86,7 +90,11 @@ router.post('/edit/:id', (req, res) => {
   }
 
   courses[index].name = name.trim();
-  courses[index].level = (level || '').trim();
+  courses[index].code = (code || '').trim();
+  courses[index].lessonsPerMonth = lessonsPerMonth ? parseInt(lessonsPerMonth) : 0;
+  courses[index].durationMinutes = durationMinutes ? parseInt(durationMinutes) : 0;
+  courses[index].durationMonths = durationMonths ? parseInt(durationMonths) : 0;
+  courses[index].price = price ? parseFloat(price) : 0;
   courses[index].description = (description || '').trim();
   writeCourses(courses);
 
