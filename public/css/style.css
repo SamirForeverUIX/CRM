@@ -1046,29 +1046,309 @@ a {
 .avatar-gradient-6 { background: #06b6d4; }
 
 /* ===================================================================
-   ATTENDANCE
+   GROUP VIEW — Two Column Layout
    =================================================================== */
-.attendance-grid {
+.group-view-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 8px;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  align-items: start;
 }
 
-.attendance-card {
+.group-left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.group-left-panel .detail-card,
+.group-right-panel .detail-card {
+  position: sticky;
+  top: calc(var(--header-height) + 28px);
+}
+
+.group-right-panel .detail-card {
+  position: static;
+}
+
+/* Compact student list in left panel */
+.student-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.student-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.student-row:hover {
+  background: var(--bg-body);
+}
+
+.student-row-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.student-row-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.student-row-phone {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===================================================================
+   ATTENDANCE TABLE
+   =================================================================== */
+.attendance-panel {
+  overflow: hidden;
+}
+
+.attendance-table-wrap {
+  overflow-x: auto;
+  margin: 0 -24px -24px;
+  padding: 0 24px 24px;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+}
+
+.attendance-table thead th {
+  padding: 0;
+  text-align: center;
+  vertical-align: bottom;
+  border-bottom: 2px solid var(--border);
+}
+
+.att-student-col {
+  text-align: left !important;
+  padding: 8px 12px 8px 0 !important;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  min-width: 130px;
+}
+
+.att-date-col {
+  width: 52px;
+  min-width: 52px;
+  padding: 6px 2px !important;
+}
+
+.att-date-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.att-lesson-num {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-body);
+  border-radius: var(--radius-full);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.att-date-day {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.att-date-val {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.att-student-cell {
+  padding: 8px 12px 8px 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: var(--bg-body);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-light);
 }
 
-.attendance-toggle {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--primary);
+.att-check-cell {
+  text-align: center;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.attendance-table tbody tr:last-child .att-student-cell,
+.attendance-table tbody tr:last-child .att-check-cell {
+  border-bottom: none;
+}
+
+.att-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+}
+
+.att-checkbox input {
+  display: none;
+}
+
+.att-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.att-mark.present {
+  background: var(--success-bg);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.att-mark.absent {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.att-checkbox:hover .att-mark {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+/* ===================================================================
+   SCHEDULE TIMETABLE
+   =================================================================== */
+.schedule-table-wrap {
+  overflow-x: auto;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  min-width: 700px;
+}
+
+.schedule-table thead th {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--bg-body);
+  border-bottom: 1px solid var(--border);
+}
+
+.schedule-time-col {
+  width: 80px;
+  text-align: left !important;
+  padding-left: 16px !important;
+}
+
+.schedule-day-col {
+  min-width: 90px;
+}
+
+.schedule-time-cell {
+  padding: 12px 8px 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+}
+
+.schedule-cell {
+  padding: 8px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+}
+
+.schedule-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.schedule-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: #eef2ff;
+  border-left: 3px solid var(--primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 4px;
+  transition: background var(--transition-fast);
+}
+
+.schedule-block:hover {
+  background: #e0e7ff;
+}
+
+.schedule-block:last-child {
+  margin-bottom: 0;
+}
+
+.schedule-block-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.schedule-block-teacher {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.schedule-block-room {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* ===================================================================
@@ -1327,6 +1607,10 @@ a {
   }
 
   .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .group-view-layout {
     grid-template-columns: 1fr;
   }
 
