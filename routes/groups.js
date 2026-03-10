@@ -38,6 +38,35 @@ function getTimeSlots() {
 
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+// Map day abbreviations to JS getDay() values (0=Sun, 1=Mon, ..., 6=Sat)
+const DAY_MAP = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+// Calculate exact lesson dates from startDate + days + totalLessons
+function calculateLessonDates(startDate, days, totalLessons) {
+  if (!startDate || !days || days.length === 0 || !totalLessons || totalLessons <= 0) {
+    return [];
+  }
+
+  const dayNumbers = days.map(d => DAY_MAP[d]).filter(n => n !== undefined);
+  if (dayNumbers.length === 0) return [];
+
+  const dates = [];
+  const current = new Date(startDate + 'T00:00:00');
+
+  // Safety: max 365 days ahead
+  const maxDate = new Date(current);
+  maxDate.setFullYear(maxDate.getFullYear() + 1);
+
+  while (dates.length < totalLessons && current <= maxDate) {
+    if (dayNumbers.includes(current.getDay())) {
+      dates.push(new Date(current));
+    }
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
 // List all groups
 router.get('/', (req, res) => {
   const groups = readGroups();
@@ -59,7 +88,6 @@ router.get('/', (req, res) => {
     });
   }
 
-  // Enrich groups with teacher/course/student info
   const enriched = filtered.map(g => ({
     ...g,
     teacher: teachers.find(t => t.id === g.teacherId),
@@ -110,6 +138,7 @@ router.post('/add', (req, res) => {
     room: (roomId || '').trim(),
     startTime: (startTime || '').trim(),
     startDate: startDate || '',
+    attendance: [],
     createdAt: new Date().toISOString()
   });
   writeGroups(groups);
@@ -131,8 +160,21 @@ router.get('/view/:id', (req, res) => {
   const course = courses.find(c => c.id === group.courseId);
   const groupStudents = allStudents.filter(s => s.groupIds && s.groupIds.includes(group.id));
 
+  // Calculate lesson dates from course.lessonsPerMonth and group schedule
+  const totalLessons = course ? (course.lessonsPerMonth || 0) : 0;
+  const lessonDates = calculateLessonDates(group.startDate, group.days, totalLessons);
+
+  // Build attendance map: { 'YYYY-MM-DD': [studentId, ...] }
+  const attendanceMap = {};
+  if (group.attendance) {
+    group.attendance.forEach(a => {
+      attendanceMap[a.date] = a.present || [];
+    });
+  }
+
   res.render('groups/view', {
-    page: 'groups', group, teacher, course, students: groupStudents
+    page: 'groups', group, teacher, course, students: groupStudents,
+    lessonDates, attendanceMap
   });
 });
 
@@ -187,7 +229,7 @@ router.post('/edit/:id', (req, res) => {
   res.redirect('/groups');
 });
 
-// Save attendance
+// Save attendance for a specific date
 router.post('/:id/attendance', (req, res) => {
   const groupId = req.params.id;
   const { date } = req.body;
@@ -195,6 +237,8 @@ router.post('/:id/attendance', (req, res) => {
 
   if (!present) present = [];
   else if (!Array.isArray(present)) present = [present];
+  // Filter out the empty marker
+  present = present.filter(p => p !== '__none__');
 
   const groups = readGroups();
   const group = groups.find(g => g.id === groupId);
@@ -202,7 +246,7 @@ router.post('/:id/attendance', (req, res) => {
 
   if (!group.attendance) group.attendance = [];
 
-  // Remove existing record for same date
+  // Remove existing record for same date, then add new
   group.attendance = group.attendance.filter(a => a.date !== date);
   group.attendance.push({
     date: date || new Date().toISOString().split('T')[0],

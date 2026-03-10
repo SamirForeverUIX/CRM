@@ -18,6 +18,7 @@ app.use('/groups', require('./routes/groups'));
 app.use('/students', require('./routes/students'));
 app.use('/courses', require('./routes/courses'));
 app.use('/settings', require('./routes/settings'));
+app.use('/schedule', require('./routes/schedule'));
 app.use('/search', require('./routes/search'));
 
 app.listen(PORT, () => {
