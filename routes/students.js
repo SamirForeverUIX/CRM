@@ -136,10 +136,26 @@ router.get('/view/:id', (req, res) => {
   if (!student) return res.redirect('/students');
 
   const groups = readJSON('groups.json');
+  const courses = readJSON('courses.json');
   const studentGroups = (student.groupIds || []).map(gid => groups.find(g => g.id === gid)).filter(Boolean);
+  const balance = calculateBalance(student, groups, courses);
+
+  let totalPaid = 0;
+  (student.payments || []).forEach(p => {
+    if (p.status === 'paid' || p.status === 'partial') totalPaid += p.amount || 0;
+  });
+  let totalOwed = 0;
+  (student.groupIds || []).forEach(gid => {
+    const g = groups.find(gr => gr.id === gid);
+    if (g && g.courseId) {
+      const c = courses.find(cr => cr.id === g.courseId);
+      if (c && c.price) totalOwed += c.price;
+    }
+  });
 
   res.render('students/view', {
-    page: 'students', student, studentGroups, allGroups: groups
+    page: 'students', student, studentGroups, allGroups: groups,
+    balance, totalPaid, totalOwed
   });
 });
 
