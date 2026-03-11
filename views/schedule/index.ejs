@@ -4,10 +4,13 @@
   <%- include('../partials/header') %>
   <div class="content-area">
     <div class="page-header">
-      <h1>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Weekly Schedule
-      </h1>
+      <h1>Schedule</h1>
+    </div>
+
+    <div class="schedule-days-filter">
+      <% days.forEach(function(day) { %>
+        <button class="schedule-day-btn active"><%= day %></button>
+      <% }) %>
     </div>
 
     <% if (timeSlots.length === 0) { %>
@@ -24,26 +27,28 @@
           <thead>
             <tr>
               <th class="schedule-time-col">Time</th>
-              <% days.forEach(day => { %>
+              <% days.forEach(function(day) { %>
                 <th class="schedule-day-col"><%= day %></th>
               <% }) %>
             </tr>
           </thead>
           <tbody>
-            <% timeSlots.forEach(time => { %>
+            <% var colors = ['color-green','color-blue','color-pink','color-cyan','color-orange','color-purple']; %>
+            <% var colorIdx = 0; %>
+            <% timeSlots.forEach(function(time) { %>
               <tr>
                 <td class="schedule-time-cell"><%= time %></td>
-                <% days.forEach(day => { %>
+                <% days.forEach(function(day) { %>
                   <td class="schedule-cell">
-                    <% const groups = (timetable[time] && timetable[time][day]) || []; %>
-                    <% groups.forEach(g => { %>
-                      <a href="/groups/view/<%= g.id %>" class="schedule-block">
+                    <% var groups = (timetable[time] && timetable[time][day]) || []; %>
+                    <% groups.forEach(function(g) { %>
+                      <a href="/groups/view/<%= g.id %>" class="schedule-block <%= colors[colorIdx++ % colors.length] %>">
                         <span class="schedule-block-name"><%= g.name %></span>
                         <% if (g.teacher) { %>
                           <span class="schedule-block-teacher"><%= g.teacher.firstName %> <%= g.teacher.lastName.charAt(0) %>.</span>
                         <% } %>
                         <% if (g.room) { %>
-                          <span class="schedule-block-room"><%= g.room %></span>
+                          <span class="schedule-block-meta"><%= g.room %></span>
                         <% } %>
                       </a>
                     <% }) %>

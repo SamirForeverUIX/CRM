@@ -1,0 +1,85 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<main class="main-content">
+  <%- include('../partials/header') %>
+  <div class="content-area">
+    <div class="page-header">
+      <h1><%= teacher.firstName %> <%= teacher.lastName %></h1>
+      <div>
+        <a href="/teachers/edit/<%= teacher.id %>" class="btn btn-primary">Edit</a>
+        <a href="/teachers" class="btn btn-secondary">Back</a>
+      </div>
+    </div>
+
+    <div class="teacher-view-layout">
+      <!-- LEFT: Profile Card -->
+      <div>
+        <div class="teacher-profile-card">
+          <div class="teacher-profile-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="teacher-profile-name"><%= teacher.firstName %> <%= teacher.lastName %></div>
+          <div class="teacher-profile-info">Phone: <a href="tel:<%= teacher.phone %>"><%= teacher.phone %></a></div>
+          <div style="margin-top:12px;">
+            <span class="teacher-profile-badge role">Teacher</span>
+          </div>
+          <div style="margin-top:8px;">
+            <span class="teacher-profile-badge branch">Backpack LC</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIDDLE: Groups List -->
+      <div>
+        <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;">Groups</h2>
+        <% if (teacherGroups.length === 0) { %>
+          <p class="muted">No groups assigned to this teacher.</p>
+        <% } else { %>
+          <div class="teacher-groups-list">
+            <% teacherGroups.forEach((g, i) => { %>
+              <a href="/groups/view/<%= g.id %>" class="teacher-group-card" data-group="<%= g.id %>">
+                <div>
+                  <span class="teacher-group-code"><%= g.course ? (g.course.code || g.course.name) : '--' %></span>
+                  <div class="teacher-group-name"><%= g.name %></div>
+                  <div class="teacher-group-meta">
+                    <%= g.startDate || '' %><br>
+                    <%= g.days ? g.days.join(', ') : '' %> · <%= g.startTime || '' %>
+                  </div>
+                </div>
+                <span class="teacher-group-students"><%= g.studentCount %></span>
+              </a>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- RIGHT: First group detail preview -->
+      <% if (teacherGroups.length > 0) { %>
+        <% var fg = teacherGroups[0]; %>
+        <div class="teacher-group-detail">
+          <div class="teacher-group-detail-header">
+            <span class="teacher-group-code"><%= fg.course ? (fg.course.code || fg.course.name) : '' %></span>
+            <h3><%= fg.name %></h3>
+            <p>Room: <strong><%= fg.room || '--' %></strong></p>
+            <p>Start: <strong><%= fg.startTime || '--' %></strong></p>
+          </div>
+          <% if (fg.students.length === 0) { %>
+            <p class="muted" style="text-align:center;font-size:13px;">No students in this group.</p>
+          <% } else { %>
+            <% fg.students.forEach(function(s) { %>
+              <div class="teacher-student-row">
+                <div class="avatar avatar-sm avatar-gradient-1" style="width:24px;height:24px;font-size:9px;"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
+                <span class="name"><%= s.firstName %> <%= s.lastName %></span>
+                <span class="phone"><%= s.phone %></span>
+              </div>
+            <% }) %>
+          <% } %>
+          <a href="/groups/view/<%= fg.id %>" class="go-to-group-link">Go to group &rarr;</a>
+        </div>
+      <% } else { %>
+        <div></div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>
