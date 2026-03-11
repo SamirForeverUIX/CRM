@@ -1,1 +1,102 @@
-[]
+[
+  {
+    "id": "student-1",
+    "firstName": "Aziz",
+    "lastName": "Rahimov",
+    "phone": "+998 93 111 22 33",
+    "groupIds": ["group-1"],
+    "payments": [
+      { "id": "pay-1a", "amount": 500000, "date": "2026-03-01", "status": "paid" }
+    ],
+    "createdAt": "2026-03-01T08:00:00.000Z"
+  },
+  {
+    "id": "student-2",
+    "firstName": "Malika",
+    "lastName": "Usmanova",
+    "phone": "+998 94 222 33 44",
+    "groupIds": ["group-1"],
+    "payments": [
+      { "id": "pay-2a", "amount": 500000, "date": "2026-03-01", "status": "paid" }
+    ],
+    "createdAt": "2026-03-01T08:05:00.000Z"
+  },
+  {
+    "id": "student-3",
+    "firstName": "Sardor",
+    "lastName": "Toshmatov",
+    "phone": "+998 90 333 44 55",
+    "groupIds": ["group-1"],
+    "payments": [
+      { "id": "pay-3a", "amount": 500000, "date": "2026-03-02", "status": "paid" }
+    ],
+    "createdAt": "2026-03-01T08:10:00.000Z"
+  },
+  {
+    "id": "student-4",
+    "firstName": "Dildora",
+    "lastName": "Nazarova",
+    "phone": "+998 91 444 55 66",
+    "groupIds": ["group-1"],
+    "payments": [
+      { "id": "pay-4a", "amount": 250000, "date": "2026-03-03", "status": "partial" }
+    ],
+    "createdAt": "2026-03-01T08:15:00.000Z"
+  },
+  {
+    "id": "student-5",
+    "firstName": "Bobur",
+    "lastName": "Aliyev",
+    "phone": "+998 93 555 66 77",
+    "groupIds": ["group-2"],
+    "payments": [
+      { "id": "pay-5a", "amount": 300000, "date": "2026-03-04", "status": "partial" }
+    ],
+    "createdAt": "2026-03-01T08:20:00.000Z"
+  },
+  {
+    "id": "student-6",
+    "firstName": "Kamola",
+    "lastName": "Mirzayeva",
+    "phone": "+998 94 666 77 88",
+    "groupIds": ["group-2"],
+    "payments": [],
+    "createdAt": "2026-03-02T09:00:00.000Z"
+  },
+  {
+    "id": "student-7",
+    "firstName": "Jasur",
+    "lastName": "Kamolov",
+    "phone": "+998 90 777 88 99",
+    "groupIds": ["group-2"],
+    "payments": [],
+    "createdAt": "2026-03-02T09:05:00.000Z"
+  },
+  {
+    "id": "student-8",
+    "firstName": "Sevara",
+    "lastName": "Xolmatova",
+    "phone": "+998 91 888 99 00",
+    "groupIds": ["group-1", "group-2"],
+    "payments": [],
+    "createdAt": "2026-03-02T09:10:00.000Z"
+  },
+  {
+    "id": "student-9",
+    "firstName": "Otabek",
+    "lastName": "Sobirov",
+    "phone": "+998 93 999 00 11",
+    "groupIds": ["group-2"],
+    "payments": [],
+    "createdAt": "2026-03-02T09:15:00.000Z"
+  },
+  {
+    "id": "student-10",
+    "firstName": "Nilufar",
+    "lastName": "Ergasheva",
+    "phone": "+998 94 100 11 22",
+    "groupIds": ["group-1"],
+    "payments": [],
+    "createdAt": "2026-03-02T09:20:00.000Z"
+  }
+]

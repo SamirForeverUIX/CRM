@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "course-1",
+    "name": "English Elementary",
+    "code": "ENG-A1",
+    "lessonsPerMonth": 12,
+    "durationMinutes": 90,
+    "durationMonths": 3,
+    "price": 500000,
+    "createdAt": "2026-02-15T10:00:00.000Z"
+  },
+  {
+    "id": "course-2",
+    "name": "English Intermediate",
+    "code": "ENG-B1",
+    "lessonsPerMonth": 12,
+    "durationMinutes": 90,
+    "durationMonths": 4,
+    "price": 650000,
+    "createdAt": "2026-02-15T10:05:00.000Z"
+  }
+]

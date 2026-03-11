@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "group-1",
+    "name": "Elementary A",
+    "courseId": "course-1",
+    "teacherId": "teacher-1",
+    "days": ["Mon", "Wed", "Fri"],
+    "room": "Room 101",
+    "startTime": "09:00",
+    "startDate": "2026-03-02",
+    "attendance": [],
+    "createdAt": "2026-02-25T10:00:00.000Z"
+  },
+  {
+    "id": "group-2",
+    "name": "Intermediate B",
+    "courseId": "course-2",
+    "teacherId": "teacher-2",
+    "days": ["Tue", "Thu", "Sat"],
+    "room": "Room 203",
+    "startTime": "14:00",
+    "startDate": "2026-03-03",
+    "attendance": [],
+    "createdAt": "2026-02-25T10:05:00.000Z"
+  }
+]
