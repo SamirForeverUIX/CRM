@@ -4,8 +4,8 @@
   <%- include('../partials/header') %>
   <div class="content-area">
     <div class="page-header">
-      <h1>Courses <span class="count-badge"><%= courses.length %></span></h1>
-      <a href="/courses/add" class="btn btn-primary">+ Add Course</a>
+      <h1>Courses <span class="page-subtitle">Quantity &mdash; <%= courses.length %></span></h1>
+      <a href="/courses/add" class="btn btn-primary">ADD NEW</a>
     </div>
 
     <% if (search) { %>
@@ -21,37 +21,34 @@
         <a href="/courses/add" class="btn btn-primary">Add your first course</a>
       </div>
     <% } else { %>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Code</th>
-            <th>Lessons/Month</th>
-            <th>Duration</th>
-            <th>Price</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% courses.forEach((course, i) => { %>
-            <tr>
-              <td><%= i + 1 %></td>
-              <td style="font-weight:600;"><%= course.name %></td>
-              <td><% if (course.code) { %><span class="tag"><%= course.code %></span><% } else { %><span class="muted">--</span><% } %></td>
-              <td><%= course.lessonsPerMonth || '--' %></td>
-              <td><%= course.durationMinutes ? course.durationMinutes + ' min' : '--' %> / <%= course.durationMonths ? course.durationMonths + ' mo' : '--' %></td>
-              <td><%= course.price ? course.price.toFixed(2) : '--' %></td>
-              <td class="actions-cell">
-                <a href="/courses/edit/<%= course.id %>" class="btn btn-small btn-edit">Edit</a>
-                <form action="/courses/delete/<%= course.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this course?')">
-                  <button type="submit" class="btn btn-small btn-delete">Delete</button>
-                </form>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+      <%
+        var courseColors = ['#f97316', '#ec4899', '#14b8a6', '#eab308', '#8b5cf6', '#06b6d4', '#16a34a', '#2563eb'];
+        var courseBgs = ['#fff7ed', '#fdf2f8', '#f0fdfa', '#fefce8', '#f5f3ff', '#ecfeff', '#f0fdf4', '#eff6ff'];
+      %>
+      <div class="courses-grid">
+        <% courses.forEach((course, i) => { %>
+          <% var color = courseColors[i % courseColors.length]; var bg = courseBgs[i % courseBgs.length]; %>
+          <a href="/courses/view/<%= course.id %>" class="course-card" style="border-top:4px solid <%= color %>;">
+            <div class="course-card-icon" style="background:<%= bg %>;color:<%= color %>;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <div class="course-card-name"><%= course.name %></div>
+            <% if (course.code) { %>
+              <div class="course-card-code"><%= course.code %></div>
+            <% } %>
+            <div class="course-card-price" style="color:<%= color %>;">
+              <%= course.price ? course.price.toLocaleString() : '0' %>
+            </div>
+            <div class="course-card-meta">
+              <% if (course.durationMonths) { %><span><%= course.durationMonths %> months</span><% } %>
+              <% if (course.lessonsPerMonth) { %><span><%= course.lessonsPerMonth %> lessons/mo</span><% } %>
+            </div>
+            <div class="course-card-actions">
+              <span class="btn btn-small btn-edit" onclick="event.preventDefault();window.location='/courses/edit/<%= course.id %>';">Edit</span>
+            </div>
+          </a>
+        <% }) %>
+      </div>
     <% } %>
   </div>
 </main>

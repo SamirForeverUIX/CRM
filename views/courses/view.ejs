@@ -1,0 +1,86 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<main class="main-content">
+  <%- include('../partials/header') %>
+  <div class="content-area">
+    <%
+      var courseColors = ['#f97316', '#ec4899', '#14b8a6', '#eab308', '#8b5cf6', '#06b6d4', '#16a34a', '#2563eb'];
+      var courseBgs = ['#fff7ed', '#fdf2f8', '#f0fdfa', '#fefce8', '#f5f3ff', '#ecfeff', '#f0fdf4', '#eff6ff'];
+      var ci = typeof colorIndex !== 'undefined' ? colorIndex : 0;
+      var color = courseColors[ci % courseColors.length];
+      var bg = courseBgs[ci % courseBgs.length];
+    %>
+
+    <div class="course-view-banner" style="background:<%= bg %>;border-left:5px solid <%= color %>;">
+      <div class="course-view-banner-content">
+        <div class="course-view-icon" style="background:<%= color %>;color:#fff;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <div>
+          <h1 style="font-size:22px;font-weight:700;margin-bottom:4px;"><%= course.name %></h1>
+          <% if (course.code) { %><span class="course-card-code" style="margin-right:10px;"><%= course.code %></span><% } %>
+          <span style="font-size:20px;font-weight:700;color:<%= color %>;"><%= course.price ? course.price.toLocaleString() : '0' %></span>
+        </div>
+      </div>
+      <div>
+        <a href="/courses/edit/<%= course.id %>" class="btn btn-primary">Edit</a>
+        <a href="/courses" class="btn btn-secondary">Back</a>
+      </div>
+    </div>
+
+    <div class="course-view-grid">
+      <!-- Course Info -->
+      <div class="detail-card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Course Details
+        </h3>
+        <div class="detail-row">
+          <span class="detail-label">Lessons / Month</span>
+          <span><%= course.lessonsPerMonth || '--' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Lesson Duration</span>
+          <span><%= course.durationMinutes ? course.durationMinutes + ' min' : '--' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Course Duration</span>
+          <span><%= course.durationMonths ? course.durationMonths + ' months' : '--' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Price</span>
+          <span style="font-weight:700;color:<%= color %>;"><%= course.price ? course.price.toLocaleString() : '0' %></span>
+        </div>
+        <% if (course.description) { %>
+          <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-light);font-size:14px;color:var(--text-secondary);line-height:1.6;">
+            <%= course.description %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Groups using this course -->
+      <div class="detail-card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Groups (<%= courseGroups.length %>)
+        </h3>
+        <% if (courseGroups.length === 0) { %>
+          <p class="muted" style="font-size:13px;">No groups assigned to this course yet.</p>
+        <% } else { %>
+          <div class="teacher-groups-list">
+            <% courseGroups.forEach(g => { %>
+              <a href="/groups/view/<%= g.id %>" class="teacher-group-card">
+                <div>
+                  <div class="teacher-group-name"><%= g.name %></div>
+                  <div class="teacher-group-meta"><%= g.schedule || '' %></div>
+                </div>
+                <div class="teacher-group-students"><%= g.studentCount %></div>
+              </a>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

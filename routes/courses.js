@@ -4,7 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-const dataFile = path.join(__dirname, '..', 'data', 'courses.json');
+const dataDir = path.join(__dirname, '..', 'data');
+const dataFile = path.join(dataDir, 'courses.json');
+
+function readJSON(file) {
+  return JSON.parse(fs.readFileSync(path.join(dataDir, file), 'utf8'));
+}
 
 function readCourses() {
   return JSON.parse(fs.readFileSync(dataFile, 'utf8'));
@@ -28,6 +33,23 @@ router.get('/', (req, res) => {
   }
 
   res.render('courses/index', { page: 'courses', courses: filtered, search });
+});
+
+// View course
+router.get('/view/:id', (req, res) => {
+  const courses = readCourses();
+  const course = courses.find(c => c.id === req.params.id);
+  if (!course) return res.redirect('/courses');
+
+  const groups = readJSON('groups.json');
+  const students = readJSON('students.json');
+  const courseGroups = groups.filter(g => g.courseId === course.id).map(g => ({
+    ...g,
+    studentCount: students.filter(s => (s.groupIds || []).includes(g.id)).length
+  }));
+  const colorIndex = courses.indexOf(course);
+
+  res.render('courses/view', { page: 'courses', course, courseGroups, colorIndex });
 });
 
 // Add course form

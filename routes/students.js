@@ -19,10 +19,33 @@ function writeStudents(students) {
   fs.writeFileSync(dataFile, JSON.stringify(students, null, 2), 'utf8');
 }
 
+// Calculate student balance: total paid - total course fees owed
+function calculateBalance(student, groups, courses) {
+  const payments = student.payments || [];
+  let totalPaid = 0;
+  payments.forEach(p => {
+    if (p.status === 'paid') totalPaid += p.amount || 0;
+    else if (p.status === 'partial') totalPaid += p.amount || 0;
+  });
+
+  let totalOwed = 0;
+  (student.groupIds || []).forEach(gid => {
+    const g = groups.find(gr => gr.id === gid);
+    if (g && g.courseId) {
+      const c = courses.find(cr => cr.id === g.courseId);
+      if (c && c.price) totalOwed += c.price;
+    }
+  });
+
+  return totalPaid - totalOwed;
+}
+
 // List all students
 router.get('/', (req, res) => {
   const students = readStudents();
   const groups = readJSON('groups.json');
+  const teachers = readJSON('teachers.json');
+  const courses = readJSON('courses.json');
   const search = (req.query.search || '').trim().toLowerCase();
   const filterGroup = req.query.group || '';
   const filterDebt = req.query.debt || '';
@@ -40,19 +63,29 @@ router.get('/', (req, res) => {
   }
   if (filterDebt === 'unpaid') {
     filtered = filtered.filter(s => {
-      const payments = s.payments || [];
-      return payments.some(p => p.status === 'unpaid' || p.status === 'partial');
+      const balance = calculateBalance(s, groups, courses);
+      return balance < 0;
+    });
+  } else if (filterDebt === 'paid') {
+    filtered = filtered.filter(s => {
+      const balance = calculateBalance(s, groups, courses);
+      return balance >= 0;
     });
   }
 
-  // Enrich with group names
-  const enriched = filtered.map(s => ({
-    ...s,
-    groupNames: (s.groupIds || []).map(gid => {
-      const g = groups.find(gr => gr.id === gid);
-      return g ? g.name : 'Unknown';
-    })
-  }));
+  const enriched = filtered.map(s => {
+    const studentGroups = (s.groupIds || []).map(gid => groups.find(gr => gr.id === gid)).filter(Boolean);
+    const firstGroup = studentGroups[0];
+    const teacher = firstGroup ? teachers.find(t => t.id === firstGroup.teacherId) : null;
+
+    return {
+      ...s,
+      groupNames: studentGroups.map(g => g.name),
+      teacherName: teacher ? teacher.firstName + ' ' + teacher.lastName : '',
+      trainingDates: firstGroup && firstGroup.startDate ? firstGroup.startDate : '',
+      balance: calculateBalance(s, groups, courses)
+    };
+  });
 
   res.render('students/index', {
     page: 'students', students: enriched, groups, search, filterGroup, filterDebt
@@ -103,10 +136,26 @@ router.get('/view/:id', (req, res) => {
   if (!student) return res.redirect('/students');
 
   const groups = readJSON('groups.json');
+  const courses = readJSON('courses.json');
   const studentGroups = (student.groupIds || []).map(gid => groups.find(g => g.id === gid)).filter(Boolean);
+  const balance = calculateBalance(student, groups, courses);
+
+  let totalPaid = 0;
+  (student.payments || []).forEach(p => {
+    if (p.status === 'paid' || p.status === 'partial') totalPaid += p.amount || 0;
+  });
+  let totalOwed = 0;
+  (student.groupIds || []).forEach(gid => {
+    const g = groups.find(gr => gr.id === gid);
+    if (g && g.courseId) {
+      const c = courses.find(cr => cr.id === g.courseId);
+      if (c && c.price) totalOwed += c.price;
+    }
+  });
 
   res.render('students/view', {
-    page: 'students', student, studentGroups, allGroups: groups
+    page: 'students', student, studentGroups, allGroups: groups,
+    balance, totalPaid, totalOwed
   });
 });
 
