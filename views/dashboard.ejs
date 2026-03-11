@@ -4,79 +4,101 @@
   <%- include('partials/header') %>
   <div class="content-area">
 
-    <div class="welcome-banner">
-      <h1>Welcome back, Admin</h1>
-      <p>Here's what's happening at your learning centre today.</p>
-      <div class="welcome-date"><%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-    </div>
-
     <div class="stats-grid">
-      <a href="/teachers" class="stat-card stat-card-link">
-        <div class="stat-icon teachers">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <a href="/students" class="stat-card stat-card-link">
+        <div class="stat-icon students">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
-        <div class="stat-number"><%= teacherCount %></div>
-        <div class="stat-label">Teachers</div>
+        <div class="stat-label">Active students</div>
+        <div class="stat-number"><%= studentCount %></div>
       </a>
       <a href="/groups" class="stat-card stat-card-link">
         <div class="stat-icon groups">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <div class="stat-number"><%= groupCount %></div>
         <div class="stat-label">Groups</div>
+        <div class="stat-number"><%= groupCount %></div>
       </a>
-      <a href="/students" class="stat-card stat-card-link">
-        <div class="stat-icon students">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <a href="/students?debt=unpaid" class="stat-card stat-card-link">
+        <div class="stat-icon" style="background:#fce4ec;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e91e63" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <div class="stat-number"><%= studentCount %></div>
-        <div class="stat-label">Students</div>
-      </a>
-      <a href="/courses" class="stat-card stat-card-link">
-        <div class="stat-icon courses">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <div class="stat-number"><%= courseCount %></div>
-        <div class="stat-label">Courses</div>
+        <div class="stat-label">Debtors</div>
+        <div class="stat-number" style="color:#e91e63;"><%= debtorCount %></div>
       </a>
       <div class="stat-card">
         <div class="stat-icon income">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <div class="stat-number">$<%= totalIncome.toFixed(2) %></div>
-        <div class="stat-label">Total Income</div>
+        <div class="stat-label">Paid this month</div>
+        <div class="stat-number"><%= paidCount %></div>
       </div>
+      <a href="/teachers" class="stat-card stat-card-link">
+        <div class="stat-icon teachers">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="stat-label">Teachers</div>
+        <div class="stat-number"><%= teacherCount %></div>
+      </a>
+      <a href="/courses" class="stat-card stat-card-link">
+        <div class="stat-icon courses">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="stat-label">Courses</div>
+        <div class="stat-number"><%= courseCount %></div>
+      </a>
     </div>
 
-    <div class="quick-actions">
-      <h2>Quick Actions</h2>
-      <div class="actions-row">
-        <a href="/teachers/add" class="action-card">
-          <div class="action-card-icon" style="background:#ede9fe;color:#7c3aed;">+</div>
-          <span>Add Teacher</span>
-        </a>
-        <a href="/groups/add" class="action-card">
-          <div class="action-card-icon" style="background:#fce7f3;color:#db2777;">+</div>
-          <span>Add Group</span>
-        </a>
-        <a href="/students/add" class="action-card">
-          <div class="action-card-icon" style="background:#d1fae5;color:#059669;">+</div>
-          <span>Add Student</span>
-        </a>
-        <a href="/courses/add" class="action-card">
-          <div class="action-card-icon" style="background:#dbeafe;color:#2563eb;">+</div>
-          <span>Add Course</span>
-        </a>
-      </div>
-    </div>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">Schedule</h2>
 
-    <div class="dashboard-grid">
+    <% if (todayGroups.length === 0) { %>
+      <div class="empty-state" style="padding:40px;">
+        <p>No groups scheduled for today. <a href="/schedule" style="color:var(--primary);font-weight:600;">View full schedule</a></p>
+      </div>
+    <% } else { %>
+      <div class="schedule-table-wrap">
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th class="schedule-time-col">Room</th>
+              <% scheduleTimeSlots.forEach(function(t) { %>
+                <th><%= t %></th>
+              <% }) %>
+            </tr>
+          </thead>
+          <tbody>
+            <% scheduleRooms.forEach(function(room) { %>
+              <tr>
+                <td class="schedule-time-cell"><%= room %></td>
+                <% scheduleTimeSlots.forEach(function(t) { %>
+                  <td class="schedule-cell">
+                    <% var matches = todayGroups.filter(function(g) { return g.room === room && g.startTime === t; }); %>
+                    <% var colors = ['color-green','color-blue','color-pink','color-cyan','color-orange','color-purple']; %>
+                    <% matches.forEach(function(g, gi) { %>
+                      <a href="/groups/view/<%= g.id %>" class="schedule-block <%= colors[gi % colors.length] %>">
+                        <span class="schedule-block-code"><%= g.courseCode %></span>
+                        <span class="schedule-block-name"><%= g.name %></span>
+                        <span class="schedule-block-teacher"><%= g.teacherName %></span>
+                        <span class="schedule-block-meta"><%= g.dateRange %> · <%= g.daysStr %></span>
+                        <span class="schedule-block-students"><%= g.studentCount %> st.</span>
+                      </a>
+                    <% }) %>
+                  </td>
+                <% }) %>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+
+    <div style="margin-top:24px;" class="dashboard-grid">
       <div class="recent-activity">
         <h2 class="section-title">Recent Activity</h2>
         <% if (recentActivities.length === 0) { %>
           <div class="activity-list">
             <div class="activity-item">
-              <span class="activity-text"><span>No activity yet. Start by adding some data!</span></span>
+              <span class="activity-text">No activity yet. Start by adding some data!</span>
             </div>
           </div>
         <% } else { %>
@@ -94,9 +116,7 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                   <% } %>
                 </div>
-                <div class="activity-text">
-                  <span><%= a.text %></span>
-                </div>
+                <div class="activity-text"><%= a.text %></div>
                 <div class="activity-time"><%= a.timeAgo %></div>
               </div>
             <% }); %>
@@ -109,7 +129,7 @@
         <% if (recentStudents.length === 0) { %>
           <div class="activity-list">
             <div class="activity-item">
-              <span class="activity-text"><span>No students yet. <a href="/students/add" style="color:var(--primary);">Add your first student</a></span></span>
+              <span class="activity-text">No students yet. <a href="/students/add" style="color:var(--primary);">Add your first student</a></span>
             </div>
           </div>
         <% } else { %>

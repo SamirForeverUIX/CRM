@@ -4,12 +4,12 @@
   <%- include('../partials/header') %>
   <div class="content-area">
     <div class="page-header">
-      <h1>Groups <span class="count-badge"><%= groups.length %></span></h1>
-      <a href="/groups/add" class="btn btn-primary">+ Add Group</a>
+      <h1>Groups <span class="page-subtitle">Quantity &mdash; <%= groups.length %></span></h1>
+      <a href="/groups/add" class="btn btn-primary">ADD NEW</a>
     </div>
 
     <% if (search) { %>
-      <p class="search-info">Search results for "<strong><%= search %></strong>" — <a href="/groups">Clear</a></p>
+      <p class="search-info">Search results for "<strong><%= search %></strong>" &mdash; <a href="/groups">Clear</a></p>
     <% } %>
 
     <% if (groups.length === 0) { %>
@@ -25,11 +25,11 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Group Name</th>
+            <th>Group</th>
             <th>Course</th>
             <th>Teacher</th>
             <th>Days</th>
-            <th>Time</th>
+            <th>Training dates</th>
             <th>Room</th>
             <th>Students</th>
             <th>Actions</th>
@@ -38,19 +38,28 @@
         <tbody>
           <% groups.forEach((group, i) => { %>
             <tr>
-              <td><%= i + 1 %></td>
+              <td style="color:var(--text-muted);"><%= i + 1 %>.</td>
               <td><a href="/groups/view/<%= group.id %>" class="table-link"><%= group.name %></a></td>
-              <td><%= group.course ? group.course.name : '<span class="muted">--</span>' %></td>
-              <td><%= group.teacher ? group.teacher.firstName + ' ' + group.teacher.lastName : '<span class="muted">--</span>' %></td>
-              <td><%= group.days && group.days.length > 0 ? group.days.join(', ') : '<span class="muted">--</span>' %></td>
-              <td><%= group.startTime || '<span class="muted">--</span>' %></td>
-              <td><%= group.room || '<span class="muted">--</span>' %></td>
-              <td><span class="count-badge"><%= group.studentCount %></span></td>
+              <td><%= group.course ? group.course.name : '--' %></td>
+              <td><%= group.teacher ? group.teacher.firstName + ' ' + group.teacher.lastName : '--' %></td>
+              <td>
+                <span style="font-size:13px;"><%= group.days && group.days.length > 0 ? group.days.join(', ') : '--' %></span>
+                <% if (group.startTime) { %><br><span style="font-size:12px;color:var(--text-muted);"><%= group.startTime %></span><% } %>
+              </td>
+              <td>
+                <% if (group.startDate) { %>
+                  <span style="font-size:13px;"><%= group.startDate %></span>
+                <% } else { %>
+                  --
+                <% } %>
+              </td>
+              <td><% if (group.room) { %><strong style="color:var(--primary);"><%= group.room.replace('Room ','') %></strong><% } else { %>--<% } %></td>
+              <td style="text-align:center;"><strong><%= group.studentCount %></strong></td>
               <td class="actions-cell">
                 <a href="/groups/view/<%= group.id %>" class="btn btn-small btn-secondary">View</a>
                 <a href="/groups/edit/<%= group.id %>" class="btn btn-small btn-edit">Edit</a>
                 <form action="/groups/delete/<%= group.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this group?')">
-                  <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                  <button type="submit" class="btn btn-small btn-delete">Del</button>
                 </form>
               </td>
             </tr>
