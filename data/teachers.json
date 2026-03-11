@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "teacher-1",
+    "firstName": "Nodira",
+    "lastName": "Karimova",
+    "phone": "+998 90 123 45 67",
+    "createdAt": "2026-02-20T09:00:00.000Z"
+  },
+  {
+    "id": "teacher-2",
+    "firstName": "James",
+    "lastName": "Wilson",
+    "phone": "+998 91 234 56 78",
+    "createdAt": "2026-02-20T09:05:00.000Z"
+  }
+]
