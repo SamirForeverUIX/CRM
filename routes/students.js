@@ -137,6 +137,7 @@ router.get('/view/:id', (req, res) => {
 
   const groups = readJSON('groups.json');
   const courses = readJSON('courses.json');
+  const teachers = readJSON('teachers.json');
   const studentGroups = (student.groupIds || []).map(gid => groups.find(g => g.id === gid)).filter(Boolean);
   const balance = calculateBalance(student, groups, courses);
 
@@ -153,9 +154,22 @@ router.get('/view/:id', (req, res) => {
     }
   });
 
+  // Enrich student groups with course and teacher info
+  const enrichedGroups = studentGroups.map(g => {
+    const course = g.courseId ? courses.find(c => c.id === g.courseId) : null;
+    const teacher = g.teacherId ? teachers.find(t => t.id === g.teacherId) : null;
+    return {
+      ...g,
+      courseName: course ? course.name : '',
+      courseCode: course ? (course.code || '') : '',
+      coursePrice: course ? (course.price || 0) : 0,
+      teacherName: teacher ? teacher.firstName + ' ' + teacher.lastName : ''
+    };
+  });
+
   res.render('students/view', {
-    page: 'students', student, studentGroups, allGroups: groups,
-    balance, totalPaid, totalOwed
+    page: 'students', student, studentGroups: enrichedGroups, allGroups: groups,
+    balance, totalPaid, totalOwed, courses
   });
 });
 
