@@ -77,12 +77,30 @@ router.get('/', (req, res) => {
     const studentGroups = (s.groupIds || []).map(gid => groups.find(gr => gr.id === gid)).filter(Boolean);
     const firstGroup = studentGroups[0];
     const teacher = firstGroup ? teachers.find(t => t.id === firstGroup.teacherId) : null;
+    const firstCourse = firstGroup && firstGroup.courseId ? courses.find(c => c.id === firstGroup.courseId) : null;
+
+    // Calculate end date from start + durationMonths
+    let endDate = '';
+    if (firstGroup && firstGroup.startDate && firstCourse && firstCourse.durationMonths) {
+      const sd = new Date(firstGroup.startDate);
+      sd.setMonth(sd.getMonth() + firstCourse.durationMonths);
+      endDate = sd.toISOString().split('T')[0];
+    }
 
     return {
       ...s,
       groupNames: studentGroups.map(g => g.name),
-      teacherName: teacher ? teacher.firstName + ' ' + teacher.lastName : '',
-      trainingDates: firstGroup && firstGroup.startDate ? firstGroup.startDate : '',
+      groupInfo: studentGroups.map(g => {
+        const c = g.courseId ? courses.find(cr => cr.id === g.courseId) : null;
+        return {
+          name: g.name,
+          courseCode: c ? (c.code || '') : '',
+          startTime: g.startTime || ''
+        };
+      }),
+      teacherName: teacher ? (teacher.firstName + ' ' + teacher.lastName).toUpperCase() : '',
+      trainingStart: firstGroup && firstGroup.startDate ? firstGroup.startDate : '',
+      trainingEnd: endDate,
       balance: calculateBalance(s, groups, courses)
     };
   });
