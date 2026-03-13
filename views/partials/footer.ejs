@@ -50,7 +50,7 @@
         form.addEventListener('submit', function(e) {
           e.preventDefault();
           var row = this.closest('tr');
-          var name = row ? (row.querySelector('.table-link') ? row.querySelector('.table-link').textContent : (row.cells[1] ? row.cells[1].textContent : 'this item')) : 'this item';
+          var name = row ? (row.querySelector('.table-link,.sl-cell-name') ? row.querySelector('.table-link,.sl-cell-name').textContent : (row.cells[1] ? row.cells[1].textContent : 'this item')) : 'this item';
           showDeleteModal(this, name.trim());
         });
       });
@@ -73,6 +73,13 @@
         setTimeout(function() { toast.remove(); }, 300);
       }, 3500);
     }
+
+    // === Close dropdown menus on outside click ===
+    document.addEventListener('click', function(e) {
+      document.querySelectorAll('.sl-menu-wrapper.open').forEach(function(el) {
+        if (!el.contains(e.target)) el.classList.remove('open');
+      });
+    });
 
     // Auto-show toast for page alerts
     document.addEventListener('DOMContentLoaded', function() {

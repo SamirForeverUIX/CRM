@@ -3,92 +3,140 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1>Students <span class="page-subtitle">Quantity &mdash; <%= students.length %></span></h1>
-      <a href="/students/add" class="btn btn-primary">ADD NEW</a>
+
+    <!-- Page Header -->
+    <div class="sl-header">
+      <div class="sl-header-left">
+        <h1 class="sl-title">Students</h1>
+        <span class="sl-quantity">Quantity &mdash; <strong><%= students.length %></strong></span>
+      </div>
+      <a href="/students/add" class="sl-add-btn">ADD NEW</a>
     </div>
 
-    <div class="filter-bar">
-      <form action="/students" method="GET" class="filter-form">
-        <input type="text" name="search" placeholder="Search by name or phone" value="<%= search %>">
-        <select name="group">
-          <option value="">All Groups</option>
+    <!-- Filter Bar -->
+    <form action="/students" method="GET" class="sl-filters">
+      <div class="sl-filter-row">
+        <input type="text" name="search" placeholder="Search by name or phone" value="<%= search %>" class="sl-filter-input">
+        <select name="group" class="sl-filter-select">
+          <option value="">By Groups</option>
           <% groups.forEach(g => { %>
             <option value="<%= g.id %>" <%= filterGroup === g.id ? 'selected' : '' %>><%= g.name %></option>
           <% }) %>
         </select>
-        <select name="debt">
+        <select name="debt" class="sl-filter-select">
           <option value="">Financial situation</option>
           <option value="unpaid" <%= filterDebt === 'unpaid' ? 'selected' : '' %>>Has debt</option>
           <option value="paid" <%= filterDebt === 'paid' ? 'selected' : '' %>>Fully paid</option>
         </select>
-        <button type="submit" class="btn btn-primary btn-small">Filter</button>
-        <a href="/students" class="btn btn-secondary btn-small">Clear</a>
-      </form>
-    </div>
+        <button type="submit" class="sl-filter-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filters
+        </button>
+        <% if (search || filterGroup || filterDebt) { %>
+          <a href="/students" class="sl-filter-btn sl-filter-clear">Clear</a>
+        <% } %>
+      </div>
+    </form>
 
+    <!-- Students Table -->
     <% if (students.length === 0) { %>
       <div class="empty-state">
         <div class="empty-state-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <p>No students found.</p>
         <a href="/students/add" class="btn btn-primary">Add your first student</a>
       </div>
     <% } else { %>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Groups</th>
-            <th>Teacher</th>
-            <th>Training dates</th>
-            <th>Balance</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% students.forEach((student, i) => { %>
+      <div class="sl-table-wrap">
+        <table class="sl-table">
+          <thead>
             <tr>
-              <td style="color:var(--text-muted);"><%= i + 1 %>.</td>
-              <td>
-                <a href="/students/view/<%= student.id %>" class="table-link" style="display:flex;align-items:center;gap:10px;">
-                  <div class="avatar avatar-sm avatar-gradient-<%= (i % 6) + 1 %>" style="width:28px;height:28px;font-size:10px;"><%= student.firstName.charAt(0) %><%= student.lastName.charAt(0) %></div>
-                  <%= student.firstName %> <%= student.lastName %>
-                </a>
-              </td>
-              <td style="color:var(--primary);font-weight:500;"><%= student.phone %></td>
-              <td>
-                <% if (student.groupNames.length > 0) { %>
-                  <% student.groupNames.forEach(function(name, gi) { %>
-                    <span class="group-code-badge"><%= name %></span>
-                  <% }) %>
-                <% } else { %>
-                  <span class="muted">--</span>
-                <% } %>
-              </td>
-              <td style="font-size:13px;"><%= student.teacherName || '--' %></td>
-              <td style="font-size:12px;color:var(--text-secondary);"><%= student.trainingDates || '--' %></td>
-              <td>
-                <% var bal = student.balance || 0; %>
-                <span class="balance-text <%= bal < 0 ? 'negative' : bal > 0 ? 'positive' : '' %>">
-                  <%= bal < 0 ? '' : '' %><%= bal.toLocaleString() %>
-                </span>
-              </td>
-              <td class="actions-cell">
-                <a href="/students/view/<%= student.id %>" class="btn btn-small btn-secondary">View</a>
-                <a href="/students/edit/<%= student.id %>" class="btn btn-small btn-edit">Edit</a>
-                <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete?')">
-                  <button type="submit" class="btn btn-small btn-delete">Del</button>
-                </form>
-              </td>
+              <th class="sl-th-num"></th>
+              <th class="sl-th-photo">Photo</th>
+              <th class="sl-th-name">Name</th>
+              <th class="sl-th-phone">Phone</th>
+              <th class="sl-th-groups">Groups</th>
+              <th class="sl-th-teacher">Teachers</th>
+              <th class="sl-th-dates">Training dates</th>
+              <th class="sl-th-balance">Balance</th>
+              <th class="sl-th-actions"></th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% students.forEach(function(student, i) { %>
+              <tr class="sl-row" onclick="window.location='/students/view/<%= student.id %>'" style="cursor:pointer;">
+                <td class="sl-cell-num"><%= i + 1 %>.</td>
+                <td class="sl-cell-photo">
+                  <div class="sl-photo-placeholder">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </div>
+                </td>
+                <td class="sl-cell-name"><%= student.firstName %> <%= student.lastName %></td>
+                <td class="sl-cell-phone"><%= student.phone %></td>
+                <td class="sl-cell-groups">
+                  <% if (student.groupInfo && student.groupInfo.length > 0) { %>
+                    <% student.groupInfo.forEach(function(gi) { %>
+                      <div class="sl-group-entry">
+                        <% if (gi.courseCode) { %>
+                          <span class="sl-course-badge"><%= gi.courseCode %></span>
+                        <% } %>
+                        <span class="sl-group-name"><%= gi.name %><% if (gi.startTime) { %> (<%= gi.startTime %>)<% } %></span>
+                      </div>
+                    <% }) %>
+                  <% } else { %>
+                    <span class="sl-muted">&mdash;</span>
+                  <% } %>
+                </td>
+                <td class="sl-cell-teacher"><%= student.teacherName || '&mdash;' %></td>
+                <td class="sl-cell-dates">
+                  <% if (student.trainingStart) { %>
+                    <span class="sl-date-range">
+                      <%= student.trainingStart %> &mdash;
+                      <% if (student.trainingEnd) { %>
+                        <br><%= student.trainingEnd %>
+                      <% } %>
+                    </span>
+                  <% } else { %>
+                    <span class="sl-muted">&mdash;</span>
+                  <% } %>
+                </td>
+                <td class="sl-cell-balance">
+                  <% var bal = student.balance || 0; %>
+                  <span class="sl-balance <%= bal < 0 ? 'negative' : bal > 0 ? 'positive' : '' %>">
+                    <%= bal.toLocaleString() %>
+                  </span>
+                </td>
+                <td class="sl-cell-actions" onclick="event.stopPropagation();">
+                  <div class="sl-menu-wrapper">
+                    <button class="sl-dots-btn" onclick="this.parentElement.classList.toggle('open');">
+                      <svg width="4" height="16" viewBox="0 0 4 16" fill="currentColor"><circle cx="2" cy="2" r="1.5"/><circle cx="2" cy="8" r="1.5"/><circle cx="2" cy="14" r="1.5"/></svg>
+                    </button>
+                    <div class="sl-dropdown">
+                      <a href="/students/view/<%= student.id %>" class="sl-dropdown-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View
+                      </a>
+                      <a href="/students/edit/<%= student.id %>" class="sl-dropdown-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                        Edit
+                      </a>
+                      <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, '<%= student.firstName %> <%= student.lastName %>')">
+                        <button type="submit" class="sl-dropdown-item sl-dropdown-danger">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          Delete
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     <% } %>
+
   </div>
 </main>
 <%- include('../partials/footer') %>
