@@ -3,118 +3,268 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1>Student Profile</h1>
-      <div>
-        <a href="/students/edit/<%= student.id %>" class="btn btn-primary">Edit</a>
-        <a href="/students" class="btn btn-secondary">Back</a>
-      </div>
-    </div>
 
-    <% const payments = student.payments || []; %>
+    <% const payments = (student.payments || []).slice().reverse(); %>
 
-    <div class="student-view-layout">
-      <!-- LEFT: Profile Card -->
-      <div class="student-profile-panel">
-        <div class="student-profile-card">
-          <div class="student-profile-avatar avatar-gradient-1">
-            <%= student.firstName.charAt(0) %><%= student.lastName.charAt(0) %>
+    <div class="sv-layout">
+      <!-- ============ LEFT: Profile Card ============ -->
+      <div class="sv-left">
+        <div class="sv-profile-card">
+          <!-- Avatar + Action Icons Row -->
+          <div class="sv-profile-top">
+            <div class="sv-avatar">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div class="sv-action-icons">
+              <a href="/students/edit/<%= student.id %>" class="sv-action-icon sv-icon-edit" title="Edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              </a>
+              <a href="tel:<%= student.phone %>" class="sv-action-icon sv-icon-phone" title="Call">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, '<%= student.firstName %> <%= student.lastName %>')">
+                <button type="submit" class="sv-action-icon sv-icon-delete" title="Delete">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </form>
+            </div>
           </div>
-          <div class="student-profile-name"><%= student.firstName %> <%= student.lastName %></div>
-          <div class="student-profile-info">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <a href="tel:<%= student.phone %>" style="color:var(--primary);font-weight:500;"><%= student.phone %></a>
+
+          <!-- Name & ID -->
+          <div class="sv-name"><%= student.firstName %> <%= student.lastName %></div>
+          <div class="sv-id">(id: <%= student.id.substring(0, 7) %>)</div>
+
+          <!-- Balance Badge -->
+          <div class="sv-balance-row">
+            <span class="sv-balance-pill <%= balance < 0 ? 'negative' : balance > 0 ? 'positive' : 'zero' %>">
+              <%= balance.toLocaleString() %> UZS
+            </span>
+            <span class="sv-balance-label">balance</span>
           </div>
 
-          <div class="student-balance-badge <%= balance < 0 ? 'negative' : balance > 0 ? 'positive' : 'zero' %>">
-            <span class="student-balance-label">Balance</span>
-            <span class="student-balance-amount"><%= balance.toLocaleString() %></span>
+          <div class="sv-divider"></div>
+
+          <!-- Phone -->
+          <div class="sv-info-section">
+            <div class="sv-info-label">Phone:</div>
+            <a href="tel:<%= student.phone %>" class="sv-phone-link"><%= student.phone %></a>
           </div>
 
-          <div class="student-profile-groups">
-            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">Groups</div>
-            <% if (studentGroups.length > 0) { %>
-              <% studentGroups.forEach(g => { %>
-                <a href="/groups/view/<%= g.id %>" class="group-code-badge" style="margin:2px;"><%= g.name %></a>
-              <% }) %>
-            <% } else { %>
-              <span class="muted" style="font-size:13px;">Not assigned</span>
-            <% } %>
+          <div class="sv-divider"></div>
+
+          <!-- Added Date -->
+          <div class="sv-info-section">
+            <span class="sv-info-label">Added at:</span>
+            <span class="sv-info-value"><%= student.createdAt ? new Date(student.createdAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : 'Unknown' %></span>
+          </div>
+
+          <div class="sv-divider"></div>
+
+          <!-- Action Buttons -->
+          <div class="sv-card-actions">
+            <a href="/students/edit/<%= student.id %>" class="sv-btn-outline sv-btn-teal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              Add to group
+            </a>
+            <div style="flex:1;"></div>
+            <a href="#payment-section" class="sv-btn-outline sv-btn-teal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Add payment
+            </a>
+          </div>
+
+          <!-- Note Section -->
+          <div class="sv-note-section">
+            <div class="sv-note-bar"></div>
+            <div class="sv-note-content">
+              <span class="sv-note-placeholder">Note</span>
+            </div>
+            <div class="sv-note-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: Payments -->
-      <div class="student-payments-panel">
-        <!-- Monthly balance row -->
-        <div class="monthly-balance-row">
-          <div class="monthly-balance-item">
-            <span class="monthly-balance-label">Total Paid</span>
-            <span class="monthly-balance-value positive"><%= totalPaid.toLocaleString() %></span>
+      <!-- ============ RIGHT: Groups, Balance, Payments ============ -->
+      <div class="sv-right">
+
+        <!-- Tabs -->
+        <div class="sv-tabs">
+          <button class="sv-tab active">Groups</button>
+          <button class="sv-tab" disabled>Comments</button>
+          <button class="sv-tab" disabled>History</button>
+        </div>
+
+        <!-- Group Cards -->
+        <% if (studentGroups.length > 0) { %>
+          <% studentGroups.forEach(function(g) { %>
+            <div class="sv-group-card">
+              <div class="sv-group-main">
+                <div class="sv-group-top-row">
+                  <span class="sv-group-code-badge"><%= g.courseCode || g.name %></span>
+                  <span class="sv-group-dates"><%= g.startDate || '' %> &mdash; <%= g.endDate || '' %></span>
+                </div>
+                <div class="sv-group-name"><%= g.name %></div>
+                <div class="sv-group-teacher"><%= g.teacherName %></div>
+
+                <div class="sv-group-divider"></div>
+
+                <div class="sv-group-details">
+                  <div class="sv-group-detail-row">
+                    <span class="sv-detail-label">Status:</span>
+                    <span class="sv-detail-value"><strong>Active (Learns)</strong></span>
+                  </div>
+                  <% if (g.startDate) { %>
+                  <div class="sv-group-detail-row">
+                    <span class="sv-detail-label">Added at:</span>
+                    <span class="sv-detail-value"><strong><%= g.startDate %></strong></span>
+                  </div>
+                  <% } %>
+                  <div class="sv-group-detail-row">
+                    <span class="sv-detail-label">Price for student:</span>
+                    <span class="sv-detail-value"><strong><%= g.coursePrice ? g.coursePrice.toLocaleString() + ' UZS' : 'N/A' %></strong></span>
+                  </div>
+                  <div class="sv-group-detail-row">
+                    <span class="sv-detail-label">By group:</span>
+                    <span class="sv-detail-value">
+                      <a href="/groups/view/<%= g.id %>" style="color:var(--primary);font-weight:500;"><%= g.name %></a>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sv-group-actions">
+                <a href="/groups/view/<%= g.id %>" class="sv-group-action-btn sv-icon-info" title="View group">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+                </a>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="sv-empty-groups">
+            <p class="muted">No groups assigned. <a href="/students/edit/<%= student.id %>" style="color:var(--primary);">Add to a group</a></p>
           </div>
-          <div class="monthly-balance-item">
-            <span class="monthly-balance-label">Total Owed</span>
-            <span class="monthly-balance-value negative"><%= totalOwed.toLocaleString() %></span>
-          </div>
-          <div class="monthly-balance-item">
-            <span class="monthly-balance-label">Balance</span>
-            <span class="monthly-balance-value <%= balance < 0 ? 'negative' : 'positive' %>"><%= balance.toLocaleString() %></span>
-          </div>
+        <% } %>
+
+        <!-- Monthly Balance Status -->
+        <div class="sv-section-header">
+          <h2>Monthly balance status</h2>
+        </div>
+
+        <div class="sv-monthly-cards">
+          <%
+            // Generate monthly balance cards
+            const now = new Date();
+            const months = [];
+            for (let i = 0; i < 3; i++) {
+              const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+              const yr = d.getFullYear();
+              const mo = String(d.getMonth() + 1).padStart(2, '0');
+              const label = yr + ' M' + mo;
+
+              // Calculate monthly owed
+              let monthlyOwed = 0;
+              studentGroups.forEach(function(g) {
+                if (g.coursePrice) {
+                  monthlyOwed += g.coursePrice;
+                }
+              });
+
+              // Calculate monthly paid
+              let monthlyPaid = 0;
+              (student.payments || []).forEach(function(p) {
+                if (p.date) {
+                  const pd = new Date(p.date);
+                  if (pd.getFullYear() === yr && pd.getMonth() === d.getMonth()) {
+                    if (p.status === 'paid' || p.status === 'partial') monthlyPaid += p.amount || 0;
+                  }
+                }
+              });
+
+              months.push({ label: label, groups: studentGroups.length, balance: monthlyPaid - monthlyOwed });
+            }
+          %>
+          <% months.forEach(function(m) { %>
+            <div class="sv-month-card <%= m.balance < 0 ? 'negative' : m.balance > 0 ? 'positive' : '' %>">
+              <div class="sv-month-label"><%= m.label %> <span><%= m.groups %></span></div>
+              <div class="sv-month-amount"><%= m.balance.toLocaleString() %></div>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- Payments Section -->
+        <div class="sv-section-header" id="payment-section">
+          <h2>Payments</h2>
         </div>
 
         <!-- Payment Form -->
-        <div class="section-block">
-          <h2>Add Payment</h2>
-          <form action="/students/payment/<%= student.id %>" method="POST" class="payment-form">
-            <input type="number" name="amount" step="0.01" min="0" placeholder="Amount" required>
+        <div class="sv-payment-form-wrap">
+          <form action="/students/payment/<%= student.id %>" method="POST" class="sv-payment-form">
             <input type="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>">
             <select name="status">
-              <option value="paid">Paid</option>
+              <option value="paid">Payment</option>
               <option value="partial">Partial</option>
-              <option value="unpaid">Unpaid</option>
             </select>
-            <button type="submit" class="btn btn-primary btn-small">Add</button>
+            <input type="number" name="amount" step="0.01" min="0" placeholder="Amount" required>
+            <button type="submit" class="sv-btn-outline sv-btn-teal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add
+            </button>
           </form>
         </div>
 
-        <!-- Payment History -->
-        <div class="section-block">
-          <h2>Payment History</h2>
-          <% if (payments.length === 0) { %>
-            <p class="muted" style="font-size:13px;">No payments recorded yet.</p>
-          <% } else { %>
-            <table class="data-table payment-table">
+        <% if (payments.length > 0) { %>
+          <div class="sv-payments-table-wrap">
+            <table class="sv-payments-table">
               <thead>
                 <tr>
-                  <th>#</th>
                   <th>Date</th>
+                  <th>Type</th>
                   <th>Amount</th>
-                  <th>Status</th>
+                  <th>Comment</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <% payments.forEach((p, i) => { %>
+                <% payments.forEach(function(p) { %>
                   <tr>
-                    <td style="color:var(--text-muted);"><%= i + 1 %>.</td>
-                    <td><%= p.date %></td>
-                    <td style="font-weight:600;"><%= (p.amount || 0).toLocaleString() %></td>
+                    <td class="sv-pay-date"><%= p.date %></td>
                     <td>
-                      <span class="status-badge status-<%= p.status %>"><%= p.status %></span>
+                      <span class="sv-pay-type-badge <%= p.status === 'paid' ? 'type-payment' : p.status === 'partial' ? 'type-partial' : 'type-system' %>">
+                        <%= p.status %>
+                      </span>
                     </td>
-                    <td>
-                      <form action="/students/payment/<%= student.id %>/delete/<%= p.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete?')">
-                        <button type="submit" class="btn btn-small btn-delete">Del</button>
+                    <td class="sv-pay-amount <%= p.status === 'paid' || p.status === 'partial' ? 'positive' : '' %>">
+                      <%= p.status === 'paid' || p.status === 'partial' ? '+' : '&minus;' %><%= (p.amount || 0).toLocaleString() %> UZS
+                    </td>
+                    <td class="sv-pay-comment">
+                      <% if (studentGroups.length > 0) { %>
+                        <span class="sv-comment-group-badge"><%= studentGroups[0].courseCode || studentGroups[0].name %></span>
+                      <% } %>
+                    </td>
+                    <td class="sv-pay-actions">
+                      <form action="/students/payment/<%= student.id %>/delete/<%= p.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, 'this payment')">
+                        <button type="submit" class="sv-btn-outline sv-btn-small sv-btn-danger">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          Delete
+                        </button>
                       </form>
                     </td>
                   </tr>
                 <% }) %>
               </tbody>
             </table>
-          <% } %>
-        </div>
+          </div>
+        <% } else { %>
+          <div class="sv-empty-payments">
+            <p class="muted" style="font-size:13px;">No payments recorded yet.</p>
+          </div>
+        <% } %>
+
       </div>
     </div>
+
   </div>
 </main>
 <%- include('../partials/footer') %>

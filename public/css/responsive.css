@@ -6,6 +6,7 @@
 @media (max-width: 1200px) {
   .teacher-view-layout { grid-template-columns:280px 1fr; }
   .teacher-view-layout > :nth-child(3) { grid-column:1 / -1; }
+  .sv-layout { grid-template-columns: 340px 1fr; }
 }
 
 /* Tablets / mobile landscape */
@@ -48,6 +49,10 @@
   .teachers-grid { grid-template-columns:1fr; }
   .teachers-grid .teacher-card { border-right:none !important; }
   .student-view-layout { grid-template-columns:1fr; }
+  .sv-layout { grid-template-columns:1fr; }
+  .sv-left { position: static; }
+  .sv-monthly-cards { flex-direction: column; }
+  .sv-payment-form { flex-direction: column; align-items: stretch; }
   .courses-grid { grid-template-columns:1fr 1fr; gap: 12px; }
   .course-view-grid { grid-template-columns:1fr; }
   .course-view-banner { padding: 20px; }
@@ -81,4 +86,7 @@
   .btn { padding: 10px 18px; font-size: 13px; }
   .courses-grid { grid-template-columns:1fr; }
   .monthly-balance-row { gap: 8px; }
+  .sv-card-actions { flex-direction: column; }
+  .sv-profile-top { flex-direction: row; }
+  .sv-action-icons { flex-direction: row; gap: 4px; }
 }
