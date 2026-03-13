@@ -1,0 +1,119 @@
+/* ============================================================
+   SCHEDULE — Tabs, day filters, time-slot table, blocks
+   ============================================================ */
+
+.schedule-tabs {
+  display:flex; gap:0; margin-bottom:16px;
+  border-bottom:2px solid var(--border);
+}
+.schedule-tab {
+  padding:10px 20px;
+  font-size:14px; font-weight:600;
+  color:var(--text-secondary);
+  cursor:pointer; border:none; background:none;
+  font-family:inherit;
+  border-bottom:2px solid transparent;
+  margin-bottom:-2px;
+  transition:all var(--transition-base);
+}
+.schedule-tab:hover { color:var(--primary); background: var(--primary-bg); border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+.schedule-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+.schedule-days-filter {
+  display:flex; gap:4px; margin-bottom:20px; flex-wrap:wrap;
+}
+.schedule-day-btn {
+  padding:6px 14px;
+  border:none; background:none;
+  font-family:inherit; font-size:13px; font-weight:500;
+  color:var(--text-secondary);
+  cursor:pointer;
+  border-radius:var(--radius-full);
+  transition:all var(--transition-fast);
+}
+.schedule-day-btn:hover { background:var(--bg-body); color:var(--text-primary); }
+.schedule-day-btn.active {
+  color:var(--primary); font-weight:700;
+}
+.schedule-day-btn.active::before {
+  content:''; display:inline-block;
+  width:6px; height:6px;
+  background:var(--primary);
+  border-radius:50%;
+  margin-right:4px;
+  vertical-align:middle;
+}
+
+/* Schedule Table */
+.schedule-table-wrap { overflow-x:auto; }
+.schedule-table {
+  width:100%; border-collapse:collapse;
+  background:#fff;
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-card);
+  min-width:800px;
+}
+.schedule-table thead th {
+  padding:12px 8px; text-align:center;
+  font-size:13px; font-weight:600;
+  color:var(--text-secondary);
+  background:#fafbfc;
+  border-bottom:1px solid var(--border);
+  border-right:1px solid var(--border-light);
+}
+.schedule-table thead th:last-child { border-right:none; }
+.schedule-time-col { width:80px; text-align:left !important; padding-left:16px !important; }
+.schedule-day-col { min-width:100px; }
+
+.schedule-time-cell {
+  padding:12px 8px 12px 16px;
+  font-size:14px; font-weight:600;
+  border-bottom:1px solid var(--border-light);
+  border-right:1px solid var(--border-light);
+  vertical-align:top;
+}
+.schedule-cell {
+  padding:6px;
+  border-bottom:1px solid var(--border-light);
+  border-right:1px solid var(--border-light);
+  vertical-align:top;
+}
+.schedule-cell:last-child { border-right:none; }
+.schedule-table tbody tr:last-child td { border-bottom:none; }
+
+/* Schedule Blocks */
+.schedule-block {
+  display:flex; flex-direction:column; gap:2px;
+  padding:8px 10px;
+  border-radius:var(--radius-sm);
+  margin-bottom:4px;
+  transition:all var(--transition-base);
+  position:relative;
+  overflow:hidden;
+}
+.schedule-block:last-child { margin-bottom:0; }
+
+/* Color variations */
+.schedule-block.color-green { background:#d1fae5; border-left:3px solid #16a34a; }
+.schedule-block.color-blue { background:#dbeafe; border-left:3px solid #2563eb; }
+.schedule-block.color-pink { background:#fce7f3; border-left:3px solid #db2777; }
+.schedule-block.color-cyan { background:#cffafe; border-left:3px solid #0891b2; }
+.schedule-block.color-orange { background:#ffedd5; border-left:3px solid #ea580c; }
+.schedule-block.color-purple { background:#ede9fe; border-left:3px solid #7c3aed; }
+
+.schedule-block:hover { transform: scale(1.02); box-shadow: var(--shadow-sm); }
+
+.schedule-block-code {
+  font-size:10px; font-weight:700;
+  padding:1px 5px; background:rgba(255,255,255,0.6);
+  border-radius:3px; display:inline-block; width:fit-content;
+}
+.schedule-block-name { font-size:12px; font-weight:600; color:var(--text-primary); }
+.schedule-block-teacher { font-size:11px; color:var(--text-secondary); }
+.schedule-block-meta { font-size:10px; color:var(--text-muted); }
+.schedule-block-students {
+  position:absolute; bottom:4px; right:6px;
+  font-size:10px; font-weight:600; color:var(--text-secondary);
+}

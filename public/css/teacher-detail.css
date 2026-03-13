@@ -1,0 +1,99 @@
+/* ============================================================
+   TEACHER DETAIL — Profile card, groups list, group detail
+   ============================================================ */
+
+.teacher-view-layout {
+  display:grid;
+  grid-template-columns:320px 1fr 320px;
+  gap:24px; align-items:start;
+}
+
+.teacher-profile-card {
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+  padding:24px; text-align:center;
+}
+.teacher-profile-avatar {
+  width:80px; height:80px;
+  border-radius:var(--radius-lg);
+  background:var(--bg-body);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 12px;
+  color:var(--text-muted);
+}
+.teacher-profile-avatar svg { width:40px; height:40px; }
+.teacher-profile-name { font-size:16px; font-weight:700; margin-bottom:8px; }
+.teacher-profile-info { font-size:13px; color:var(--text-secondary); margin-bottom:4px; }
+.teacher-profile-info a { color:var(--primary); font-weight:500; }
+.teacher-profile-badge {
+  display:inline-block;
+  padding:4px 12px;
+  border-radius:var(--radius-full);
+  font-size:12px; font-weight:600;
+  margin-top:8px;
+}
+.teacher-profile-badge.role { border:1.5px solid var(--primary); color:var(--primary); }
+.teacher-profile-badge.branch { border:1.5px solid var(--success); color:var(--success); }
+
+/* Groups List */
+.teacher-groups-list {
+  display:flex; flex-direction:column; gap:12px;
+}
+.teacher-group-card {
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  padding:16px 20px;
+  display:flex; align-items:center; gap:16px;
+  cursor:pointer;
+  transition:all var(--transition-fast);
+}
+.teacher-group-card:hover { box-shadow:var(--shadow-md); border-color:var(--primary-border); }
+.teacher-group-card.active { border-color:var(--primary); background:var(--primary-bg); }
+
+.teacher-group-code {
+  font-size:11px; font-weight:700; padding:2px 8px;
+  background:var(--bg-body); border:1px solid var(--border);
+  border-radius:4px; white-space:nowrap;
+}
+.teacher-group-name { font-size:14px; font-weight:600; }
+.teacher-group-meta { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+.teacher-group-students {
+  margin-left:auto;
+  width:28px; height:28px;
+  border-radius:var(--radius-full);
+  background:var(--primary);
+  color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700;
+}
+
+/* Group Detail Panel */
+.teacher-group-detail {
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+  padding:24px;
+}
+.teacher-group-detail-header { text-align:center; margin-bottom:20px; }
+.teacher-group-detail-header h3 { font-size:16px; font-weight:700; }
+.teacher-group-detail-header p { font-size:13px; color:var(--text-secondary); margin-top:4px; }
+
+.teacher-student-row {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid var(--border-light);
+  font-size:13px;
+}
+.teacher-student-row:last-child { border-bottom:none; }
+.teacher-student-row .name { flex:1; font-weight:500; }
+.teacher-student-row .phone { color:var(--text-secondary); font-size:12px; }
+
+.go-to-group-link {
+  display:block; text-align:right; margin-top:16px;
+  font-size:13px; font-weight:600; color:var(--text-secondary);
+}
+.go-to-group-link:hover { color:var(--primary); }

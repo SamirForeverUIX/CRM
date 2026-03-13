@@ -1,0 +1,36 @@
+/* ============================================================
+   SETTINGS — Room management
+   ============================================================ */
+
+.rooms-section { margin-top:32px; }
+.rooms-section h2 {
+  font-size:17px; font-weight:600; margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
+}
+.room-add-form { display:flex; gap:10px; margin-bottom:16px; }
+.room-add-form input {
+  flex:1; padding:10px 14px;
+  background:#fff; border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-family:inherit; font-size:14px;
+}
+.room-add-form input:focus {
+  outline:none; border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(249,115,22,0.1);
+}
+.room-list { display:flex; flex-wrap:wrap; gap:8px; }
+.room-chip {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 14px;
+  background:var(--bg-body); border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  font-size:13px; font-weight:500;
+  transition: all var(--transition-base);
+}
+.room-chip:hover { border-color: #d1d5db; background: #fff; }
+.room-chip button {
+  background:none; border:none; cursor:pointer;
+  color:var(--text-muted); font-size:16px; padding:0;
+  line-height:1; display:flex; align-items:center;
+}
+.room-chip button:hover { color:var(--danger); }

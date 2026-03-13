@@ -1,0 +1,80 @@
+/* ============================================================
+   TOP HEADER — Search bar, profile, mobile menu
+   ============================================================ */
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-left { display:flex; align-items:center; gap:16px; flex:1; }
+
+.mobile-menu-btn {
+  display:none;
+  background:none; border:none;
+  color:var(--text-secondary); cursor:pointer;
+  padding:6px; border-radius:var(--radius-sm);
+}
+.mobile-menu-btn:hover { background:var(--bg-body); }
+
+.search-form {
+  display:flex; align-items:center;
+  background:var(--bg-body);
+  border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  padding:0 16px;
+  max-width:420px; flex:1;
+  transition: all var(--transition-base);
+}
+.search-form:focus-within {
+  border-color:var(--primary);
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+  background: #fff;
+}
+.search-form button {
+  background:none; border:none; cursor:pointer;
+  color:var(--text-muted); display:flex; padding:0;
+}
+.search-form input {
+  background:transparent; border:none; outline:none;
+  padding:8px 10px;
+  color:var(--text-primary);
+  font-size:13px; font-family:inherit; width:100%;
+}
+.search-form input::placeholder { color:var(--text-muted); }
+
+.header-right { display:flex; align-items:center; gap:12px; }
+.profile-btn {
+  display:flex; align-items:center; gap:8px;
+  padding:6px 12px;
+  border-radius:var(--radius-full);
+  transition: background var(--transition-fast);
+}
+.profile-btn:hover { background:var(--bg-body); }
+.profile-icon {
+  width:30px; height:30px;
+  border-radius:var(--radius-full);
+  background:var(--primary);
+  color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600;
+}
+.profile-label { font-size:13px; font-weight:500; color:var(--text-primary); }
