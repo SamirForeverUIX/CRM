@@ -1,0 +1,107 @@
+/* ============================================================
+   ATTENDANCE — Table with circle checkboxes, navigation
+   ============================================================ */
+
+.attendance-panel { overflow:hidden; }
+.attendance-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px; flex-wrap:wrap; gap:10px;
+}
+.attendance-header h3 {
+  font-size:17px; font-weight:700; margin:0; padding:0; border:0;
+}
+.attendance-nav {
+  display:flex; align-items:center; gap:6px;
+}
+.att-nav-btn {
+  background:none; border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:6px 10px;
+  cursor:pointer; color:var(--text-secondary);
+  font-size:12px; font-weight:600; font-family:inherit;
+  transition:all var(--transition-fast);
+}
+.att-nav-btn:hover { border-color:var(--primary); color:var(--primary); }
+.att-nav-btn.current { background:var(--primary); color:#fff; border-color:var(--primary); }
+.att-date-range { font-size:13px; font-weight:500; color:var(--text-primary); padding:0 6px; }
+
+.attendance-table-wrap {
+  overflow-x:auto;
+  margin:0 -24px -24px;
+  padding:0 24px 24px;
+}
+.attendance-table {
+  width:100%; border-collapse:collapse; min-width:500px;
+}
+.attendance-table thead th {
+  padding:8px 4px; text-align:center;
+  vertical-align:bottom;
+  border-bottom:2px solid var(--border);
+}
+.att-student-col {
+  text-align:left !important;
+  padding:8px 12px 8px 0 !important;
+  font-size:13px; font-weight:600;
+  color:var(--text-secondary);
+  white-space:nowrap; min-width:160px;
+}
+.att-date-col { width:52px; min-width:52px; padding:6px 2px !important; }
+
+.att-date-header { display:flex; flex-direction:column; align-items:center; gap:1px; }
+.att-lesson-num {
+  font-size:9px; font-weight:700; color:var(--text-muted);
+  display:none;
+}
+.att-date-day { font-size:11px; font-weight:600; color:var(--text-secondary); }
+.att-date-val { font-size:11px; font-weight:500; color:var(--text-primary); }
+
+.att-student-cell {
+  padding:10px 12px 10px 0;
+  display:flex; align-items:center; gap:10px;
+  font-size:13px; font-weight:500;
+  white-space:nowrap;
+  border-bottom:1px solid var(--border-light);
+}
+.att-was-badge {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:2px 8px;
+  border-radius:var(--radius-full);
+  font-size:10px; font-weight:700;
+  background:var(--success); color:#fff;
+  min-width:36px;
+}
+
+.att-check-cell {
+  text-align:center; padding:6px 2px;
+  border-bottom:1px solid var(--border-light);
+}
+.attendance-table tbody tr:last-child .att-student-cell,
+.attendance-table tbody tr:last-child .att-check-cell { border-bottom:none; }
+
+.att-checkbox { display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+.att-checkbox input { display:none; }
+.att-mark {
+  width:26px; height:26px;
+  border-radius:var(--radius-full);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700;
+  border:2px solid var(--border);
+  background:#fff;
+  color:transparent;
+  transition:all var(--transition-base);
+}
+.att-checkbox:active .att-mark { transform: scale(0.9); }
+.att-mark.present {
+  background:var(--success);
+  border-color:var(--success);
+  color:#fff;
+}
+.att-mark.absent {
+  background:var(--danger-bg);
+  border-color:var(--danger);
+  color:var(--danger);
+}
+.att-checkbox:hover .att-mark {
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px rgba(249,115,22,0.1);
+}

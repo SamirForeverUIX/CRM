@@ -1,0 +1,69 @@
+/* ============================================================
+   COURSES — Colored card grid, course detail view
+   ============================================================ */
+
+.courses-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+  gap:16px;
+}
+
+.course-card {
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+  padding:20px;
+  display:flex; flex-direction:column;
+  transition:all var(--transition-base);
+  position:relative;
+}
+.course-card:hover {
+  box-shadow:var(--shadow-card-hover);
+  transform:translateY(-3px);
+  border-color: transparent;
+}
+.course-card:active { transform: translateY(-1px); }
+
+.course-card-icon {
+  width:44px; height:44px;
+  border-radius:var(--radius-md);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:12px;
+}
+.course-card-name { font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+.course-card-code {
+  display:inline-block;
+  font-size:10px; font-weight:700;
+  padding:2px 8px;
+  background:var(--bg-body); border:1px solid var(--border);
+  border-radius:4px; color:var(--text-secondary);
+  margin-bottom:8px; width:fit-content;
+}
+.course-card-price { font-size:22px; font-weight:700; margin-bottom:6px; }
+.course-card-meta {
+  display:flex; flex-direction:column; gap:2px;
+  font-size:12px; color:var(--text-secondary);
+  margin-bottom:12px;
+}
+.course-card-actions { margin-top:auto; display:flex; gap:6px; }
+
+/* Course View — Banner + Grid */
+.course-view-banner {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:24px; border-radius:var(--radius-lg);
+  margin-bottom:24px;
+  flex-wrap:wrap; gap:16px;
+}
+.course-view-banner-content { display:flex; align-items:center; gap:16px; }
+.course-view-icon {
+  width:56px; height:56px;
+  border-radius:var(--radius-lg);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.course-view-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px; align-items:start;
+}

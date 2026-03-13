@@ -1,0 +1,12 @@
+/* ============================================================
+   STUDENTS — List page (uses shared data-table, filter-bar,
+   status-badge styles from style.css)
+   ============================================================ */
+
+/* Balance text in tables */
+.balance-text { font-size:13px; font-weight:600; }
+.balance-text.positive { color:var(--success); }
+.balance-text.negative { color:var(--danger); }
+
+/* Payment table compact */
+.payment-table { font-size:13px; }
