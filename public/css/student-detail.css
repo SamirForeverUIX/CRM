@@ -1,5 +1,5 @@
 /* ============================================================
-   STUDENT DETAIL — ModMe-style layout
+   STUDENT DETAIL — ModMe-style layout (identical)
    Profile card left, groups + balance + payments right
    ============================================================ */
 
@@ -42,7 +42,7 @@
   flex-shrink: 0;
 }
 
-/* Right-side action icons */
+/* Right-side action icons (vertical column) */
 .sv-action-icons {
   display: flex;
   flex-direction: column;
@@ -63,10 +63,12 @@
 .sv-action-icon:hover { transform: scale(1.1); }
 .sv-icon-edit { color: #f97316; }
 .sv-icon-edit:hover { background: #fff7ed; }
-.sv-icon-phone { color: #6366f1; }
-.sv-icon-phone:hover { background: #eef2ff; }
+.sv-icon-message { color: #22c55e; }
+.sv-icon-message:hover { background: #f0fdf4; }
 .sv-icon-delete { color: #ef4444; }
 .sv-icon-delete:hover { background: #fef2f2; }
+.sv-icon-smiley { color: #eab308; }
+.sv-icon-smiley:hover { background: #fefce8; }
 .sv-icon-info { color: #06b6d4; }
 .sv-icon-info:hover { background: #ecfeff; }
 
@@ -109,9 +111,8 @@
   color: #fff;
 }
 .sv-balance-pill.zero {
-  background: var(--bg-body);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
+  background: #16a34a;
+  color: #fff;
 }
 .sv-balance-label {
   font-size: 14px;
@@ -194,6 +195,23 @@
   background: #fef2f2;
   border-color: #ef4444;
 }
+.sv-btn-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid #14b8a6;
+  background: transparent;
+  color: #14b8a6;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+}
+.sv-btn-dropdown-toggle:hover {
+  background: #f0fdfa;
+}
 
 /* Note Section */
 .sv-note-section {
@@ -211,7 +229,7 @@
   width: 3px;
   min-height: 32px;
   border-radius: 2px;
-  background: #f59e0b;
+  background: #14b8a6;
   flex-shrink: 0;
 }
 .sv-note-content {
@@ -255,8 +273,8 @@
 }
 .sv-tab:hover:not(:disabled) { color: var(--primary); }
 .sv-tab.active {
-  color: #ef4444;
-  border-bottom-color: #ef4444;
+  color: var(--primary);
+  border-bottom-color: var(--primary);
   font-weight: 600;
 }
 .sv-tab:disabled {
@@ -281,9 +299,17 @@
 }
 .sv-group-top-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 4px;
+}
+.sv-group-left-info {
+  flex: 1;
+  min-width: 0;
+}
+.sv-group-right-info {
+  text-align: right;
+  flex-shrink: 0;
 }
 .sv-group-code-badge {
   display: inline-flex;
@@ -294,11 +320,17 @@
   background: #f3f4f6;
   color: var(--text-primary);
   border: 1px solid var(--border);
+  margin-bottom: 4px;
 }
 .sv-group-dates {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.sv-group-schedule {
   font-size: 12px;
   color: var(--text-muted);
-  text-align: right;
+  margin-top: 2px;
 }
 .sv-group-name {
   font-size: 15px;
@@ -335,6 +367,18 @@
 .sv-detail-value {
   color: var(--text-primary);
 }
+.sv-group-link-icon {
+  display: inline-flex;
+  color: var(--primary);
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.sv-group-hash {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Group action buttons (pause, remove) */
 .sv-group-actions {
   display: flex;
   flex-direction: column;
@@ -351,12 +395,23 @@
   border: 1.5px solid;
   transition: all var(--transition-base);
   background: transparent;
+  cursor: pointer;
 }
-.sv-group-action-btn.sv-icon-info {
+.sv-group-action-btn:hover { transform: scale(1.1); }
+.sv-group-action-btn.sv-icon-pause {
   color: #06b6d4;
   border-color: #a5f3fc;
 }
-.sv-group-action-btn:hover { transform: scale(1.1); }
+.sv-group-action-btn.sv-icon-pause:hover {
+  background: #ecfeff;
+}
+.sv-group-action-btn.sv-icon-remove {
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+.sv-group-action-btn.sv-icon-remove:hover {
+  background: #fef2f2;
+}
 
 .sv-empty-groups {
   padding: 32px 20px;
@@ -397,7 +452,7 @@
   padding: 14px 18px;
   background: #fff;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   transition: all var(--transition-base);
 }
 .sv-month-card.negative {
@@ -409,9 +464,8 @@
 .sv-month-label {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #ef4444;
   margin-bottom: 4px;
-  text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 .sv-month-label span {
@@ -425,6 +479,7 @@
   font-size: 10px;
   margin-left: 4px;
   vertical-align: middle;
+  color: var(--text-muted);
 }
 .sv-month-amount {
   font-size: 22px;
@@ -477,7 +532,7 @@
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  min-width: 580px;
+  min-width: 700px;
 }
 .sv-payments-table thead th {
   padding: 14px 16px;
@@ -543,12 +598,113 @@
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
-  background: #fce7f3;
-  color: #be185d;
+  background: #f3f4f6;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  vertical-align: middle;
 }
+.sv-comment-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+.sv-comment-daterange {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Creator column */
+.sv-pay-creator {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.sv-creator-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.sv-creator-date {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* Payment actions: Print out + dropdown */
 .sv-pay-actions {
   white-space: nowrap;
 }
+.sv-print-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+.sv-print-row .sv-btn-outline {
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+  border-right: none;
+}
+.sv-btn-dropdown-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 30px;
+  border: 1.5px solid #14b8a6;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  background: transparent;
+  color: #14b8a6;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.sv-btn-dropdown-sm:hover {
+  background: #f0fdfa;
+}
+
+/* Print dropdown */
+.sv-print-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.sv-print-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px 0;
+  min-width: 120px;
+  animation: svDropIn 0.15s ease;
+}
+.sv-print-dropdown-wrap.open .sv-print-dropdown {
+  display: block;
+}
+@keyframes svDropIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.sv-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: inherit;
+  text-align: left;
+}
+.sv-dropdown-item:hover { background: var(--bg-body); }
+.sv-dropdown-danger { color: #ef4444; }
+.sv-dropdown-danger:hover { background: #fef2f2; }
 
 .sv-empty-payments {
   padding: 32px 20px;

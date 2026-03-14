@@ -19,14 +19,17 @@
               <a href="/students/edit/<%= student.id %>" class="sv-action-icon sv-icon-edit" title="Edit">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
               </a>
-              <a href="tel:<%= student.phone %>" class="sv-action-icon sv-icon-phone" title="Call">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <a href="#" class="sv-action-icon sv-icon-message" title="Message">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </a>
               <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, '<%= student.firstName %> <%= student.lastName %>')">
                 <button type="submit" class="sv-action-icon sv-icon-delete" title="Delete">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
               </form>
+              <a href="#" class="sv-action-icon sv-icon-smiley" title="Emoji">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              </a>
             </div>
           </div>
 
@@ -71,6 +74,9 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               Add payment
             </a>
+            <button class="sv-btn-dropdown-toggle" title="More options">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
           </div>
 
           <!-- Note Section -->
@@ -93,7 +99,10 @@
         <div class="sv-tabs">
           <button class="sv-tab active">Groups</button>
           <button class="sv-tab" disabled>Comments</button>
+          <button class="sv-tab" disabled>Call history</button>
+          <button class="sv-tab" disabled>SMS</button>
           <button class="sv-tab" disabled>History</button>
+          <button class="sv-tab" disabled>Lead history</button>
         </div>
 
         <!-- Group Cards -->
@@ -102,11 +111,22 @@
             <div class="sv-group-card">
               <div class="sv-group-main">
                 <div class="sv-group-top-row">
-                  <span class="sv-group-code-badge"><%= g.courseCode || g.name %></span>
-                  <span class="sv-group-dates"><%= g.startDate || '' %> &mdash; <%= g.endDate || '' %></span>
+                  <div class="sv-group-left-info">
+                    <span class="sv-group-code-badge"><%= g.courseCode || g.name %></span>
+                    <div class="sv-group-name"><%= g.name %></div>
+                    <div class="sv-group-teacher"><%= g.teacherName %></div>
+                  </div>
+                  <div class="sv-group-right-info">
+                    <div class="sv-group-dates">
+                      <%= g.startDate || '' %> &mdash;
+                      <br><%= g.endDate || '' %>
+                    </div>
+                    <div class="sv-group-schedule">
+                      <% if (g.schedule) { %><%= g.schedule %><% } else { %>Other<% } %>
+                      <% if (g.scheduleTime) { %> &bull; <%= g.scheduleTime %><% } %>
+                    </div>
+                  </div>
                 </div>
-                <div class="sv-group-name"><%= g.name %></div>
-                <div class="sv-group-teacher"><%= g.teacherName %></div>
 
                 <div class="sv-group-divider"></div>
 
@@ -120,6 +140,10 @@
                     <span class="sv-detail-label">Added at:</span>
                     <span class="sv-detail-value"><strong><%= g.startDate %></strong></span>
                   </div>
+                  <div class="sv-group-detail-row">
+                    <span class="sv-detail-label">Activated at:</span>
+                    <span class="sv-detail-value"><strong><%= g.startDate %></strong></span>
+                  </div>
                   <% } %>
                   <div class="sv-group-detail-row">
                     <span class="sv-detail-label">Price for student:</span>
@@ -128,16 +152,22 @@
                   <div class="sv-group-detail-row">
                     <span class="sv-detail-label">By group:</span>
                     <span class="sv-detail-value">
-                      <a href="/groups/view/<%= g.id %>" style="color:var(--primary);font-weight:500;"><%= g.name %></a>
+                      <a href="/groups/view/<%= g.id %>" class="sv-group-link-icon" title="View group">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                      </a>
+                      <span class="sv-group-hash">#</span> /
                     </span>
                   </div>
                 </div>
               </div>
 
               <div class="sv-group-actions">
-                <a href="/groups/view/<%= g.id %>" class="sv-group-action-btn sv-icon-info" title="View group">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+                <a href="/groups/view/<%= g.id %>" class="sv-group-action-btn sv-icon-pause" title="Pause">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
                 </a>
+                <button class="sv-group-action-btn sv-icon-remove" title="Remove from group">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                </button>
               </div>
             </div>
           <% }) %>
@@ -223,7 +253,8 @@
                   <th>Type</th>
                   <th>Amount</th>
                   <th>Comment</th>
-                  <th>Actions</th>
+                  <th>Creator</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -232,7 +263,7 @@
                     <td class="sv-pay-date"><%= p.date %></td>
                     <td>
                       <span class="sv-pay-type-badge <%= p.status === 'paid' ? 'type-payment' : p.status === 'partial' ? 'type-partial' : 'type-system' %>">
-                        <%= p.status %>
+                        <%= p.status === 'paid' ? 'payment' : p.status %>
                       </span>
                     </td>
                     <td class="sv-pay-amount <%= p.status === 'paid' || p.status === 'partial' ? 'positive' : '' %>">
@@ -242,14 +273,39 @@
                       <% if (studentGroups.length > 0) { %>
                         <span class="sv-comment-group-badge"><%= studentGroups[0].courseCode || studentGroups[0].name %></span>
                       <% } %>
+                      <% if (p.status !== 'paid' && p.status !== 'partial' && studentGroups.length > 0) { %>
+                        <span class="sv-comment-detail"><%= studentGroups[0].courseLessons || '' %> les.</span>
+                        <% if (studentGroups[0].startDate) { %>
+                          <div class="sv-comment-daterange"><%= studentGroups[0].startDate %>&mdash;<%= studentGroups[0].endDate || '' %></div>
+                        <% } %>
+                      <% } else { %>
+                        <span class="sv-comment-detail">Cash</span>
+                      <% } %>
+                    </td>
+                    <td class="sv-pay-creator">
+                      <div class="sv-creator-name">Admin</div>
+                      <div class="sv-creator-date"><%= p.date %></div>
                     </td>
                     <td class="sv-pay-actions">
-                      <form action="/students/payment/<%= student.id %>/delete/<%= p.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, 'this payment')">
-                        <button type="submit" class="sv-btn-outline sv-btn-small sv-btn-danger">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                          Delete
+                      <div class="sv-print-row">
+                        <button class="sv-btn-outline sv-btn-teal sv-btn-small" onclick="window.print();">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                          Print out
                         </button>
-                      </form>
+                        <div class="sv-print-dropdown-wrap">
+                          <button class="sv-btn-dropdown-sm" onclick="this.parentElement.classList.toggle('open');">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                          </button>
+                          <div class="sv-print-dropdown">
+                            <form action="/students/payment/<%= student.id %>/delete/<%= p.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, 'this payment')">
+                              <button type="submit" class="sv-dropdown-item sv-dropdown-danger">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                Delete
+                              </button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 <% }) %>
