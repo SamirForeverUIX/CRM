@@ -138,6 +138,8 @@ router.post('/add', (req, res) => {
     firstName: firstName.trim(),
     lastName: lastName.trim(),
     phone: phone.trim(),
+    birthday: '',
+    gender: '',
     groupIds,
     payments: [],
     createdAt: new Date().toISOString()
@@ -197,7 +199,7 @@ router.get('/view/:id', (req, res) => {
 
   res.render('students/view', {
     page: 'students', student, studentGroups: enrichedGroups, allGroups: groups,
-    balance, totalPaid, totalOwed, courses
+    balance, totalPaid, totalOwed, courses, teachers
   });
 });
 
@@ -211,33 +213,62 @@ router.get('/edit/:id', (req, res) => {
   res.render('students/edit', { page: 'students', student, groups, error: null });
 });
 
-// Update student
+// Update student (AJAX from modal)
 router.post('/edit/:id', (req, res) => {
-  const { firstName, lastName, phone } = req.body;
+  const { name, phone, birthday, gender } = req.body;
   let { groupIds } = req.body;
+  const students = readStudents();
+  const index = students.findIndex(s => s.id === req.params.id);
+
+  if (index === -1) {
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    return res.redirect('/students');
+  }
+
+  // Support both old (firstName/lastName) and new (name) format
+  if (name) {
+    const parts = name.trim().split(/\s+/);
+    students[index].firstName = parts[0] || '';
+    students[index].lastName = parts.slice(1).join(' ') || '';
+  } else if (req.body.firstName && req.body.lastName) {
+    students[index].firstName = req.body.firstName.trim();
+    students[index].lastName = req.body.lastName.trim();
+  }
+
+  if (phone) students[index].phone = phone.trim();
+  if (birthday !== undefined) students[index].birthday = birthday;
+  if (gender !== undefined) students[index].gender = gender;
+
+  if (groupIds) {
+    if (!Array.isArray(groupIds)) groupIds = [groupIds];
+    students[index].groupIds = groupIds;
+  }
+
+  writeStudents(students);
+
+  if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    return res.json({ success: true });
+  }
+  res.redirect('/students/view/' + req.params.id);
+});
+
+// Add student to group (from modal)
+router.post('/add-to-group/:id', (req, res) => {
+  const { groupId, dateFrom } = req.body;
   const students = readStudents();
   const index = students.findIndex(s => s.id === req.params.id);
 
   if (index === -1) return res.redirect('/students');
 
-  if (!firstName || !lastName || !phone) {
-    const groups = readJSON('groups.json');
-    return res.render('students/edit', {
-      page: 'students', student: students[index], groups,
-      error: 'First name, last name, and phone are required.'
-    });
+  if (!students[index].groupIds) students[index].groupIds = [];
+  if (groupId && !students[index].groupIds.includes(groupId)) {
+    students[index].groupIds.push(groupId);
   }
-
-  if (!groupIds) groupIds = [];
-  else if (!Array.isArray(groupIds)) groupIds = [groupIds];
-
-  students[index].firstName = firstName.trim();
-  students[index].lastName = lastName.trim();
-  students[index].phone = phone.trim();
-  students[index].groupIds = groupIds;
   writeStudents(students);
 
-  res.redirect('/students');
+  res.redirect('/students/view/' + req.params.id);
 });
 
 // Add payment
