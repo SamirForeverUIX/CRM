@@ -176,12 +176,22 @@ router.get('/view/:id', (req, res) => {
   const enrichedGroups = studentGroups.map(g => {
     const course = g.courseId ? courses.find(c => c.id === g.courseId) : null;
     const teacher = g.teacherId ? teachers.find(t => t.id === g.teacherId) : null;
+    let endDate = '';
+    if (g.startDate && course && course.durationMonths) {
+      const sd = new Date(g.startDate);
+      sd.setMonth(sd.getMonth() + course.durationMonths);
+      endDate = sd.toISOString().split('T')[0];
+    }
     return {
       ...g,
       courseName: course ? course.name : '',
       courseCode: course ? (course.code || '') : '',
       coursePrice: course ? (course.price || 0) : 0,
-      teacherName: teacher ? teacher.firstName + ' ' + teacher.lastName : ''
+      courseLessons: course ? (course.lessonsPerMonth || 0) : 0,
+      teacherName: teacher ? (teacher.firstName + ' ' + teacher.lastName).toUpperCase() : '',
+      endDate,
+      schedule: (g.days || []).join(', '),
+      scheduleTime: g.startTime || ''
     };
   });
 
