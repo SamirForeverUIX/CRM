@@ -430,6 +430,9 @@
   margin-bottom: 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .sv-section-header h2 {
   font-size: 20px;
@@ -441,12 +444,7 @@
 /* ===================================================================
    Monthly Balance Cards
    =================================================================== */
-.sv-monthly-cards {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
+/* overridden by scroll wrap below */
 .sv-month-card {
   min-width: 140px;
   padding: 14px 18px;
@@ -712,4 +710,508 @@
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+}
+
+/* ===================================================================
+   Groups Row (side-by-side cards)
+   =================================================================== */
+.sv-groups-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.sv-groups-row .sv-group-card {
+  flex: 1;
+  min-width: 320px;
+  margin-bottom: 0;
+}
+
+/* ===================================================================
+   Payment Button Dropdown (Return money / Write-of)
+   =================================================================== */
+.sv-payment-btn-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.sv-payment-btn-wrap .sv-btn-payment-main {
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+  border-right: none;
+}
+.sv-payment-btn-wrap .sv-payment-dropdown-toggle {
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  height: 34px;
+  background: #14b8a6;
+  color: #fff;
+  border-color: #14b8a6;
+}
+.sv-payment-btn-wrap .sv-payment-dropdown-toggle:hover {
+  background: #0d9488;
+}
+.sv-payment-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px 0;
+  min-width: 160px;
+  margin-top: 4px;
+  animation: svDropIn 0.15s ease;
+}
+.sv-payment-btn-wrap.open .sv-payment-dropdown {
+  display: block;
+}
+.sv-payment-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sv-payment-dropdown-item:hover {
+  background: var(--bg-body);
+}
+.sv-payment-return {
+  color: #ef4444;
+}
+.sv-payment-writeoff {
+  color: #ef4444;
+}
+
+/* ===================================================================
+   Monthly Balance Scroll
+   =================================================================== */
+.sv-monthly-scroll-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  position: relative;
+}
+.sv-monthly-cards {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 8px;
+  flex: 1;
+}
+.sv-monthly-cards::-webkit-scrollbar {
+  height: 8px;
+}
+.sv-monthly-cards::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+.sv-monthly-cards::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+.sv-scroll-arrow {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+.sv-scroll-arrow:hover {
+  background: var(--bg-body);
+  border-color: #d1d5db;
+}
+
+.sv-calendar-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.sv-calendar-btn:hover {
+  background: var(--bg-body);
+  color: var(--text-secondary);
+}
+
+/* Comment "more" button */
+.sv-comment-more-btn {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 10px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.sv-comment-more-btn:hover {
+  background: var(--bg-body);
+}
+
+/* ===================================================================
+   Modal Overlay (shared for Edit + Add to Group)
+   =================================================================== */
+.sv-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+.sv-modal-container {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  width: 100%;
+  animation: svModalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes svModalIn {
+  from { transform: translateY(20px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.sv-edit-modal {
+  max-width: 420px;
+}
+.sv-add-group-modal {
+  max-width: 500px;
+}
+.sv-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+.sv-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.sv-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.sv-modal-close:hover {
+  background: var(--bg-body);
+  color: var(--text-primary);
+}
+.sv-modal-form {
+  padding: 20px 24px 24px;
+}
+.sv-form-group {
+  margin-bottom: 18px;
+}
+.sv-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+/* Phone Input with +998 prefix */
+.sv-phone-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+.sv-phone-input-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+.sv-phone-prefix {
+  padding: 10px 12px;
+  background: var(--bg-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border-right: 1.5px solid var(--border);
+  white-space: nowrap;
+}
+.sv-phone-input-wrap input {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  background: transparent;
+}
+
+/* Date input with icon */
+.sv-date-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding-left: 12px;
+  gap: 8px;
+  transition: border-color var(--transition-fast);
+  color: var(--text-muted);
+}
+.sv-date-input-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+.sv-date-input-wrap input {
+  flex: 1;
+  padding: 10px 14px 10px 4px;
+  border: none;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  background: transparent;
+}
+
+/* Text inputs in modal */
+.sv-modal-form input[type="text"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast);
+}
+.sv-modal-form input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* Gender Radios */
+.sv-gender-radios {
+  display: flex;
+  gap: 20px;
+}
+.sv-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.sv-radio-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+/* Photo Upload */
+.sv-photo-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.sv-photo-label {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.sv-photo-browse-btn {
+  padding: 10px 18px;
+  background: var(--bg-body);
+  border: none;
+  border-left: 1.5px solid var(--border);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.sv-photo-browse-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Additional Contacts */
+.sv-contacts-label {
+  font-size: 13px !important;
+  color: var(--text-secondary) !important;
+}
+.sv-contact-icons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sv-contact-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+.sv-contact-icon:hover {
+  transform: scale(1.1);
+  opacity: 0.85;
+}
+
+/* Tags Input */
+.sv-tags-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding-right: 10px;
+  transition: border-color var(--transition-fast);
+}
+.sv-tags-input-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+.sv-tags-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  background: transparent;
+}
+.sv-tags-chevron {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Set Password Link */
+.sv-set-password-link {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  float: right;
+}
+.sv-set-password-link:hover {
+  color: var(--primary);
+}
+
+/* Submit Button */
+.sv-submit-btn {
+  display: block;
+  width: auto;
+  padding: 12px 40px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-top: 8px;
+}
+.sv-submit-btn:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ===================================================================
+   Add to Group Modal
+   =================================================================== */
+.sv-group-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  appearance: auto;
+  transition: border-color var(--transition-fast);
+}
+.sv-group-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+.sv-group-start-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.sv-add-group-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  background: #14b8a6;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-top: 4px;
+}
+.sv-add-group-btn:hover {
+  background: #0d9488;
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Month card flex-shrink fix */
+.sv-month-card {
+  flex-shrink: 0;
 }

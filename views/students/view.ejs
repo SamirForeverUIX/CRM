@@ -16,9 +16,9 @@
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
             <div class="sv-action-icons">
-              <a href="/students/edit/<%= student.id %>" class="sv-action-icon sv-icon-edit" title="Edit">
+              <button type="button" class="sv-action-icon sv-icon-edit" title="Edit" onclick="openEditModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-              </a>
+              </button>
               <a href="#" class="sv-action-icon sv-icon-message" title="Message">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </a>
@@ -53,6 +53,17 @@
             <a href="tel:<%= student.phone %>" class="sv-phone-link"><%= student.phone %></a>
           </div>
 
+          <!-- Birthday -->
+          <% if (student.birthday) { %>
+          <div class="sv-info-section" style="margin-top: 12px;">
+            <span class="sv-info-label" style="display:inline;">Birthday:</span>
+            <span class="sv-info-value" style="margin-left: 6px;">
+              <% const bd = new Date(student.birthday); %>
+              <%= String(bd.getDate()).padStart(2,'0') %>.<%= String(bd.getMonth()+1).padStart(2,'0') %>.<%= bd.getFullYear() %>
+            </span>
+          </div>
+          <% } %>
+
           <div class="sv-divider"></div>
 
           <!-- Added Date -->
@@ -65,18 +76,30 @@
 
           <!-- Action Buttons -->
           <div class="sv-card-actions">
-            <a href="/students/edit/<%= student.id %>" class="sv-btn-outline sv-btn-teal">
+            <button type="button" class="sv-btn-outline sv-btn-teal" onclick="openAddToGroupModal()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
               Add to group
-            </a>
-            <div style="flex:1;"></div>
-            <a href="#payment-section" class="sv-btn-outline sv-btn-teal">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              Add payment
-            </a>
-            <button class="sv-btn-dropdown-toggle" title="More options">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
+            <div style="flex:1;"></div>
+            <div class="sv-payment-btn-wrap">
+              <a href="#payment-section" class="sv-btn-outline sv-btn-teal sv-btn-payment-main">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Add payment
+              </a>
+              <button class="sv-btn-dropdown-toggle sv-payment-dropdown-toggle" onclick="this.parentElement.classList.toggle('open')">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="sv-payment-dropdown">
+                <a href="#" class="sv-payment-dropdown-item sv-payment-return">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                  Return money
+                </a>
+                <a href="#" class="sv-payment-dropdown-item sv-payment-writeoff">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+                  Write-of
+                </a>
+              </div>
+            </div>
           </div>
 
           <!-- Note Section -->
@@ -86,7 +109,7 @@
               <span class="sv-note-placeholder">Note</span>
             </div>
             <div class="sv-note-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
             </div>
           </div>
         </div>
@@ -107,6 +130,7 @@
 
         <!-- Group Cards -->
         <% if (studentGroups.length > 0) { %>
+          <div class="sv-groups-row">
           <% studentGroups.forEach(function(g) { %>
             <div class="sv-group-card">
               <div class="sv-group-main">
@@ -171,56 +195,62 @@
               </div>
             </div>
           <% }) %>
+          </div>
         <% } else { %>
           <div class="sv-empty-groups">
-            <p class="muted">No groups assigned. <a href="/students/edit/<%= student.id %>" style="color:var(--primary);">Add to a group</a></p>
+            <p class="muted">No groups assigned. <a href="#" onclick="openAddToGroupModal(); return false;" style="color:var(--primary);">Add to a group</a></p>
           </div>
         <% } %>
 
         <!-- Monthly Balance Status -->
         <div class="sv-section-header">
           <h2>Monthly balance status</h2>
+          <button class="sv-calendar-btn" title="Calendar view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </button>
         </div>
 
-        <div class="sv-monthly-cards">
-          <%
-            // Generate monthly balance cards
-            const now = new Date();
-            const months = [];
-            for (let i = 0; i < 3; i++) {
-              const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-              const yr = d.getFullYear();
-              const mo = String(d.getMonth() + 1).padStart(2, '0');
-              const label = yr + ' M' + mo;
+        <div class="sv-monthly-scroll-wrap">
+          <button class="sv-scroll-arrow sv-scroll-left" onclick="scrollMonthly(-1)">&lsaquo;</button>
+          <div class="sv-monthly-cards">
+            <%
+              // Generate monthly balance cards (8 months for scroll)
+              const now = new Date();
+              const months = [];
+              for (let i = 0; i < 8; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const yr = d.getFullYear();
+                const mo = String(d.getMonth() + 1).padStart(2, '0');
+                const label = yr + ' M' + mo;
 
-              // Calculate monthly owed
-              let monthlyOwed = 0;
-              studentGroups.forEach(function(g) {
-                if (g.coursePrice) {
-                  monthlyOwed += g.coursePrice;
-                }
-              });
-
-              // Calculate monthly paid
-              let monthlyPaid = 0;
-              (student.payments || []).forEach(function(p) {
-                if (p.date) {
-                  const pd = new Date(p.date);
-                  if (pd.getFullYear() === yr && pd.getMonth() === d.getMonth()) {
-                    if (p.status === 'paid' || p.status === 'partial') monthlyPaid += p.amount || 0;
+                let monthlyOwed = 0;
+                studentGroups.forEach(function(g) {
+                  if (g.coursePrice) {
+                    monthlyOwed += g.coursePrice;
                   }
-                }
-              });
+                });
 
-              months.push({ label: label, groups: studentGroups.length, balance: monthlyPaid - monthlyOwed });
-            }
-          %>
-          <% months.forEach(function(m) { %>
-            <div class="sv-month-card <%= m.balance < 0 ? 'negative' : m.balance > 0 ? 'positive' : '' %>">
-              <div class="sv-month-label"><%= m.label %> <span><%= m.groups %></span></div>
-              <div class="sv-month-amount"><%= m.balance.toLocaleString() %></div>
-            </div>
-          <% }) %>
+                let monthlyPaid = 0;
+                (student.payments || []).forEach(function(p) {
+                  if (p.date) {
+                    const pd = new Date(p.date);
+                    if (pd.getFullYear() === yr && pd.getMonth() === d.getMonth()) {
+                      if (p.status === 'paid' || p.status === 'partial') monthlyPaid += p.amount || 0;
+                    }
+                  }
+                });
+
+                months.push({ label: label, groups: studentGroups.length, balance: monthlyPaid - monthlyOwed });
+              }
+            %>
+            <% months.forEach(function(m) { %>
+              <div class="sv-month-card <%= m.balance < 0 ? 'negative' : m.balance > 0 ? 'positive' : '' %>">
+                <div class="sv-month-label"><%= m.label %> <span><%= m.groups %></span></div>
+                <div class="sv-month-amount"><%= m.balance.toLocaleString() %></div>
+              </div>
+            <% }) %>
+          </div>
+          <button class="sv-scroll-arrow sv-scroll-right" onclick="scrollMonthly(1)">&rsaquo;</button>
         </div>
 
         <!-- Payments Section -->
@@ -278,6 +308,7 @@
                         <% if (studentGroups[0].startDate) { %>
                           <div class="sv-comment-daterange"><%= studentGroups[0].startDate %>&mdash;<%= studentGroups[0].endDate || '' %></div>
                         <% } %>
+                        <button class="sv-comment-more-btn">more</button>
                       <% } else { %>
                         <span class="sv-comment-detail">Cash</span>
                       <% } %>
@@ -322,5 +353,186 @@
     </div>
 
   </div>
+
+  <!-- ============ EDIT STUDENT MODAL ============ -->
+  <div class="sv-modal-overlay" id="editStudentModal" style="display:none;">
+    <div class="sv-modal-container sv-edit-modal">
+      <div class="sv-modal-header">
+        <h2>Edit Student</h2>
+        <button class="sv-modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form id="editStudentForm" action="/students/edit/<%= student.id %>" method="POST" class="sv-modal-form">
+        <div class="sv-form-group">
+          <label>Phone</label>
+          <div class="sv-phone-input-wrap">
+            <span class="sv-phone-prefix">+998</span>
+            <input type="text" name="phone" id="editPhone" value="<%= (student.phone || '').replace('+998', '').replace(/^\s+/, '') %>" placeholder="XX XXX XX XX">
+          </div>
+        </div>
+        <div class="sv-form-group">
+          <label>Name</label>
+          <input type="text" name="name" id="editName" value="<%= student.firstName %> <%= student.lastName %>">
+        </div>
+        <div class="sv-form-group">
+          <label>Date of birth</label>
+          <div class="sv-date-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" name="birthday" id="editBirthday" value="<%= student.birthday || '' %>">
+          </div>
+        </div>
+        <div class="sv-form-group">
+          <label>Gender</label>
+          <div class="sv-gender-radios">
+            <label class="sv-radio-label">
+              <input type="radio" name="gender" value="male" <%= student.gender === 'male' ? 'checked' : '' %>>
+              <span>Male</span>
+            </label>
+            <label class="sv-radio-label">
+              <input type="radio" name="gender" value="female" <%= student.gender === 'female' ? 'checked' : '' %>>
+              <span>Female</span>
+            </label>
+          </div>
+        </div>
+        <div class="sv-form-group">
+          <label>Photo</label>
+          <div class="sv-photo-input-wrap">
+            <span class="sv-photo-label">No file chosen</span>
+            <button type="button" class="sv-photo-browse-btn">Browse</button>
+          </div>
+        </div>
+        <div class="sv-form-group">
+          <label class="sv-contacts-label">additional contacts</label>
+          <div class="sv-contact-icons">
+            <button type="button" class="sv-contact-icon" style="background: #f59e0b;" title="Phone"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+            <button type="button" class="sv-contact-icon" style="background: #22c55e;" title="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+            <button type="button" class="sv-contact-icon" style="background: #ef4444;" title="Person"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+            <button type="button" class="sv-contact-icon" style="background: #3b82f6;" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+            <button type="button" class="sv-contact-icon" style="background: #8b5cf6;" title="Email"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            <button type="button" class="sv-contact-icon" style="background: #ec4899;" title="Car"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></button>
+            <button type="button" class="sv-contact-icon" style="background: #14b8a6;" title="Location"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
+            <button type="button" class="sv-contact-icon" style="background: #6366f1;" title="QR Code"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          </div>
+        </div>
+        <div class="sv-form-group">
+          <label>Tags</label>
+          <div class="sv-tags-input-wrap">
+            <input type="text" placeholder="Add new tags" class="sv-tags-input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sv-tags-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="sv-form-group">
+          <a href="#" class="sv-set-password-link">+ Set password</a>
+        </div>
+        <button type="submit" class="sv-submit-btn">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ ADD TO GROUP MODAL ============ -->
+  <div class="sv-modal-overlay" id="addToGroupModal" style="display:none;">
+    <div class="sv-modal-container sv-add-group-modal">
+      <div class="sv-modal-header">
+        <h2>Add student to group</h2>
+        <button class="sv-modal-close" onclick="closeAddToGroupModal()">&times;</button>
+      </div>
+      <form action="/students/add-to-group/<%= student.id %>" method="POST" class="sv-modal-form">
+        <div class="sv-form-group">
+          <select name="groupId" id="groupSelect" class="sv-group-select" onchange="updateGroupInfo()">
+            <option value="">Select a group...</option>
+            <% allGroups.forEach(function(g) { %>
+              <%
+                const gc = courses.find(c => c.id === g.courseId);
+                const gt = teachers.find(t => t.id === g.teacherId);
+                const gcName = gc ? gc.name : g.name;
+                const gcCode = gc ? (gc.code || '') : '';
+                const gtName = gt ? (gt.firstName + ' ' + gt.lastName) : '';
+              %>
+              <option value="<%= g.id %>" data-start="<%= g.startDate || '' %>" data-code="<%= gcCode %>" data-name="<%= gcName %>" data-teacher="<%= gtName %>" data-time="<%= g.startTime || '' %>">
+                [<%= gcCode || gcName %>] <%= gcName %> (<%= gtName %> &middot; <%= g.startTime || '' %>)
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="sv-form-group" id="groupStartInfo" style="display:none;">
+          <div class="sv-group-start-text">Group start date: <strong id="groupStartDate"></strong></div>
+        </div>
+        <div class="sv-form-group">
+          <label>Date from</label>
+          <div class="sv-date-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" name="dateFrom" value="<%= new Date().toISOString().split('T')[0] %>">
+          </div>
+        </div>
+        <button type="submit" class="sv-add-group-btn">Add student to group</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+
+<script>
+  // Edit Student Modal
+  function openEditModal() {
+    document.getElementById('editStudentModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeEditModal() {
+    document.getElementById('editStudentModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Add to Group Modal
+  function openAddToGroupModal() {
+    document.getElementById('addToGroupModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAddToGroupModal() {
+    document.getElementById('addToGroupModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Update group info when selection changes
+  function updateGroupInfo() {
+    var sel = document.getElementById('groupSelect');
+    var opt = sel.options[sel.selectedIndex];
+    var startDate = opt.getAttribute('data-start');
+    var infoDiv = document.getElementById('groupStartInfo');
+    var dateEl = document.getElementById('groupStartDate');
+    if (startDate) {
+      infoDiv.style.display = 'block';
+      var d = new Date(startDate);
+      dateEl.textContent = String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+    } else {
+      infoDiv.style.display = 'none';
+    }
+  }
+
+  // Close modals on overlay click
+  document.addEventListener('click', function(e) {
+    if (e.target.id === 'editStudentModal') closeEditModal();
+    if (e.target.id === 'addToGroupModal') closeAddToGroupModal();
+  });
+
+  // Close modals on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeEditModal();
+      closeAddToGroupModal();
+    }
+  });
+
+  // Close payment dropdown on outside click
+  document.addEventListener('click', function(e) {
+    var wrap = document.querySelector('.sv-payment-btn-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      wrap.classList.remove('open');
+    }
+  });
+
+  // Monthly balance scroll
+  function scrollMonthly(dir) {
+    var container = document.querySelector('.sv-monthly-cards');
+    container.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  }
+</script>
 <%- include('../partials/footer') %>
