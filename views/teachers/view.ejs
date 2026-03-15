@@ -6,7 +6,7 @@
     <div class="page-header">
       <h1><%= teacher.firstName %> <%= teacher.lastName %></h1>
       <div>
-        <a href="/teachers/edit/<%= teacher.id %>" class="btn btn-primary">Edit</a>
+        <button onclick="openEditTeacherModal()" class="btn btn-primary">Edit</button>
         <a href="/teachers" class="btn btn-secondary">Back</a>
       </div>
     </div>
@@ -81,5 +81,48 @@
       <% } %>
     </div>
   </div>
+
+  <!-- ============ EDIT TEACHER SLIDE-IN PANEL ============ -->
+  <div class="tv-modal-overlay" id="editTeacherModal" style="display:none;">
+    <div class="tv-modal-container">
+      <div class="tv-modal-header">
+        <h2>Edit Teacher</h2>
+        <button class="tv-modal-close" onclick="closeEditTeacherModal()">&times;</button>
+      </div>
+      <form action="/teachers/edit/<%= teacher.id %>" method="POST" class="tv-modal-form">
+        <div class="tv-form-group">
+          <label>First Name</label>
+          <input type="text" name="firstName" value="<%= teacher.firstName %>" class="tv-input" required>
+        </div>
+        <div class="tv-form-group">
+          <label>Last Name</label>
+          <input type="text" name="lastName" value="<%= teacher.lastName %>" class="tv-input" required>
+        </div>
+        <div class="tv-form-group">
+          <label>Phone</label>
+          <input type="text" name="phone" value="<%= teacher.phone %>" class="tv-input" required>
+        </div>
+        <button type="submit" class="tv-submit-btn">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+
+<script>
+function openEditTeacherModal() {
+  document.getElementById('editTeacherModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeEditTeacherModal() {
+  document.getElementById('editTeacherModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'editTeacherModal') closeEditTeacherModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeEditTeacherModal();
+});
+</script>
 <%- include('../partials/footer') %>

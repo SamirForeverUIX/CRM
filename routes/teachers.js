@@ -97,7 +97,7 @@ router.post('/edit/:id', (req, res) => {
   teachers[index].lastName = lastName.trim();
   teachers[index].phone = phone.trim();
   writeTeachers(teachers);
-  res.redirect('/teachers');
+  res.redirect('/teachers/view/' + req.params.id);
 });
 
 router.post('/delete/:id', (req, res) => {

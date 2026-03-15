@@ -97,3 +97,108 @@
   font-size:13px; font-weight:600; color:var(--text-secondary);
 }
 .go-to-group-link:hover { color:var(--primary); }
+
+/* ===================================================================
+   EDIT TEACHER SLIDE-IN PANEL
+   =================================================================== */
+.tv-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 9999;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+.tv-modal-container {
+  background: #fff;
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  animation: tvSlideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+@keyframes tvSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.tv-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+}
+.tv-modal-header h2 {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.tv-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.tv-modal-close:hover {
+  background: var(--bg-body);
+  color: var(--text-primary);
+}
+.tv-modal-form {
+  padding: 16px 24px 24px;
+}
+.tv-form-group {
+  margin-bottom: 18px;
+}
+.tv-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.tv-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast);
+}
+.tv-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+.tv-submit-btn {
+  display: block;
+  padding: 12px 32px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-top: 8px;
+}
+.tv-submit-btn:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+  transform: translateY(-1px);
+}
