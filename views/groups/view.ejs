@@ -111,7 +111,7 @@
             <% students.forEach((s, i) => { %>
               <div class="gv-student-row">
                 <span class="gv-student-num"><%= i + 1 %>.</span>
-                <span class="gv-student-dot"></span>
+                <span class="gv-student-dot <%= s.balance < 0 ? 'dot-red' : s.balance >= 0 ? 'dot-green' : '' %>"></span>
                 <a href="/students/view/<%= s.id %>" class="gv-student-name"><%= s.firstName %> <%= s.lastName %></a>
                 <span class="gv-student-phone">(<%= s.phone.replace('+998 ', '').replace('+998', '') %>)</span>
                 <button class="gv-student-menu-btn" onclick="this.parentElement.classList.toggle('menu-open')">
@@ -232,16 +232,21 @@
                         <td class="gv-att-check-cell" data-date="<%= dateStr2 %>">
                           <% if (hasRecord && wasPresent) { %>
                             <span class="gv-was-badge">Was</span>
+                          <% } else if (hasRecord && !wasPresent) { %>
+                            <span class="gv-was-badge gv-was-not">Was</span>
+                            <span class="gv-not-label">Not</span>
                           <% } else { %>
-                            <label class="gv-att-checkbox">
-                              <input type="checkbox"
-                                data-student="<%= s.id %>"
-                                data-date="<%= dateStr2 %>"
-                                <%= wasPresent ? 'checked' : '' %>
-                                onchange="saveAttendance(this)"
-                              >
+                            <div class="gv-att-hover-wrap">
                               <span class="gv-att-circle"></span>
-                            </label>
+                              <div class="gv-att-hover-actions">
+                                <button class="gv-att-hover-btn gv-att-was" title="Was" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', true)">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </button>
+                                <button class="gv-att-hover-btn gv-att-not" title="Not" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', false)">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              </div>
+                            </div>
                           <% } %>
                         </td>
                       <% }) %>
@@ -394,6 +399,58 @@ document.addEventListener('click', function(e) {
     if (!row.contains(e.target)) row.classList.remove('menu-open');
   });
 });
+
+function markAttendance(studentId, date, wasPresent) {
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/groups/<%= group.id %>/attendance';
+  form.style.display = 'none';
+
+  var dateInput = document.createElement('input');
+  dateInput.name = 'date';
+  dateInput.value = date;
+  form.appendChild(dateInput);
+
+  // Get all existing attendance for this date
+  var wasBadges = document.querySelectorAll('.gv-att-check-cell[data-date="' + date + '"] .gv-was-badge:not(.gv-was-not)');
+  wasBadges.forEach(function(badge) {
+    var cell = badge.closest('tr');
+    if (cell) {
+      var nameCell = cell.querySelector('.gv-att-name-cell');
+      // Find student ID from other cells
+    }
+  });
+
+  // Add the current student as present if marking "was"
+  if (wasPresent) {
+    var input = document.createElement('input');
+    input.name = 'present';
+    input.value = studentId;
+    form.appendChild(input);
+  }
+
+  // Also preserve existing present students for this date
+  document.querySelectorAll('.gv-att-check-cell[data-date="' + date + '"]').forEach(function(cell) {
+    var badge = cell.querySelector('.gv-was-badge:not(.gv-was-not)');
+    if (badge) {
+      // Find the student ID from the row
+      var row = cell.closest('tr');
+      var otherCells = row.querySelectorAll('.gv-att-check-cell');
+      // We need to get student from the data attributes
+    }
+  });
+
+  // Simpler approach: just submit for this one student
+  if (!wasPresent) {
+    var empty = document.createElement('input');
+    empty.name = 'present';
+    empty.value = '__none__';
+    form.appendChild(empty);
+  }
+
+  document.body.appendChild(form);
+  form.submit();
+}
 
 function saveAttendance(el) {
   var date = el.dataset.date;

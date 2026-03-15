@@ -158,7 +158,23 @@ router.get('/view/:id', (req, res) => {
 
   const teacher = teachers.find(t => t.id === group.teacherId);
   const course = courses.find(c => c.id === group.courseId);
-  const groupStudents = allStudents.filter(s => s.groupIds && s.groupIds.includes(group.id));
+  const groupStudents = allStudents.filter(s => s.groupIds && s.groupIds.includes(group.id)).map(s => {
+    // Calculate balance for dot color
+    const payments = s.payments || [];
+    let totalPaid = 0;
+    payments.forEach(p => {
+      if (p.status === 'paid' || p.status === 'partial') totalPaid += p.amount || 0;
+    });
+    let totalOwed = 0;
+    (s.groupIds || []).forEach(gid => {
+      const g2 = groups.find(gr => gr.id === gid);
+      if (g2 && g2.courseId) {
+        const c2 = courses.find(cr => cr.id === g2.courseId);
+        if (c2 && c2.price) totalOwed += c2.price;
+      }
+    });
+    return { ...s, balance: totalPaid - totalOwed };
+  });
   const settings = readSettings();
 
   // Calculate end date
