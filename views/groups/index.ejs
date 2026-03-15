@@ -5,7 +5,7 @@
   <div class="content-area">
     <div class="page-header">
       <h1>Groups <span class="page-subtitle">Quantity &mdash; <%= groups.length %></span></h1>
-      <a href="/groups/add" class="btn btn-primary">ADD NEW</a>
+      <button onclick="openAddGroupPanel()" class="btn btn-primary">ADD NEW</button>
     </div>
 
     <% if (search) { %>
@@ -18,7 +18,7 @@
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </div>
         <p>No groups found.</p>
-        <a href="/groups/add" class="btn btn-primary">Create your first group</a>
+        <button onclick="openAddGroupPanel()" class="btn btn-primary">Create your first group</button>
       </div>
     <% } else { %>
       <table class="data-table">
@@ -41,23 +41,32 @@
               <td style="color:var(--text-muted);"><%= i + 1 %>.</td>
               <td><a href="/groups/view/<%= group.id %>" class="table-link"><%= group.name %></a></td>
               <td><%= group.course ? group.course.name : '--' %></td>
-              <td><%= group.teacher ? group.teacher.firstName + ' ' + group.teacher.lastName : '--' %></td>
+              <td><%= group.teacher ? (group.teacher.firstName + ' ' + group.teacher.lastName).toUpperCase() : '--' %></td>
               <td>
-                <span style="font-size:13px;"><%= group.days && group.days.length > 0 ? group.days.join(', ') : '--' %></span>
+                <span style="font-size:13px;"><%= group.days && group.days.length > 0 ? 'Other' : '--' %></span>
                 <% if (group.startTime) { %><br><span style="font-size:12px;color:var(--text-muted);"><%= group.startTime %></span><% } %>
               </td>
               <td>
                 <% if (group.startDate) { %>
-                  <span style="font-size:13px;"><%= group.startDate %></span>
+                  <%
+                    var sd = new Date(group.startDate);
+                    var sdStr = String(sd.getDate()).padStart(2,'0') + '.' + String(sd.getMonth()+1).padStart(2,'0') + '.' + sd.getFullYear();
+                    var endDate = '';
+                    if (group.course && group.course.durationMonths) {
+                      var ed = new Date(group.startDate);
+                      ed.setMonth(ed.getMonth() + group.course.durationMonths);
+                      endDate = String(ed.getDate()).padStart(2,'0') + '.' + String(ed.getMonth()+1).padStart(2,'0') + '.' + ed.getFullYear();
+                    }
+                  %>
+                  <span style="font-size:13px;"><%= sdStr %> &mdash;<br><%= endDate %></span>
                 <% } else { %>
                   --
                 <% } %>
               </td>
-              <td><% if (group.room) { %><strong style="color:var(--primary);"><%= group.room.replace('Room ','') %></strong><% } else { %>--<% } %></td>
+              <td><% if (group.room) { %><strong><%= group.room.replace('Room ','') %></strong><% } else { %>--<% } %></td>
               <td style="text-align:center;"><strong><%= group.studentCount %></strong></td>
               <td class="actions-cell">
                 <a href="/groups/view/<%= group.id %>" class="btn btn-small btn-secondary">View</a>
-                <a href="/groups/edit/<%= group.id %>" class="btn btn-small btn-edit">Edit</a>
                 <form action="/groups/delete/<%= group.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this group?')">
                   <button type="submit" class="btn btn-small btn-delete">Del</button>
                 </form>
@@ -68,5 +77,87 @@
       </table>
     <% } %>
   </div>
+
+  <!-- ============ ADD NEW GROUP SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="addGroupPanel" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Add New Group</h2>
+        <button class="gv-modal-close" onclick="closeAddGroupPanel()">&times;</button>
+      </div>
+      <form action="/groups/add" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label>Name</label>
+          <input type="text" name="name" class="gv-input" required>
+        </div>
+        <div class="gv-form-group">
+          <label>Select course</label>
+          <select name="courseId" class="gv-select">
+            <option value="">Select options</option>
+            <% courses.forEach(c => { %>
+              <option value="<%= c.id %>"><%= c.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Select teacher</label>
+          <select name="teacherId" class="gv-select">
+            <option value="">Select options</option>
+            <% teachers.forEach(t => { %>
+              <option value="<%= t.id %>"><%= t.firstName.toUpperCase() %> <%= t.lastName.toUpperCase() %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Days</label>
+          <select class="gv-select" disabled>
+            <option>Select options</option>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Select room</label>
+          <select name="roomId" class="gv-select">
+            <option value="">Select options</option>
+            <% rooms.forEach(room => { %>
+              <option value="<%= room %>"><%= room %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Lesson start time</label>
+          <div class="gv-time-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <input type="text" name="startTime" placeholder="No time selected" class="gv-time-input">
+          </div>
+        </div>
+        <div class="gv-form-group">
+          <label>Group start date</label>
+          <div class="gv-date-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" name="startDate" placeholder="No date selected">
+          </div>
+        </div>
+        <button type="submit" class="gv-submit-btn">Submit</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+
+<script>
+function openAddGroupPanel() {
+  document.getElementById('addGroupPanel').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAddGroupPanel() {
+  document.getElementById('addGroupPanel').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'addGroupPanel') closeAddGroupPanel();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAddGroupPanel();
+});
+</script>
 <%- include('../partials/footer') %>

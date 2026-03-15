@@ -95,7 +95,11 @@ router.get('/', (req, res) => {
     studentCount: students.filter(s => s.groupIds && s.groupIds.includes(g.id)).length
   }));
 
-  res.render('groups/index', { page: 'groups', groups: enriched, search });
+  res.render('groups/index', {
+    page: 'groups', groups: enriched, search,
+    teachers, courses, rooms: readSettings().rooms,
+    timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK
+  });
 });
 
 // Add group form
