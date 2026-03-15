@@ -216,7 +216,7 @@
                 </thead>
                 <tbody>
                   <% students.forEach((s, si) => { %>
-                    <tr>
+                    <tr data-student-id="<%= s.id %>">
                       <td class="gv-att-name-cell">
                         <div class="gv-att-avatar gv-att-avatar-<%= (si % 6) + 1 %>"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
                         <span class="gv-att-student-name"><%= s.firstName %> <%= s.lastName %></span>
@@ -411,37 +411,35 @@ function markAttendance(studentId, date, wasPresent) {
   dateInput.value = date;
   form.appendChild(dateInput);
 
-  // Get all existing attendance for this date
-  var wasBadges = document.querySelectorAll('.gv-att-check-cell[data-date="' + date + '"] .gv-was-badge:not(.gv-was-not)');
-  wasBadges.forEach(function(badge) {
-    var cell = badge.closest('tr');
-    if (cell) {
-      var nameCell = cell.querySelector('.gv-att-name-cell');
-      // Find student ID from other cells
-    }
-  });
-
-  // Add the current student as present if marking "was"
-  if (wasPresent) {
-    var input = document.createElement('input');
-    input.name = 'present';
-    input.value = studentId;
-    form.appendChild(input);
-  }
-
-  // Also preserve existing present students for this date
+  // Collect all students who are already marked present for this date
+  var presentStudents = [];
   document.querySelectorAll('.gv-att-check-cell[data-date="' + date + '"]').forEach(function(cell) {
     var badge = cell.querySelector('.gv-was-badge:not(.gv-was-not)');
     if (badge) {
-      // Find the student ID from the row
       var row = cell.closest('tr');
-      var otherCells = row.querySelectorAll('.gv-att-check-cell');
-      // We need to get student from the data attributes
+      var sid = row.getAttribute('data-student-id');
+      if (sid) presentStudents.push(sid);
     }
   });
 
-  // Simpler approach: just submit for this one student
-  if (!wasPresent) {
+  // Add or remove current student
+  if (wasPresent) {
+    if (presentStudents.indexOf(studentId) === -1) {
+      presentStudents.push(studentId);
+    }
+  } else {
+    presentStudents = presentStudents.filter(function(sid) { return sid !== studentId; });
+  }
+
+  // Add all present students to form
+  if (presentStudents.length > 0) {
+    presentStudents.forEach(function(sid) {
+      var input = document.createElement('input');
+      input.name = 'present';
+      input.value = sid;
+      form.appendChild(input);
+    });
+  } else {
     var empty = document.createElement('input');
     empty.name = 'present';
     empty.value = '__none__';
