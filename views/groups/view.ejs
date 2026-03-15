@@ -3,81 +3,174 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1>
-        <%= group.name %>
-        <% if (course) { %>&nbsp;&middot;&nbsp;<span style="font-weight:400;font-size:18px;color:var(--text-secondary);"><%= course.name %></span><% } %>
-        <% if (teacher) { %>&nbsp;&middot;&nbsp;<span style="font-weight:400;font-size:18px;color:var(--text-secondary);"><%= teacher.firstName %> <%= teacher.lastName %></span><% } %>
-      </h1>
-      <div>
-        <a href="/groups/edit/<%= group.id %>" class="btn btn-primary">Edit Group</a>
-        <a href="/groups" class="btn btn-secondary">Back</a>
-      </div>
+
+    <%
+      const teacherFullName = teacher ? (teacher.firstName + ' ' + teacher.lastName).toUpperCase() : '';
+      const courseName = course ? course.name : '';
+      const coursePrice = course ? (course.price || 0) : 0;
+      const groupDays = group.days && group.days.length > 0 ? group.days.join(', ') : 'Other';
+      const shortId = group.id.substring(0, 6);
+      // End date
+      let computedEndDate = endDate || '';
+      // Format dates for display
+      function fmtDate(ds) {
+        if (!ds) return '';
+        var d = new Date(ds);
+        return String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+      }
+    %>
+
+    <!-- Page Title -->
+    <div class="gv-page-title">
+      <h1><%= group.name %> &middot; <%= courseName %> &middot; <%= teacherFullName %></h1>
     </div>
 
-    <div class="group-view-layout">
-      <!-- LEFT: Info + Students -->
-      <div class="group-left-panel">
-        <div class="detail-card">
-          <h3>Group Info</h3>
-          <div class="detail-row">
-            <span class="detail-label">Course</span>
-            <span><%= course ? course.name : '--' %></span>
+    <!-- Show/Hide Coins Toggle -->
+    <div class="gv-coins-toggle">
+      <span>Show coins</span>
+      <label class="gv-toggle-switch">
+        <input type="checkbox">
+        <span class="gv-toggle-slider"></span>
+      </label>
+      <span>Hide coins</span>
+    </div>
+
+    <div class="gv-layout">
+      <!-- ============ LEFT PANEL ============ -->
+      <div class="gv-left">
+        <div class="gv-info-card">
+          <div class="gv-info-content">
+            <div class="gv-info-rows">
+              <div class="gv-info-row"><span class="gv-info-label">Course:</span> <span class="gv-info-value"><%= courseName || '--' %></span></div>
+              <div class="gv-info-row"><span class="gv-info-label">Teacher:</span> <span class="gv-info-value"><%= teacherFullName || '--' %></span></div>
+              <div class="gv-info-row"><span class="gv-info-label">Price:</span> <span class="gv-info-value"><%= coursePrice.toLocaleString() %> UZS</span></div>
+              <div class="gv-info-row"><span class="gv-info-label">Time:</span> <span class="gv-info-value"><%= groupDays %> &middot; <%= group.startTime || '--' %></span></div>
+              <div class="gv-info-row"><span class="gv-info-label">Rooms:</span> <span class="gv-info-value"><%= group.room || '--' %></span></div>
+              <div class="gv-info-row"><span class="gv-info-label">Room capacity:</span> <span class="gv-info-value"><%= group.roomCapacity || 14 %></span></div>
+              <div class="gv-info-row">
+                <span class="gv-info-label">Training dates:</span><br>
+                <span class="gv-info-value gv-training-dates"><%= fmtDate(group.startDate) %> &mdash; <%= fmtDate(computedEndDate) %></span>
+              </div>
+              <div class="gv-info-id">(id: <%= shortId %>)</div>
+            </div>
+            <div class="gv-info-actions">
+              <button type="button" class="gv-action-icon gv-icon-edit" title="Edit" onclick="openEditGroupModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              </button>
+              <form action="/groups/delete/<%= group.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, '<%= group.name %>')">
+                <button type="submit" class="gv-action-icon gv-icon-delete" title="Delete">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </form>
+              <button class="gv-action-icon gv-icon-message" title="Message">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </button>
+              <button class="gv-action-icon gv-icon-add" title="Add">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              </button>
+              <button class="gv-action-icon gv-icon-smiley" title="Emoji">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              </button>
+            </div>
           </div>
-          <div class="detail-row">
-            <span class="detail-label">Teacher</span>
-            <span><%= teacher ? teacher.firstName + ' ' + teacher.lastName : '--' %></span>
-          </div>
-          <% if (course && course.price) { %>
-          <div class="detail-row">
-            <span class="detail-label">Price</span>
-            <span><%= (course.price || 0).toLocaleString() %> UZS</span>
-          </div>
-          <% } %>
-          <div class="detail-row">
-            <span class="detail-label">Time</span>
-            <span><%= group.days && group.days.length > 0 ? group.days.join(', ') : '--' %> &middot; <%= group.startTime || '--' %></span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Room</span>
-            <span><%= group.room || '--' %></span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Training dates</span>
-            <span><%= group.startDate || '--' %></span>
+
+          <!-- Date of next withdraw -->
+          <div class="gv-withdraw-box">
+            <div class="gv-withdraw-label">Date of next withdraw:</div>
+            <div class="gv-withdraw-date">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <%
+                // Calculate next withdraw as ~1 month from now
+                var nw = new Date();
+                nw.setMonth(nw.getMonth() + 1);
+                nw.setDate(8);
+              %>
+              <span><%= fmtDate(nw.toISOString().split('T')[0]) %></span>
+            </div>
+            <div class="gv-withdraw-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
           </div>
         </div>
 
-        <div class="detail-card">
-          <h3>Students <span class="count-badge" style="margin-left:6px;font-size:11px;min-width:20px;height:20px;"><%= students.length %></span></h3>
+        <div class="gv-divider"></div>
+
+        <!-- Sort Dropdown -->
+        <div class="gv-sort-wrap">
+          <select class="gv-sort-select">
+            <option value="az">By A-Z</option>
+            <option value="za">By Z-A</option>
+          </select>
+        </div>
+
+        <!-- Student List -->
+        <div class="gv-student-list">
           <% if (students.length === 0) { %>
-            <p class="muted" style="font-size:13px;">No students assigned yet.</p>
+            <p class="muted" style="font-size:13px; padding:12px 0;">No students assigned yet.</p>
           <% } else { %>
-            <div class="student-list-compact">
-              <% students.forEach((s, i) => { %>
-                <a href="/students/view/<%= s.id %>" class="student-row">
-                  <span class="student-row-num"><%= i + 1 %>.</span>
-                  <span class="student-row-dot"></span>
-                  <div class="student-row-info">
-                    <span class="student-row-name"><%= s.firstName %> <%= s.lastName %></span>
-                  </div>
-                  <span style="font-size:12px;color:var(--text-muted);margin-left:auto;"><%= s.phone %></span>
-                </a>
-              <% }) %>
-            </div>
+            <% students.forEach((s, i) => { %>
+              <div class="gv-student-row">
+                <span class="gv-student-num"><%= i + 1 %>.</span>
+                <span class="gv-student-dot"></span>
+                <a href="/students/view/<%= s.id %>" class="gv-student-name"><%= s.firstName %> <%= s.lastName %></a>
+                <span class="gv-student-phone">(<%= s.phone.replace('+998 ', '').replace('+998', '') %>)</span>
+                <button class="gv-student-menu-btn" onclick="this.parentElement.classList.toggle('menu-open')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                </button>
+                <div class="gv-student-dropdown">
+                  <a href="/students/view/<%= s.id %>" class="gv-student-dropdown-item">View</a>
+                  <a href="/students/edit/<%= s.id %>" class="gv-student-dropdown-item">Edit</a>
+                </div>
+              </div>
+            <% }) %>
           <% } %>
+        </div>
+
+        <!-- Show archived students button -->
+        <div class="gv-archived-btn-wrap">
+          <button class="gv-archived-btn">Show archived students</button>
+          <button class="gv-download-btn" title="Download">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+
+        <div class="gv-divider"></div>
+
+        <!-- Note Section -->
+        <div class="gv-note-section">
+          <div class="gv-note-bar"></div>
+          <div class="gv-note-content">
+            <span class="gv-note-placeholder">Note</span>
+          </div>
+          <div class="gv-note-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
         </div>
       </div>
 
-      <!-- RIGHT: Attendance -->
-      <div class="group-right-panel">
-        <div class="detail-card attendance-panel">
-          <div class="attendance-header">
-            <h3 style="border:none;padding:0;margin:0;">Attendance</h3>
-            <% if (lessonDates.length > 0) { %>
-              <div class="attendance-nav">
-                <button class="att-nav-btn current">Current</button>
-                <span class="att-date-range">
+      <!-- ============ RIGHT PANEL ============ -->
+      <div class="gv-right">
+        <!-- Tabs -->
+        <div class="gv-tabs">
+          <button class="gv-tab active">Attendance</button>
+          <button class="gv-tab" disabled>Grade</button>
+          <button class="gv-tab" disabled>Online lessons and materials</button>
+          <button class="gv-tab" disabled>Discount prices</button>
+          <button class="gv-tab" disabled>Exams</button>
+          <button class="gv-tab" disabled>History</button>
+          <button class="gv-tab" disabled>Comments</button>
+        </div>
+
+        <!-- Attendance Section -->
+        <div class="gv-attendance-section">
+          <div class="gv-attendance-header">
+            <h2>Attendance</h2>
+            <div class="gv-attendance-nav">
+              <button class="gv-att-nav-btn gv-att-current">Current</button>
+              <button class="gv-att-nav-btn gv-att-arrow">&lsaquo;</button>
+              <button class="gv-att-nav-btn gv-att-arrow">&lsaquo;</button>
+              <span class="gv-att-date-range">
+                <% if (lessonDates.length > 0) { %>
                   <%
                     var fd = lessonDates[0];
                     var ld = lessonDates[lessonDates.length - 1];
@@ -85,9 +178,14 @@
                     var lds = String(ld.getDate()).padStart(2,'0') + '.' + String(ld.getMonth()+1).padStart(2,'0') + '.' + String(ld.getFullYear()).slice(2);
                   %>
                   <%= fds %> - <%= lds %>
-                </span>
-              </div>
-            <% } %>
+                <% } %>
+              </span>
+              <button class="gv-att-nav-btn gv-att-arrow">&rsaquo;</button>
+              <button class="gv-att-nav-btn gv-att-arrow">&rsaquo;</button>
+              <button class="gv-att-nav-btn gv-att-settings" title="Settings">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </button>
+            </div>
           </div>
 
           <% if (students.length === 0) { %>
@@ -95,44 +193,33 @@
           <% } else if (lessonDates.length === 0) { %>
             <p class="muted" style="font-size:13px;">Set a course with lessons/month, start date, and days to generate lesson dates.</p>
           <% } else { %>
-            <div class="attendance-table-wrap">
-              <table class="attendance-table">
+            <div class="gv-attendance-table-wrap">
+              <table class="gv-attendance-table">
                 <thead>
                   <tr>
-                    <th class="att-student-col">Name</th>
+                    <th class="gv-att-name-col">Name</th>
                     <% lessonDates.forEach((d) => { %>
                       <%
                         var dd = String(d.getDate()).padStart(2, '0');
                         var mm = String(d.getMonth() + 1).padStart(2, '0');
-                        var dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
                         var months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
                         var dateStr = d.getFullYear() + '-' + mm + '-' + dd;
+                        var today = new Date();
+                        var isPast = d <= today;
+                        var isToday = d.toDateString() === today.toDateString();
                       %>
-                      <th class="att-date-col" data-date="<%= dateStr %>">
-                        <div class="att-date-header">
-                          <span class="att-date-val"><%= d.getDate() %> <%= months[d.getMonth()] %></span>
-                        </div>
+                      <th class="gv-att-date-col <%= isToday ? 'today' : '' %>" data-date="<%= dateStr %>">
+                        <span class="gv-att-day"><%= d.getDate() %> <%= months[d.getMonth()] %></span>
                       </th>
                     <% }) %>
                   </tr>
                 </thead>
                 <tbody>
                   <% students.forEach((s, si) => { %>
-                    <%
-                      // Check if first lesson has attendance for this student
-                      var firstDate = lessonDates[0];
-                      var fdd = String(firstDate.getDate()).padStart(2,'0');
-                      var fmm = String(firstDate.getMonth()+1).padStart(2,'0');
-                      var firstDateStr = firstDate.getFullYear()+'-'+fmm+'-'+fdd;
-                      var firstPresent = attendanceMap[firstDateStr] && attendanceMap[firstDateStr].includes(s.id);
-                    %>
                     <tr>
-                      <td class="att-student-cell">
-                        <div class="avatar avatar-sm avatar-gradient-<%= (si % 6) + 1 %>" style="width:24px;height:24px;font-size:9px;"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
-                        <span><%= s.firstName %> <%= s.lastName %></span>
-                        <% if (attendanceMap[firstDateStr]) { %>
-                          <span class="att-was-badge">Was</span>
-                        <% } %>
+                      <td class="gv-att-name-cell">
+                        <div class="gv-att-avatar gv-att-avatar-<%= (si % 6) + 1 %>"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
+                        <span class="gv-att-student-name"><%= s.firstName %> <%= s.lastName %></span>
                       </td>
                       <% lessonDates.forEach((d) => { %>
                         <%
@@ -142,19 +229,20 @@
                           var wasPresent = attendanceMap[dateStr2] && attendanceMap[dateStr2].includes(s.id);
                           var hasRecord = attendanceMap[dateStr2] !== undefined;
                         %>
-                        <td class="att-check-cell" data-date="<%= dateStr2 %>">
-                          <label class="att-checkbox">
-                            <input type="checkbox"
-                              data-student="<%= s.id %>"
-                              data-date="<%= dateStr2 %>"
-                              <%= wasPresent ? 'checked' : '' %>
-                              onchange="saveAttendance(this)"
-                            >
-                            <span class="att-mark <%= hasRecord ? (wasPresent ? 'present' : 'absent') : '' %>">
-                              <% if (hasRecord && wasPresent) { %>&#10003;<% } %>
-                              <% if (hasRecord && !wasPresent) { %>&#10007;<% } %>
-                            </span>
-                          </label>
+                        <td class="gv-att-check-cell" data-date="<%= dateStr2 %>">
+                          <% if (hasRecord && wasPresent) { %>
+                            <span class="gv-was-badge">Was</span>
+                          <% } else { %>
+                            <label class="gv-att-checkbox">
+                              <input type="checkbox"
+                                data-student="<%= s.id %>"
+                                data-date="<%= dateStr2 %>"
+                                <%= wasPresent ? 'checked' : '' %>
+                                onchange="saveAttendance(this)"
+                              >
+                              <span class="gv-att-circle"></span>
+                            </label>
+                          <% } %>
                         </td>
                       <% }) %>
                     </tr>
@@ -162,14 +250,151 @@
                 </tbody>
               </table>
             </div>
+            <!-- Calendar icon on right -->
+            <div class="gv-att-calendar-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+            </div>
           <% } %>
         </div>
       </div>
     </div>
+
   </div>
+
+  <!-- ============ EDIT GROUP MODAL ============ -->
+  <div class="gv-modal-overlay" id="editGroupModal" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Edit group</h2>
+        <button class="gv-modal-close" onclick="closeEditGroupModal()">&times;</button>
+      </div>
+      <form action="/groups/edit/<%= group.id %>" method="POST" class="gv-modal-form">
+        <!-- Group Name -->
+        <div class="gv-form-group">
+          <input type="text" name="name" value="<%= group.name %>" class="gv-input" required>
+          <span class="gv-input-indicator"></span>
+        </div>
+
+        <!-- Select course -->
+        <div class="gv-form-group">
+          <label>Select course</label>
+          <select name="courseId" class="gv-select">
+            <option value="">-- Select Course --</option>
+            <% courses.forEach(c => { %>
+              <option value="<%= c.id %>" <%= group.courseId === c.id ? 'selected' : '' %>><%= c.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Select teacher -->
+        <div class="gv-form-group">
+          <label>Select teacher</label>
+          <select name="teacherId" class="gv-select">
+            <option value="">-- Select Teacher --</option>
+            <% teachers.forEach(t => { %>
+              <option value="<%= t.id %>" <%= group.teacherId === t.id ? 'selected' : '' %>><%= t.firstName.toUpperCase() %> <%= t.lastName.toUpperCase() %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Days -->
+        <div class="gv-form-group">
+          <label>Days</label>
+          <select class="gv-select" disabled>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- Exact days -->
+        <div class="gv-form-group">
+          <label>Exact days</label>
+          <div class="gv-days-grid">
+            <% daysOfWeek.forEach(day => { %>
+              <label class="gv-day-checkbox">
+                <input type="checkbox" name="days" value="<%= day %>" <%= group.days && group.days.includes(day) ? 'checked' : '' %>>
+                <span class="gv-day-label"><%= day %></span>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Select room -->
+        <div class="gv-form-group">
+          <label>Select room</label>
+          <select name="roomId" class="gv-select">
+            <option value="">-- Select Room --</option>
+            <% rooms.forEach(room => { %>
+              <option value="<%= room %>" <%= group.room === room ? 'selected' : '' %>><%= room %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Tags -->
+        <div class="gv-form-group">
+          <label>Tags</label>
+          <div class="gv-tags-input-wrap">
+            <input type="text" placeholder="Add new tags" class="gv-tags-input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="gv-tags-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <!-- Lesson start time -->
+        <div class="gv-form-group">
+          <label>Lesson start time</label>
+          <div class="gv-time-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <input type="text" name="startTime" value="<%= group.startTime || '' %>" placeholder="HH:MM" class="gv-time-input">
+          </div>
+        </div>
+
+        <!-- Group start date -->
+        <div class="gv-form-group">
+          <label>Group start date</label>
+          <div class="gv-date-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" name="startDate" value="<%= group.startDate || '' %>">
+          </div>
+        </div>
+
+        <!-- Group end date -->
+        <div class="gv-form-group">
+          <label>Group end date</label>
+          <div class="gv-date-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" name="endDate" value="<%= computedEndDate || '' %>">
+          </div>
+        </div>
+
+        <button type="submit" class="gv-submit-btn">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
 </main>
 
 <script>
+function openEditGroupModal() {
+  document.getElementById('editGroupModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeEditGroupModal() {
+  document.getElementById('editGroupModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'editGroupModal') closeEditGroupModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeEditGroupModal();
+});
+
+// Close student dropdown on outside click
+document.addEventListener('click', function(e) {
+  document.querySelectorAll('.gv-student-row.menu-open').forEach(function(row) {
+    if (!row.contains(e.target)) row.classList.remove('menu-open');
+  });
+});
+
 function saveAttendance(el) {
   var date = el.dataset.date;
   var checkboxes = document.querySelectorAll('input[data-date="' + date + '"]');
