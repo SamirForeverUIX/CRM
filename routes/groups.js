@@ -159,6 +159,16 @@ router.get('/view/:id', (req, res) => {
   const teacher = teachers.find(t => t.id === group.teacherId);
   const course = courses.find(c => c.id === group.courseId);
   const groupStudents = allStudents.filter(s => s.groupIds && s.groupIds.includes(group.id));
+  const settings = readSettings();
+
+  // Calculate end date
+  let endDate = '';
+  if (group.startDate && course && course.durationMonths) {
+    const sd = new Date(group.startDate);
+    sd.setMonth(sd.getMonth() + course.durationMonths);
+    endDate = sd.toISOString().split('T')[0];
+  }
+  if (group.endDate) endDate = group.endDate;
 
   // Calculate lesson dates from course.lessonsPerMonth and group schedule
   const totalLessons = course ? (course.lessonsPerMonth || 0) : 0;
@@ -174,7 +184,9 @@ router.get('/view/:id', (req, res) => {
 
   res.render('groups/view', {
     page: 'groups', group, teacher, course, students: groupStudents,
-    lessonDates, attendanceMap
+    lessonDates, attendanceMap, endDate,
+    teachers, courses, rooms: settings.rooms,
+    timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK
   });
 });
 
@@ -224,9 +236,12 @@ router.post('/edit/:id', (req, res) => {
   groups[index].room = (roomId || '').trim();
   groups[index].startTime = (startTime || '').trim();
   groups[index].startDate = startDate || '';
+  if (req.body.endDate !== undefined) {
+    groups[index].endDate = req.body.endDate || '';
+  }
   writeGroups(groups);
 
-  res.redirect('/groups');
+  res.redirect('/groups/view/' + req.params.id);
 });
 
 // Save attendance for a specific date
