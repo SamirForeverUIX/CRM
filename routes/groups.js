@@ -194,11 +194,18 @@ router.get('/view/:id', (req, res) => {
   const totalLessons = course ? (course.lessonsPerMonth || 0) : 0;
   const lessonDates = calculateLessonDates(group.startDate, group.days, totalLessons);
 
-  // Build attendance map: { 'YYYY-MM-DD': [studentId, ...] }
+  // Build attendance map: { 'YYYY-MM-DD': { studentId: 'was'|'not' } }
   const attendanceMap = {};
   if (group.attendance) {
     group.attendance.forEach(a => {
-      attendanceMap[a.date] = a.present || [];
+      if (a.statuses) {
+        attendanceMap[a.date] = a.statuses;
+      } else if (a.present) {
+        // Migrate old format on read
+        const statuses = {};
+        a.present.forEach(id => { statuses[id] = 'was'; });
+        attendanceMap[a.date] = statuses;
+      }
     });
   }
 
@@ -264,16 +271,10 @@ router.post('/edit/:id', (req, res) => {
   res.redirect('/groups/view/' + req.params.id);
 });
 
-// Save attendance for a specific date
+// Save attendance for a specific student+date
 router.post('/:id/attendance', (req, res) => {
   const groupId = req.params.id;
-  const { date } = req.body;
-  let { present } = req.body;
-
-  if (!present) present = [];
-  else if (!Array.isArray(present)) present = [present];
-  // Filter out the empty marker
-  present = present.filter(p => p !== '__none__');
+  const { date, studentId, status } = req.body;
 
   const groups = readGroups();
   const group = groups.find(g => g.id === groupId);
@@ -281,12 +282,25 @@ router.post('/:id/attendance', (req, res) => {
 
   if (!group.attendance) group.attendance = [];
 
-  // Remove existing record for same date, then add new
-  group.attendance = group.attendance.filter(a => a.date !== date);
-  group.attendance.push({
-    date: date || new Date().toISOString().split('T')[0],
-    present
-  });
+  // Find or create record for this date
+  let record = group.attendance.find(a => a.date === date);
+  if (!record) {
+    record = { date: date || new Date().toISOString().split('T')[0], statuses: {} };
+    group.attendance.push(record);
+  }
+
+  // Migrate old format (present array) to new format (statuses object)
+  if (record.present && !record.statuses) {
+    record.statuses = {};
+    record.present.forEach(id => { record.statuses[id] = 'was'; });
+    delete record.present;
+  }
+  if (!record.statuses) record.statuses = {};
+
+  // Set the individual student's status
+  if (studentId && status) {
+    record.statuses[studentId] = status; // 'was' or 'not'
+  }
 
   const index = groups.findIndex(g => g.id === groupId);
   groups[index] = group;

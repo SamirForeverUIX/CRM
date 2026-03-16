@@ -226,23 +226,36 @@
                           var dd2 = String(d.getDate()).padStart(2,'0');
                           var mm2 = String(d.getMonth()+1).padStart(2,'0');
                           var dateStr2 = d.getFullYear()+'-'+mm2+'-'+dd2;
-                          var wasPresent = attendanceMap[dateStr2] && attendanceMap[dateStr2].includes(s.id);
-                          var hasRecord = attendanceMap[dateStr2] !== undefined;
+                          var studentStatus = attendanceMap[dateStr2] && attendanceMap[dateStr2][s.id];
                         %>
-                        <td class="gv-att-check-cell" data-date="<%= dateStr2 %>">
-                          <% if (hasRecord && wasPresent) { %>
-                            <span class="gv-was-badge">Was</span>
-                          <% } else if (hasRecord && !wasPresent) { %>
-                            <span class="gv-was-badge gv-was-not">Was</span>
-                            <span class="gv-not-label">Not</span>
+                        <td class="gv-att-check-cell" data-date="<%= dateStr2 %>" data-status="<%= studentStatus || '' %>">
+                          <% if (studentStatus === 'was') { %>
+                            <div class="gv-att-hover-wrap gv-att-marked">
+                              <span class="gv-was-badge">Was</span>
+                              <div class="gv-att-hover-actions">
+                                <button class="gv-att-hover-btn gv-att-not" title="Mark as Not" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'not')">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              </div>
+                            </div>
+                          <% } else if (studentStatus === 'not') { %>
+                            <div class="gv-att-hover-wrap gv-att-marked">
+                              <span class="gv-was-badge gv-was-not">Was</span>
+                              <span class="gv-not-label">Not</span>
+                              <div class="gv-att-hover-actions">
+                                <button class="gv-att-hover-btn gv-att-was" title="Mark as Was" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'was')">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </button>
+                              </div>
+                            </div>
                           <% } else { %>
                             <div class="gv-att-hover-wrap">
                               <span class="gv-att-circle"></span>
                               <div class="gv-att-hover-actions">
-                                <button class="gv-att-hover-btn gv-att-was" title="Was" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', true)">
+                                <button class="gv-att-hover-btn gv-att-was" title="Was" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'was')">
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                                 </button>
-                                <button class="gv-att-hover-btn gv-att-not" title="Not" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', false)">
+                                <button class="gv-att-hover-btn gv-att-not" title="Not" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'not')">
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 </button>
                               </div>
@@ -400,7 +413,7 @@ document.addEventListener('click', function(e) {
   });
 });
 
-function markAttendance(studentId, date, wasPresent) {
+function markAttendance(studentId, date, status) {
   var form = document.createElement('form');
   form.method = 'POST';
   form.action = '/groups/<%= group.id %>/attendance';
@@ -411,40 +424,15 @@ function markAttendance(studentId, date, wasPresent) {
   dateInput.value = date;
   form.appendChild(dateInput);
 
-  // Collect all students who are already marked present for this date
-  var presentStudents = [];
-  document.querySelectorAll('.gv-att-check-cell[data-date="' + date + '"]').forEach(function(cell) {
-    var badge = cell.querySelector('.gv-was-badge:not(.gv-was-not)');
-    if (badge) {
-      var row = cell.closest('tr');
-      var sid = row.getAttribute('data-student-id');
-      if (sid) presentStudents.push(sid);
-    }
-  });
+  var studentInput = document.createElement('input');
+  studentInput.name = 'studentId';
+  studentInput.value = studentId;
+  form.appendChild(studentInput);
 
-  // Add or remove current student
-  if (wasPresent) {
-    if (presentStudents.indexOf(studentId) === -1) {
-      presentStudents.push(studentId);
-    }
-  } else {
-    presentStudents = presentStudents.filter(function(sid) { return sid !== studentId; });
-  }
-
-  // Add all present students to form
-  if (presentStudents.length > 0) {
-    presentStudents.forEach(function(sid) {
-      var input = document.createElement('input');
-      input.name = 'present';
-      input.value = sid;
-      form.appendChild(input);
-    });
-  } else {
-    var empty = document.createElement('input');
-    empty.name = 'present';
-    empty.value = '__none__';
-    form.appendChild(empty);
-  }
+  var statusInput = document.createElement('input');
+  statusInput.name = 'status';
+  statusInput.value = status; // 'was' or 'not'
+  form.appendChild(statusInput);
 
   document.body.appendChild(form);
   form.submit();
