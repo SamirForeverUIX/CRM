@@ -623,8 +623,7 @@
 
 /* "Was" with "Not" label for absent */
 .gv-was-not {
-  background: #3b82f6;
-  opacity: 0.7;
+  background: #ef4444;
 }
 .gv-not-label {
   display: block;
@@ -633,10 +632,11 @@
   margin-top: 2px;
 }
 
-/* Hover wrapper for empty attendance cells */
+/* Hover wrapper for attendance cells (both empty and marked) */
 .gv-att-hover-wrap {
   position: relative;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -654,6 +654,11 @@
 }
 .gv-att-hover-wrap:hover .gv-att-circle {
   opacity: 0.3;
+}
+/* Hide badge text on hover to show toggle button */
+.gv-att-hover-wrap.gv-att-marked:hover .gv-was-badge,
+.gv-att-hover-wrap.gv-att-marked:hover .gv-not-label {
+  opacity: 0.2;
 }
 .gv-att-hover-btn {
   width: 28px;
