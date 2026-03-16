@@ -579,7 +579,6 @@ input::placeholder, textarea::placeholder {
 
 /* === 9. Content Area Container === */
 .content-area {
-  max-width: 1400px;
   padding: var(--space-4);
 }
 
