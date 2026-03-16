@@ -10,7 +10,7 @@
         <h1 class="sl-title">Students</h1>
         <span class="sl-quantity">Quantity &mdash; <strong><%= students.length %></strong></span>
       </div>
-      <a href="/students/add" class="sl-add-btn">ADD NEW</a>
+      <button onclick="openAddStudentPanel()" class="sl-add-btn">ADD NEW</button>
     </div>
 
     <!-- Filter Bar -->
@@ -45,7 +45,7 @@
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <p>No students found.</p>
-        <a href="/students/add" class="btn btn-primary">Add your first student</a>
+        <button onclick="openAddStudentPanel()" class="btn btn-primary">Add your first student</button>
       </div>
     <% } else { %>
       <div class="sl-table-wrap">
@@ -138,5 +138,63 @@
     <% } %>
 
   </div>
+
+  <!-- ============ ADD NEW STUDENT SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="addStudentPanel" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Add New Student</h2>
+        <button class="gv-modal-close" onclick="closeAddStudentPanel()">&times;</button>
+      </div>
+      <form action="/students/add" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label>First Name</label>
+          <input type="text" name="firstName" class="gv-input" required placeholder="Enter first name">
+        </div>
+        <div class="gv-form-group">
+          <label>Last Name</label>
+          <input type="text" name="lastName" class="gv-input" required placeholder="Enter last name">
+        </div>
+        <div class="gv-form-group">
+          <label>Phone Number</label>
+          <input type="text" name="phone" class="gv-input" required placeholder="Enter phone number">
+        </div>
+        <div class="gv-form-group">
+          <label>Assign to Groups</label>
+          <% if (groups.length === 0) { %>
+            <p style="font-size:13px; color:var(--text-muted);">No groups available.</p>
+          <% } else { %>
+            <div class="gv-days-grid" style="grid-template-columns: 1fr;">
+              <% groups.forEach(g => { %>
+                <label class="gv-day-checkbox">
+                  <input type="checkbox" name="groupIds" value="<%= g.id %>">
+                  <span class="gv-day-label"><%= g.name %></span>
+                </label>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+        <button type="submit" class="gv-submit-btn">Add Student</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+
+<script>
+function openAddStudentPanel() {
+  document.getElementById('addStudentPanel').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAddStudentPanel() {
+  document.getElementById('addStudentPanel').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'addStudentPanel') closeAddStudentPanel();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAddStudentPanel();
+});
+</script>
 <%- include('../partials/footer') %>
