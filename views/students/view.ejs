@@ -3,6 +3,11 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
+    <nav class="breadcrumb">
+      <span class="breadcrumb-item"><a href="/">Dashboard</a></span>
+      <span class="breadcrumb-item"><a href="/students">Students</a></span>
+      <span class="breadcrumb-item active"><%= student.firstName %> <%= student.lastName %></span>
+    </nav>
 
     <% const payments = (student.payments || []).slice().reverse(); %>
 

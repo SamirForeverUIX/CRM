@@ -3,6 +3,11 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
+    <nav class="breadcrumb">
+      <span class="breadcrumb-item"><a href="/">Dashboard</a></span>
+      <span class="breadcrumb-item"><a href="/courses">Courses</a></span>
+      <span class="breadcrumb-item active"><%= course.name %></span>
+    </nav>
     <%
       var courseColors = ['#f97316', '#ec4899', '#14b8a6', '#eab308', '#8b5cf6', '#06b6d4', '#16a34a', '#2563eb'];
       var courseBgs = ['#fff7ed', '#fdf2f8', '#f0fdfa', '#fefce8', '#f5f3ff', '#ecfeff', '#f0fdf4', '#eff6ff'];

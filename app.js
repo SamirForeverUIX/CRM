@@ -11,6 +11,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Compute sidebar badge data for all routes
+const fs = require('fs');
+app.use((req, res, next) => {
+  try {
+    const students = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'students.json'), 'utf8'));
+    let debtorCount = 0;
+    students.forEach(s => {
+      const payments = s.payments || [];
+      let hasDebt = false;
+      payments.forEach(p => { if (p.status === 'unpaid' || p.status === 'partial') hasDebt = true; });
+      if (payments.length === 0) hasDebt = true;
+      if (hasDebt) debtorCount++;
+    });
+    res.locals.debtorCount = debtorCount;
+  } catch (e) {
+    res.locals.debtorCount = 0;
+  }
+  next();
+});
+
 // Routes
 app.use('/', require('./routes/dashboard'));
 app.use('/teachers', require('./routes/teachers'));

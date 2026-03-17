@@ -20,11 +20,11 @@
         <div class="stat-number"><%= groupCount %></div>
       </a>
       <a href="/students?debt=unpaid" class="stat-card stat-card-link">
-        <div class="stat-icon" style="background:#fce4ec;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e91e63" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <div class="stat-icon debtors">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
         <div class="stat-label">Debtors</div>
-        <div class="stat-number" style="color:#e91e63;"><%= debtorCount %></div>
+        <div class="stat-number danger"><%= debtorCount %></div>
       </a>
       <div class="stat-card">
         <div class="stat-icon income">
@@ -49,7 +49,7 @@
       </a>
     </div>
 
-    <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">Schedule</h2>
+    <h2 class="section-title" style="font-size:20px;">Schedule</h2>
 
     <% if (todayGroups.length === 0) { %>
       <div class="empty-state" style="padding:40px;">
@@ -92,7 +92,7 @@
       </div>
     <% } %>
 
-    <div style="margin-top:24px;" class="dashboard-grid">
+    <div class="dashboard-grid">
       <div class="recent-activity">
         <h2 class="section-title">Recent Activity</h2>
         <% if (recentActivities.length === 0) { %>

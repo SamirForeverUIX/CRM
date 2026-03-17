@@ -3,6 +3,11 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
+    <nav class="breadcrumb">
+      <span class="breadcrumb-item"><a href="/">Dashboard</a></span>
+      <span class="breadcrumb-item"><a href="/teachers">Teachers</a></span>
+      <span class="breadcrumb-item active"><%= teacher.firstName %> <%= teacher.lastName %></span>
+    </nav>
     <div class="page-header">
       <h1><%= teacher.firstName %> <%= teacher.lastName %></h1>
       <div>

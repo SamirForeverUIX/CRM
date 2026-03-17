@@ -52,6 +52,12 @@
 .stat-icon.courses svg { stroke:#1e88e5; }
 .stat-icon.income { background:#fff8e1; color:#f9a825; }
 .stat-icon.income svg { stroke:#f9a825; }
+.stat-icon.debtors { background:#fce4ec; color:#e91e63; }
+.stat-icon.debtors svg { stroke:#e91e63; }
+
+.stat-number.danger { color:#e91e63; }
+
+.dashboard-grid { margin-top: var(--space-3); }
 
 .stat-number { font-size: 32px; font-weight: 800; color: var(--text-primary); line-height: 1.2; letter-spacing: -0.5px; }
 .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 4px; }
@@ -98,18 +104,21 @@
 .activity-item:last-child { border-bottom:none; }
 .activity-item:hover { background: var(--bg-body); }
 .activity-icon {
-  width:32px; height:32px;
+  width:36px; height:36px;
   border-radius:var(--radius-full);
   display:flex; align-items:center; justify-content:center;
   flex-shrink:0;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+  transition: transform var(--transition-fast);
 }
-.activity-icon.student-add { background:#e8f5e9; }
+.activity-item:hover .activity-icon { transform: scale(1.08); }
+.activity-icon.student-add { background:#e8f5e9; box-shadow: 0 0 0 3px rgba(67,160,71,0.12); }
 .activity-icon.student-add svg { stroke:#43a047; }
-.activity-icon.payment { background:#fff8e1; }
+.activity-icon.payment { background:#fff8e1; box-shadow: 0 0 0 3px rgba(249,168,37,0.12); }
 .activity-icon.payment svg { stroke:#f9a825; }
-.activity-icon.group { background:#fce4ec; }
+.activity-icon.group { background:#fce4ec; box-shadow: 0 0 0 3px rgba(233,30,99,0.12); }
 .activity-icon.group svg { stroke:#e91e63; }
-.activity-icon.teacher { background:#fff3e0; }
+.activity-icon.teacher { background:#fff3e0; box-shadow: 0 0 0 3px rgba(245,124,0,0.12); }
 .activity-icon.teacher svg { stroke:#f57c00; }
 .activity-text { flex:1; font-size:13px; color:var(--text-primary); min-width:0; }
 .activity-text strong { font-weight:600; }
