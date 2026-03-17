@@ -3,6 +3,11 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
+    <nav class="breadcrumb">
+      <span class="breadcrumb-item"><a href="/">Dashboard</a></span>
+      <span class="breadcrumb-item"><a href="/groups">Groups</a></span>
+      <span class="breadcrumb-item active"><%= group.name %></span>
+    </nav>
 
     <%
       const teacherFullName = teacher ? (teacher.firstName + ' ' + teacher.lastName).toUpperCase() : '';

@@ -93,6 +93,25 @@
   stroke: var(--text-secondary);
   transition: stroke var(--transition-fast);
 }
+.nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+}
+
 .nav-divider { height:1px; background:var(--border); margin:6px 10px; width:60px; }
 
 .sidebar-user {
