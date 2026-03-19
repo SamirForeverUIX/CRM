@@ -3,9 +3,79 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1>Groups <span class="page-subtitle">Quantity &mdash; <%= groups.length %></span></h1>
-      <button onclick="openAddGroupPanel()" class="btn btn-primary">ADD NEW</button>
+
+    <!-- Page Header -->
+    <div class="gl-header">
+      <div class="gl-header-left">
+        <h1 class="gl-title">Groups</h1>
+        <span class="gl-subtitle">Quantity &mdash; <%= groups.length %></span>
+      </div>
+      <button onclick="openAddGroupPanel()" class="gl-add-btn">ADD NEW</button>
+    </div>
+
+    <!-- Filter Row -->
+    <div class="gl-filters">
+      <div class="gl-filter-item">
+        <select class="gl-filter-select" id="filterStatus">
+          <option value="">Active groups</option>
+          <option value="active">Active</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+      <div class="gl-filter-item">
+        <select class="gl-filter-select" id="filterTeacher">
+          <option value="">Teachers</option>
+          <% teachers.forEach(t => { %>
+            <option value="<%= t.id %>"><%= t.firstName %> <%= t.lastName %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="gl-filter-item">
+        <select class="gl-filter-select" id="filterCourse">
+          <option value="">Courses</option>
+          <% courses.forEach(c => { %>
+            <option value="<%= c.id %>"><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="gl-filter-item">
+        <select class="gl-filter-select" id="filterDays">
+          <option value="">Days</option>
+          <option value="Mon">Mon</option>
+          <option value="Tue">Tue</option>
+          <option value="Wed">Wed</option>
+          <option value="Thu">Thu</option>
+          <option value="Fri">Fri</option>
+          <option value="Sat">Sat</option>
+          <option value="Sun">Sun</option>
+        </select>
+      </div>
+      <div class="gl-filter-item">
+        <select class="gl-filter-select" id="filterTags">
+          <option value="">Tags</option>
+        </select>
+      </div>
+      <div class="gl-filter-item">
+        <input type="date" class="gl-filter-date" id="filterStartDate" placeholder="Start date">
+      </div>
+      <div class="gl-filter-item">
+        <input type="date" class="gl-filter-date" id="filterEndDate" placeholder="End date">
+      </div>
+      <button class="gl-filter-clear" onclick="clearFilters()" title="Clear filters">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="gl-actions-row">
+      <button class="gl-action-btn" onclick="toggleFilters()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Filters
+      </button>
+      <button class="gl-action-btn" onclick="toggleColumns()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Columns
+      </button>
     </div>
 
     <% if (search) { %>
@@ -21,60 +91,72 @@
         <button onclick="openAddGroupPanel()" class="btn btn-primary">Create your first group</button>
       </div>
     <% } else { %>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Group</th>
-            <th>Course</th>
-            <th>Teacher</th>
-            <th>Days</th>
-            <th>Training dates</th>
-            <th>Room</th>
-            <th>Students</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% groups.forEach((group, i) => { %>
+      <div class="gl-table-wrap">
+        <table class="gl-table table-divided">
+          <thead>
             <tr>
-              <td style="color:var(--text-muted);"><%= i + 1 %>.</td>
-              <td><a href="/groups/view/<%= group.id %>" class="table-link"><%= group.name %></a></td>
-              <td><%= group.course ? group.course.name : '--' %></td>
-              <td><%= group.teacher ? (group.teacher.firstName + ' ' + group.teacher.lastName).toUpperCase() : '--' %></td>
-              <td>
-                <span style="font-size:13px;"><%= group.days && group.days.length > 0 ? 'Other' : '--' %></span>
-                <% if (group.startTime) { %><br><span style="font-size:12px;color:var(--text-muted);"><%= group.startTime %></span><% } %>
-              </td>
-              <td>
-                <% if (group.startDate) { %>
-                  <%
-                    var sd = new Date(group.startDate);
-                    var sdStr = String(sd.getDate()).padStart(2,'0') + '.' + String(sd.getMonth()+1).padStart(2,'0') + '.' + sd.getFullYear();
-                    var endDate = '';
-                    if (group.course && group.course.durationMonths) {
-                      var ed = new Date(group.startDate);
-                      ed.setMonth(ed.getMonth() + group.course.durationMonths);
-                      endDate = String(ed.getDate()).padStart(2,'0') + '.' + String(ed.getMonth()+1).padStart(2,'0') + '.' + ed.getFullYear();
-                    }
-                  %>
-                  <span style="font-size:13px;"><%= sdStr %> &mdash;<br><%= endDate %></span>
-                <% } else { %>
-                  --
-                <% } %>
-              </td>
-              <td><% if (group.room) { %><strong><%= group.room.replace('Room ','') %></strong><% } else { %>--<% } %></td>
-              <td style="text-align:center;"><strong><%= group.studentCount %></strong></td>
-              <td class="actions-cell">
-                <a href="/groups/view/<%= group.id %>" class="btn btn-small btn-secondary">View</a>
-                <form action="/groups/delete/<%= group.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this group?')">
-                  <button type="submit" class="btn btn-small btn-delete">Del</button>
-                </form>
-              </td>
+              <th class="gl-th-sortable">Group</th>
+              <th class="gl-th-sortable">Course</th>
+              <th class="gl-th-sortable">Teacher</th>
+              <th class="gl-th-sortable">Days</th>
+              <th class="gl-th-sortable">Training dates</th>
+              <th class="gl-th-sortable">Week of study</th>
+              <th class="gl-th-sortable">Room</th>
+              <th class="gl-th-sortable">Tags</th>
+              <th class="gl-th-sortable">Students</th>
+              <th>Actions</th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% groups.forEach((group, i) => { %>
+              <tr class="gl-row" onclick="window.location='/groups/view/<%= group.id %>'" data-group-id="<%= group.id %>">
+                <td class="gl-cell-num"><span class="gl-row-num"><%= i + 1 %>.</span> <a href="/groups/view/<%= group.id %>" class="gl-group-name"><%= group.name %></a></td>
+                <td class="gl-cell-course"><%= group.course ? group.course.name : '--' %></td>
+                <td class="gl-cell-teacher"><%= group.teacher ? (group.teacher.firstName + ' ' + group.teacher.lastName).toUpperCase() : '--' %></td>
+                <td class="gl-cell-days">
+                  <span class="gl-days-label"><%= group.days && group.days.length > 0 ? 'Other' : '--' %></span>
+                  <% if (group.startTime) { %><br><span class="gl-days-time"><%= group.startTime %></span><% } %>
+                </td>
+                <td class="gl-cell-dates">
+                  <% if (group.startDate) { %>
+                    <%
+                      var sd = new Date(group.startDate);
+                      var sdStr = String(sd.getDate()).padStart(2,'0') + '.' + String(sd.getMonth()+1).padStart(2,'0') + '.' + sd.getFullYear();
+                      var edStr = '';
+                      if (group.endDate) {
+                        var ed = new Date(group.endDate);
+                        edStr = String(ed.getDate()).padStart(2,'0') + '.' + String(ed.getMonth()+1).padStart(2,'0') + '.' + ed.getFullYear();
+                      }
+                    %>
+                    <span class="gl-date-range"><%= sdStr %> &mdash;<br><%= edStr %></span>
+                  <% } else { %>
+                    --
+                  <% } %>
+                </td>
+                <td class="gl-cell-weeks">
+                  <span class="gl-week-info"><%= group.weekOfStudy.months %> months</span>
+                  <br><span class="gl-week-sub"><%= group.weekOfStudy.weeks %> weeks</span>
+                </td>
+                <td class="gl-cell-room"><%= group.room ? group.room.replace('Room ', '') : '--' %></td>
+                <td class="gl-cell-tags"></td>
+                <td class="gl-cell-students"><span class="gl-student-count<%= group.studentCount > 5 ? ' highlight' : '' %>"><%= group.studentCount %></span></td>
+                <td class="gl-cell-actions" onclick="event.stopPropagation();">
+                  <button class="gl-menu-btn" onclick="toggleRowMenu(this, event)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                  </button>
+                  <div class="gl-menu-dropdown">
+                    <a href="/groups/view/<%= group.id %>" class="gl-menu-item">View</a>
+                    <a href="/groups/edit/<%= group.id %>" class="gl-menu-item">Edit</a>
+                    <form action="/groups/delete/<%= group.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this group?')">
+                      <button type="submit" class="gl-menu-item gl-menu-danger">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     <% } %>
   </div>
 
@@ -110,9 +192,14 @@
         </div>
         <div class="gv-form-group">
           <label>Days</label>
-          <select class="gv-select" disabled>
-            <option>Select options</option>
-          </select>
+          <div class="gv-days-grid">
+            <% daysOfWeek.forEach(d => { %>
+              <label class="gv-day-checkbox">
+                <input type="checkbox" name="days" value="<%= d %>">
+                <span class="gv-day-label"><%= d %></span>
+              </label>
+            <% }) %>
+          </div>
         </div>
         <div class="gv-form-group">
           <label>Select room</label>
@@ -155,9 +242,48 @@ function closeAddGroupPanel() {
 }
 document.addEventListener('click', function(e) {
   if (e.target.id === 'addGroupPanel') closeAddGroupPanel();
+  // Close any open row menus
+  if (!e.target.closest('.gl-cell-actions')) {
+    document.querySelectorAll('.gl-menu-dropdown.open').forEach(function(m) {
+      m.classList.remove('open');
+    });
+  }
 });
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeAddGroupPanel();
+});
+function toggleRowMenu(btn, e) {
+  e.stopPropagation();
+  var dropdown = btn.nextElementSibling;
+  var wasOpen = dropdown.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.gl-menu-dropdown.open').forEach(function(m) {
+    m.classList.remove('open');
+  });
+  if (!wasOpen) dropdown.classList.add('open');
+}
+function toggleFilters() {
+  var filters = document.querySelector('.gl-filters');
+  filters.classList.toggle('hidden');
+}
+function toggleColumns() {
+  // placeholder for column visibility toggle
+}
+function clearFilters() {
+  document.querySelectorAll('.gl-filter-select').forEach(function(s) { s.selectedIndex = 0; });
+  document.querySelectorAll('.gl-filter-date').forEach(function(d) { d.value = ''; });
+  applyFilters();
+}
+function applyFilters() {
+  var teacher = document.getElementById('filterTeacher').value;
+  var course = document.getElementById('filterCourse').value;
+  var day = document.getElementById('filterDays').value;
+  var rows = document.querySelectorAll('.gl-row');
+  rows.forEach(function(row) { row.style.display = ''; });
+}
+// Attach filter change listeners
+document.querySelectorAll('.gl-filter-select, .gl-filter-date').forEach(function(el) {
+  el.addEventListener('change', applyFilters);
 });
 </script>
 <%- include('../partials/footer') %>
