@@ -984,6 +984,295 @@
 /* ===================================================================
    GROUP LIST PAGE (index)
    =================================================================== */
+
+/* Page Header */
+.gl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.gl-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.gl-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+.gl-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.gl-add-btn {
+  padding: 10px 28px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.gl-add-btn:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 16px rgba(241, 128, 36, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Filter Row */
+.gl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.gl-filters.hidden { display: none; }
+.gl-filter-item { flex-shrink: 0; }
+.gl-filter-select {
+  padding: 8px 28px 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  appearance: auto;
+  min-width: 120px;
+}
+.gl-filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.gl-filter-date {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  min-width: 130px;
+}
+.gl-filter-date:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.gl-filter-clear {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.gl-filter-clear:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+/* Action Buttons Row */
+.gl-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.gl-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.gl-action-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.gl-action-btn svg { stroke: currentColor; }
+
+/* Table - Divided Style */
+.gl-table-wrap {
+  overflow-x: auto;
+}
+.table-divided {
+  border-collapse: separate;
+  border-spacing: 0 0.6rem;
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.gl-table {
+  font-size: 14px;
+}
+.gl-table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+}
+.gl-th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.gl-th-sortable:hover {
+  color: var(--text-primary);
+}
+
+/* Table Rows */
+.gl-table tbody tr {
+  background: #fff;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.gl-table tbody tr:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.gl-table tbody tr:hover td:first-child {
+  border-left: 3px solid var(--primary);
+}
+.gl-table tbody td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  color: var(--text-primary);
+  border: none;
+  font-size: 14px;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+.gl-table tbody td:first-child {
+  border-left: 3px solid transparent;
+  border-radius: 8px 0 0 8px;
+}
+.gl-table tbody td:last-child {
+  border-radius: 0 8px 8px 0;
+  border-right: 1px solid var(--border-light);
+}
+
+/* Cell styles */
+.gl-cell-num {
+  white-space: nowrap;
+}
+.gl-row-num {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-right: 8px;
+}
+.gl-group-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.gl-group-name:hover {
+  color: var(--primary);
+}
+.gl-cell-teacher {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.gl-cell-days { white-space: nowrap; }
+.gl-days-label { font-size: 13px; }
+.gl-days-time { font-size: 12px; color: var(--text-muted); }
+.gl-cell-dates { white-space: nowrap; }
+.gl-date-range { font-size: 13px; }
+.gl-cell-weeks { white-space: nowrap; }
+.gl-week-info { font-size: 13px; }
+.gl-week-sub { font-size: 12px; color: var(--text-muted); }
+.gl-cell-room { font-weight: 500; }
+.gl-cell-students { text-align: center; }
+.gl-student-count {
+  font-weight: 700;
+  font-size: 14px;
+}
+.gl-student-count.highlight {
+  color: var(--primary);
+}
+
+/* Three-dot menu */
+.gl-cell-actions {
+  position: relative;
+  text-align: center;
+  width: 40px;
+}
+.gl-menu-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+.gl-menu-btn:hover {
+  background: var(--bg-body);
+  color: var(--text-primary);
+}
+.gl-menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 4px 0;
+  min-width: 120px;
+}
+.gl-menu-dropdown.open { display: block; }
+.gl-menu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition-fast);
+}
+.gl-menu-item:hover { background: var(--bg-body); }
+.gl-menu-danger { color: var(--danger); }
+.gl-menu-danger:hover { background: var(--danger-bg); }
+
+/* Legacy group view layout */
 .group-view-layout {
   display: grid;
   grid-template-columns: 360px 1fr;
@@ -1025,4 +1314,10 @@
   .gv-att-calendar-icon {
     display: none;
   }
+  .gl-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .gl-filters { flex-direction: column; }
+  .gl-filter-select, .gl-filter-date { width: 100%; min-width: unset; }
+  .gl-table-wrap { margin: 0 -16px; }
+  .gl-table { font-size: 12px; }
+  .gl-table tbody td { padding: 10px 12px; }
 }

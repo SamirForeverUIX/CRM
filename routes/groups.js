@@ -107,12 +107,34 @@ router.get('/', (req, res) => {
     });
   }
 
-  const enriched = filtered.map(g => ({
-    ...g,
-    teacher: teachers.find(t => t.id === g.teacherId),
-    course: courses.find(c => c.id === g.courseId),
-    studentCount: students.filter(s => s.groupIds && s.groupIds.includes(g.id)).length
-  }));
+  const now = new Date();
+  const enriched = filtered.map(g => {
+    const teacher = teachers.find(t => t.id === g.teacherId);
+    const course = courses.find(c => c.id === g.courseId);
+    const studentCount = students.filter(s => s.groupIds && s.groupIds.includes(g.id)).length;
+
+    // Calculate training end date
+    let endDate = '';
+    if (g.startDate && course && course.durationMonths) {
+      const ed = new Date(g.startDate);
+      ed.setMonth(ed.getMonth() + course.durationMonths);
+      endDate = ed.toISOString().split('T')[0];
+    }
+
+    // Calculate week of study (months and weeks since start)
+    let weekOfStudy = { months: 0, weeks: 0 };
+    if (g.startDate) {
+      const start = new Date(g.startDate);
+      const diffMs = now - start;
+      if (diffMs > 0) {
+        const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        weekOfStudy.months = Math.floor(totalDays / 30);
+        weekOfStudy.weeks = Math.floor((totalDays % 30) / 7);
+      }
+    }
+
+    return { ...g, teacher, course, studentCount, endDate, weekOfStudy };
+  });
 
   res.render('groups/index', {
     page: 'groups', groups: enriched, search,
