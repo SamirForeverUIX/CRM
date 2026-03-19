@@ -19,6 +19,14 @@ function writeGroups(groups) {
   fs.writeFileSync(dataFile, JSON.stringify(groups, null, 2), 'utf8');
 }
 
+function readStudents() {
+  return JSON.parse(fs.readFileSync(path.join(dataDir, 'students.json'), 'utf8'));
+}
+
+function writeStudents(students) {
+  fs.writeFileSync(path.join(dataDir, 'students.json'), JSON.stringify(students, null, 2), 'utf8');
+}
+
 function readSettings() {
   const data = JSON.parse(fs.readFileSync(path.join(dataDir, 'settings.json'), 'utf8'));
   if (!data.rooms) data.rooms = [];
@@ -41,7 +49,8 @@ const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 // Map day abbreviations to JS getDay() values (0=Sun, 1=Mon, ..., 6=Sat)
 const DAY_MAP = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 
-// Calculate exact lesson dates from startDate + days + totalLessons
+// Calculate ALL lesson dates from startDate + days of week + total lessons count
+// totalLessons = lessonsPerMonth * durationMonths (full course duration)
 function calculateLessonDates(startDate, days, totalLessons) {
   if (!startDate || !days || days.length === 0 || !totalLessons || totalLessons <= 0) {
     return [];
@@ -65,6 +74,16 @@ function calculateLessonDates(startDate, days, totalLessons) {
   }
 
   return dates;
+}
+
+// Get lessons for a specific month from all lesson dates
+function getLessonsByMonth(lessonDates, year, month) {
+  return lessonDates.filter(d => d.getFullYear() === year && d.getMonth() === month);
+}
+
+// Format date as YYYY-MM-DD
+function dateToStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
 // List all groups
@@ -177,7 +196,10 @@ router.get('/view/:id', (req, res) => {
         if (c2 && c2.price) totalOwed += c2.price;
       }
     });
-    return { ...s, balance: totalPaid - totalOwed };
+    // Get join date for this group
+    const joinDates = s.groupJoinDates || {};
+    const joinedAt = joinDates[group.id] || s.createdAt || '';
+    return { ...s, balance: totalPaid - totalOwed, joinedAt };
   });
   const settings = readSettings();
 
@@ -190,9 +212,50 @@ router.get('/view/:id', (req, res) => {
   }
   if (group.endDate) endDate = group.endDate;
 
-  // Calculate lesson dates from course.lessonsPerMonth and group schedule
-  const totalLessons = course ? (course.lessonsPerMonth || 0) : 0;
-  const lessonDates = calculateLessonDates(group.startDate, group.days, totalLessons);
+  // Calculate ALL lesson dates for the entire course duration
+  const lessonsPerMonth = course ? (course.lessonsPerMonth || 0) : 0;
+  const durationMonths = course ? (course.durationMonths || 1) : 1;
+  const totalLessons = lessonsPerMonth * durationMonths;
+  const allLessonDates = calculateLessonDates(group.startDate, group.days, totalLessons);
+
+  // Month navigation: determine which month to show
+  const monthParam = req.query.month; // format: YYYY-MM
+  let viewYear, viewMonth;
+  if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+    viewYear = parseInt(monthParam.split('-')[0]);
+    viewMonth = parseInt(monthParam.split('-')[1]) - 1; // 0-indexed
+  } else {
+    // Default to current month, or first lesson month if no lessons this month
+    const now = new Date();
+    viewYear = now.getFullYear();
+    viewMonth = now.getMonth();
+    // If no lessons this month, show the first month that has lessons
+    const thisMonthLessons = getLessonsByMonth(allLessonDates, viewYear, viewMonth);
+    if (thisMonthLessons.length === 0 && allLessonDates.length > 0) {
+      viewYear = allLessonDates[0].getFullYear();
+      viewMonth = allLessonDates[0].getMonth();
+    }
+  }
+
+  // Get lessons for the current view month
+  const lessonDates = getLessonsByMonth(allLessonDates, viewYear, viewMonth);
+
+  // Compute available months for navigation (all months that have lessons)
+  const monthSet = new Set();
+  allLessonDates.forEach(d => {
+    monthSet.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+  });
+  const availableMonths = Array.from(monthSet).sort();
+
+  // Current month key for navigation
+  const currentMonthKey = viewYear + '-' + String(viewMonth + 1).padStart(2, '0');
+  const currentMonthIdx = availableMonths.indexOf(currentMonthKey);
+  const prevMonth = currentMonthIdx > 0 ? availableMonths[currentMonthIdx - 1] : null;
+  const nextMonth = currentMonthIdx < availableMonths.length - 1 ? availableMonths[currentMonthIdx + 1] : null;
+
+  // Month display name
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const viewMonthName = monthNames[viewMonth] + ' ' + viewYear;
 
   // Build attendance map: { 'YYYY-MM-DD': { studentId: 'was'|'not' } }
   const attendanceMap = {};
@@ -211,7 +274,8 @@ router.get('/view/:id', (req, res) => {
 
   res.render('groups/view', {
     page: 'groups', group, teacher, course, students: groupStudents,
-    lessonDates, attendanceMap, endDate,
+    lessonDates, allLessonDates, attendanceMap, endDate,
+    viewMonthName, currentMonthKey, prevMonth, nextMonth, availableMonths,
     teachers, courses, rooms: settings.rooms,
     timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK
   });
@@ -271,14 +335,19 @@ router.post('/edit/:id', (req, res) => {
   res.redirect('/groups/view/' + req.params.id);
 });
 
-// Save attendance for a specific student+date
+// Save attendance for a specific student+date (supports AJAX)
 router.post('/:id/attendance', (req, res) => {
   const groupId = req.params.id;
   const { date, studentId, status } = req.body;
 
   const groups = readGroups();
   const group = groups.find(g => g.id === groupId);
-  if (!group) return res.redirect('/groups');
+  if (!group) {
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      return res.json({ success: false, error: 'Group not found' });
+    }
+    return res.redirect('/groups');
+  }
 
   if (!group.attendance) group.attendance = [];
 
@@ -297,16 +366,69 @@ router.post('/:id/attendance', (req, res) => {
   }
   if (!record.statuses) record.statuses = {};
 
-  // Set the individual student's status
+  // Set the individual student's status, or clear it
   if (studentId && status) {
-    record.statuses[studentId] = status; // 'was' or 'not'
+    if (status === 'clear') {
+      delete record.statuses[studentId];
+    } else {
+      record.statuses[studentId] = status; // 'was' or 'not'
+    }
   }
 
   const index = groups.findIndex(g => g.id === groupId);
   groups[index] = group;
   writeGroups(groups);
 
+  // Support AJAX response
+  if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    return res.json({ success: true, status: status === 'clear' ? '' : status });
+  }
+
   res.redirect('/groups/view/' + groupId);
+});
+
+// Bulk mark attendance for a column (entire lesson date) or row (entire student)
+router.post('/:id/attendance/bulk', (req, res) => {
+  const groupId = req.params.id;
+  const { date, studentId, status, studentIds, dates } = req.body;
+
+  const groups = readGroups();
+  const group = groups.find(g => g.id === groupId);
+  if (!group) return res.json({ success: false, error: 'Group not found' });
+
+  if (!group.attendance) group.attendance = [];
+
+  // Bulk mark a column (all students for one date)
+  if (date && studentIds) {
+    const ids = Array.isArray(studentIds) ? studentIds : JSON.parse(studentIds);
+    let record = group.attendance.find(a => a.date === date);
+    if (!record) {
+      record = { date, statuses: {} };
+      group.attendance.push(record);
+    }
+    if (!record.statuses) record.statuses = {};
+    ids.forEach(sid => { record.statuses[sid] = status || 'was'; });
+  }
+
+  // Bulk mark a row (all dates for one student)
+  if (studentId && dates) {
+    const dateList = Array.isArray(dates) ? dates : JSON.parse(dates);
+    dateList.forEach(d => {
+      let record = group.attendance.find(a => a.date === d);
+      if (!record) {
+        record = { date: d, statuses: {} };
+        group.attendance.push(record);
+      }
+      if (!record.statuses) record.statuses = {};
+      record.statuses[studentId] = status || 'was';
+    });
+  }
+
+  const index = groups.findIndex(g => g.id === groupId);
+  groups[index] = group;
+  writeGroups(groups);
+
+  res.json({ success: true });
 });
 
 // Delete group

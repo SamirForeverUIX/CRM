@@ -132,6 +132,11 @@ router.post('/add', (req, res) => {
   if (!groupIds) groupIds = [];
   else if (!Array.isArray(groupIds)) groupIds = [groupIds];
 
+  // Track when student joined each group
+  const now = new Date().toISOString();
+  const groupJoinDates = {};
+  groupIds.forEach(gid => { groupJoinDates[gid] = now; });
+
   const students = readStudents();
   students.push({
     id: uuidv4(),
@@ -141,8 +146,9 @@ router.post('/add', (req, res) => {
     birthday: '',
     gender: '',
     groupIds,
+    groupJoinDates,
     payments: [],
-    createdAt: new Date().toISOString()
+    createdAt: now
   });
   writeStudents(students);
 
@@ -263,8 +269,10 @@ router.post('/add-to-group/:id', (req, res) => {
   if (index === -1) return res.redirect('/students');
 
   if (!students[index].groupIds) students[index].groupIds = [];
+  if (!students[index].groupJoinDates) students[index].groupJoinDates = {};
   if (groupId && !students[index].groupIds.includes(groupId)) {
     students[index].groupIds.push(groupId);
+    students[index].groupJoinDates[groupId] = dateFrom || new Date().toISOString();
   }
   writeStudents(students);
 

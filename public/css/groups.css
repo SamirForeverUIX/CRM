@@ -583,120 +583,150 @@
 .gv-att-check-cell {
   text-align: center;
   padding: 8px 4px;
-}
-
-/* "Was" badge */
-.gv-was-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 10px;
-  background: #14b8a6;
-  color: #fff;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-/* Attendance circle checkbox */
-.gv-att-checkbox {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-fast);
+  min-height: 44px;
 }
-.gv-att-checkbox input {
-  display: none;
+.gv-att-check-cell:hover {
+  background: var(--primary-bg);
 }
-.gv-att-circle {
+.gv-att-check-cell:active {
+  background: var(--primary-border);
+}
+
+/* Disabled cells (before student joined) */
+.gv-att-disabled {
+  cursor: default;
+  background: #f8f8f8;
+  pointer-events: none;
+}
+.gv-att-disabled:hover { background: #f8f8f8; }
+.gv-att-na {
+  display: inline-block;
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid #d1d5db;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    #e5e7eb 3px,
+    #e5e7eb 4px
+  );
+  opacity: 0.5;
+}
+
+/* Today column highlight */
+.gv-att-today-cell {
+  background: rgba(249, 115, 22, 0.04);
+}
+.gv-att-today-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin: 3px auto 0;
+}
+.gv-att-date-col.today {
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(249, 115, 22, 0.04);
+}
+.gv-att-date-col.future {
+  opacity: 0.5;
+}
+
+/* Attendance circle (empty state) */
+.gv-att-circle {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
   background: #fff;
   transition: all var(--transition-fast);
 }
-.gv-att-checkbox input:checked + .gv-att-circle {
-  background: #14b8a6;
-  border-color: #14b8a6;
+.gv-att-check-cell:hover .gv-att-circle {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
-/* "Was" with "Not" label for absent */
-.gv-was-not {
-  background: #ef4444;
-}
-.gv-not-label {
-  display: block;
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-/* Hover wrapper for attendance cells (both empty and marked) */
-.gv-att-hover-wrap {
-  position: relative;
+/* Attendance status icons */
+.gv-att-status {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-.gv-att-hover-actions {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  gap: 2px;
-  z-index: 10;
-}
-.gv-att-hover-wrap:hover .gv-att-hover-actions {
-  display: flex;
-}
-.gv-att-hover-wrap:hover .gv-att-circle {
-  opacity: 0.3;
-}
-/* Hide badge text on hover to show toggle button */
-.gv-att-hover-wrap.gv-att-marked:hover .gv-was-badge,
-.gv-att-hover-wrap.gv-att-marked:hover .gv-not-label {
-  opacity: 0.2;
-}
-.gv-att-hover-btn {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: all var(--transition-fast);
 }
-.gv-att-was {
-  background: #14b8a6;
+.gv-att-present {
+  background: var(--success);
   color: #fff;
 }
-.gv-att-was:hover {
-  background: #0d9488;
-  transform: scale(1.1);
+.gv-att-present svg { stroke: #fff; }
+.gv-att-check-cell:hover .gv-att-present {
+  background: #15803d;
+  transform: scale(1.08);
 }
-.gv-att-not {
-  background: #ef4444;
+.gv-att-absent {
+  background: var(--danger);
   color: #fff;
 }
-.gv-att-not:hover {
-  background: #dc2626;
-  transform: scale(1.1);
+.gv-att-absent svg { stroke: #fff; }
+.gv-att-check-cell:hover .gv-att-absent {
+  background: #b91c1c;
+  transform: scale(1.08);
 }
 
-/* Calendar icon on right side */
-.gv-att-calendar-icon {
-  position: absolute;
-  right: -40px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  opacity: 0.6;
+/* Month navigation */
+.gv-att-nav-btn.disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
 }
+.gv-att-month-select {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: #fff;
+  margin-left: 4px;
+}
+
+/* Bulk actions bar */
+.gv-att-bulk-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.gv-att-bulk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.gv-att-bulk-btn:hover {
+  border-color: var(--success);
+  color: var(--success);
+  background: var(--success-bg);
+}
+.gv-att-bulk-btn svg { stroke: currentColor; }
 
 /* ===================================================================
    EDIT GROUP MODAL
