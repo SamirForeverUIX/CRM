@@ -5,33 +5,41 @@
 
 /* === CSS Custom Properties === */
 :root {
-  --primary: #f97316;
-  --primary-light: #fb923c;
-  --primary-dark: #ea580c;
-  --primary-bg: #fff7ed;
-  --primary-border: #fed7aa;
+  /* Theme colors (from reference) */
+  --primary: #f18024;
+  --primary-light: #f6a058;
+  --primary-dark: #d96d1a;
+  --primary-bg: rgba(241, 128, 36, 0.1);
+  --primary-border: rgba(241, 128, 36, 0.3);
 
-  --success: #16a34a;
+  --theme-color-1: #f18024;
+  --theme-color-2: #e7523e;
+  --theme-color-3: #d6a779;
+  --theme-color-4: #dba070;
+  --theme-color-5: #f6c797;
+  --theme-color-6: #d6cdca;
+
+  --success: #28a745;
   --success-bg: #f0fdf4;
-  --warning: #d97706;
+  --warning: #ffc107;
   --warning-bg: #fffbeb;
-  --danger: #dc2626;
+  --danger: #dc3545;
   --danger-bg: #fef2f2;
-  --info: #2563eb;
+  --info: #17a2b8;
   --info-bg: #eff6ff;
 
-  --bg-body: #f5f6f8;
+  --bg-body: #f8f9fa;
   --surface: #ffffff;
   --surface-hover: #fafafa;
-  --border: #e5e7eb;
+  --border: #d7d7d7;
   --border-light: #f3f4f6;
 
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
+  --text-primary: #212121;
+  --text-secondary: #6c757d;
   --text-muted: #9ca3af;
 
-  --sidebar-width: 90px;
-  --header-height: 60px;
+  --sidebar-width: 120px;
+  --header-height: 70px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
