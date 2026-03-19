@@ -9,58 +9,59 @@
 
 /* Stats Grid */
 .stats-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
-  gap:16px; margin-bottom:24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 .stat-card {
-  padding: 24px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   text-align: center;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
+  background: #fff;
+  border: 1px solid var(--border);
   transition: all 0.25s ease;
 }
 .stat-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
-}
-.stat-card-link { transition: all var(--transition-base); }
-.stat-card-link:hover {
-  box-shadow:var(--shadow-card-hover);
-  transform:translateY(-3px);
   border-color: transparent;
 }
+.stat-card-link { transition: all var(--transition-base); }
 .stat-card-link:active { transform: translateY(-1px) scale(0.99); }
 
 .stat-icon {
-  width:48px; height:48px;
-  border-radius:var(--radius-md);
-  display:flex; align-items:center; justify-content:center;
-  margin:0 auto 6px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  background: transparent;
   transition: transform var(--transition-base);
 }
-.stat-card-link:hover .stat-icon { transform: scale(1.08); }
-.stat-icon.teachers { background:#fff3e0; color:#f57c00; }
-.stat-icon.teachers svg { stroke:#f57c00; }
-.stat-icon.groups { background:#fce4ec; color:#e91e63; }
-.stat-icon.groups svg { stroke:#e91e63; }
-.stat-icon.students { background:#e8f5e9; color:#43a047; }
-.stat-icon.students svg { stroke:#43a047; }
-.stat-icon.courses { background:#e3f2fd; color:#1e88e5; }
-.stat-icon.courses svg { stroke:#1e88e5; }
-.stat-icon.income { background:#fff8e1; color:#f9a825; }
-.stat-icon.income svg { stroke:#f9a825; }
-.stat-icon.debtors { background:#fce4ec; color:#e91e63; }
-.stat-icon.debtors svg { stroke:#e91e63; }
+.stat-card:hover .stat-icon { transform: scale(1.08); }
 
-.stat-number.danger { color:#e91e63; }
+/* All stat icons use primary orange outlined style */
+.stat-icon svg {
+  stroke: var(--primary);
+  width: 36px;
+  height: 36px;
+  stroke-width: 1.5;
+}
+.stat-icon.debtors svg { stroke: var(--danger); }
+
+.stat-number.danger { color: var(--danger); }
 
 .dashboard-grid { margin-top: var(--space-3); }
 
 .stat-number { font-size: 32px; font-weight: 800; color: var(--text-primary); line-height: 1.2; letter-spacing: -0.5px; }
-.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 4px; }
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
 
 /* Quick Actions */
 .quick-actions { margin-bottom:24px; }
