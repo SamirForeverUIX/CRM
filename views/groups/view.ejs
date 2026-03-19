@@ -171,111 +171,114 @@
           <div class="gv-attendance-header">
             <h2>Attendance</h2>
             <div class="gv-attendance-nav">
-              <button class="gv-att-nav-btn gv-att-current">Current</button>
-              <button class="gv-att-nav-btn gv-att-arrow">&lsaquo;</button>
-              <button class="gv-att-nav-btn gv-att-arrow">&lsaquo;</button>
-              <span class="gv-att-date-range">
-                <% if (lessonDates.length > 0) { %>
-                  <%
-                    var fd = lessonDates[0];
-                    var ld = lessonDates[lessonDates.length - 1];
-                    var fds = String(fd.getDate()).padStart(2,'0') + '.' + String(fd.getMonth()+1).padStart(2,'0') + '.' + String(fd.getFullYear()).slice(2);
-                    var lds = String(ld.getDate()).padStart(2,'0') + '.' + String(ld.getMonth()+1).padStart(2,'0') + '.' + String(ld.getFullYear()).slice(2);
-                  %>
-                  <%= fds %> - <%= lds %>
-                <% } %>
-              </span>
-              <button class="gv-att-nav-btn gv-att-arrow">&rsaquo;</button>
-              <button class="gv-att-nav-btn gv-att-arrow">&rsaquo;</button>
-              <button class="gv-att-nav-btn gv-att-settings" title="Settings">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              </button>
+              <% if (prevMonth) { %>
+                <a href="/groups/view/<%= group.id %>?month=<%= prevMonth %>" class="gv-att-nav-btn gv-att-arrow" title="Previous month">&lsaquo;</a>
+              <% } else { %>
+                <span class="gv-att-nav-btn gv-att-arrow disabled">&lsaquo;</span>
+              <% } %>
+              <span class="gv-att-date-range"><%= viewMonthName %></span>
+              <% if (nextMonth) { %>
+                <a href="/groups/view/<%= group.id %>?month=<%= nextMonth %>" class="gv-att-nav-btn gv-att-arrow" title="Next month">&rsaquo;</a>
+              <% } else { %>
+                <span class="gv-att-nav-btn gv-att-arrow disabled">&rsaquo;</span>
+              <% } %>
+              <% if (availableMonths.length > 2) { %>
+                <select class="gv-att-month-select" onchange="if(this.value) window.location='/groups/view/<%= group.id %>?month='+this.value">
+                  <% availableMonths.forEach(function(m) { %>
+                    <option value="<%= m %>" <%= m === currentMonthKey ? 'selected' : '' %>><%= m %></option>
+                  <% }) %>
+                </select>
+              <% } %>
             </div>
           </div>
 
           <% if (students.length === 0) { %>
             <p class="muted" style="font-size:13px;">Add students to track attendance.</p>
-          <% } else if (lessonDates.length === 0) { %>
+          <% } else if (lessonDates.length === 0 && allLessonDates.length === 0) { %>
             <p class="muted" style="font-size:13px;">Set a course with lessons/month, start date, and days to generate lesson dates.</p>
+          <% } else if (lessonDates.length === 0) { %>
+            <p class="muted" style="font-size:13px;">No lessons in this month. Use navigation to switch months.</p>
           <% } else { %>
+            <!-- Bulk actions -->
+            <div class="gv-att-bulk-actions">
+              <button class="gv-att-bulk-btn" onclick="bulkMarkAllPresent()" title="Mark all students present for today">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Mark all present today
+              </button>
+            </div>
+
             <div class="gv-attendance-table-wrap">
-              <table class="gv-attendance-table">
+              <table class="gv-attendance-table" id="attendanceTable">
                 <thead>
                   <tr>
                     <th class="gv-att-name-col">Name</th>
-                    <% lessonDates.forEach((d) => { %>
+                    <% lessonDates.forEach(function(d) { %>
                       <%
                         var dd = String(d.getDate()).padStart(2, '0');
                         var mm = String(d.getMonth() + 1).padStart(2, '0');
                         var months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
                         var dateStr = d.getFullYear() + '-' + mm + '-' + dd;
                         var today = new Date();
-                        var isPast = d <= today;
                         var isToday = d.toDateString() === today.toDateString();
+                        var isFuture = d > today && !isToday;
                       %>
-                      <th class="gv-att-date-col <%= isToday ? 'today' : '' %>" data-date="<%= dateStr %>">
+                      <th class="gv-att-date-col <%= isToday ? 'today' : '' %> <%= isFuture ? 'future' : '' %>" data-date="<%= dateStr %>">
                         <span class="gv-att-day"><%= d.getDate() %> <%= months[d.getMonth()] %></span>
+                        <% if (isToday) { %><span class="gv-att-today-dot"></span><% } %>
                       </th>
                     <% }) %>
                   </tr>
                 </thead>
                 <tbody>
-                  <% students.forEach((s, si) => { %>
+                  <% students.forEach(function(s, si) { %>
+                    <%
+                      // Determine student's join date for this group
+                      var studentJoinDate = s.joinedAt ? new Date(s.joinedAt.split('T')[0] + 'T00:00:00') : null;
+                    %>
                     <tr data-student-id="<%= s.id %>">
                       <td class="gv-att-name-cell">
                         <div class="gv-att-avatar gv-att-avatar-<%= (si % 6) + 1 %>"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
                         <span class="gv-att-student-name"><%= s.firstName %> <%= s.lastName %></span>
                       </td>
-                      <% lessonDates.forEach((d) => { %>
+                      <% lessonDates.forEach(function(d) { %>
                         <%
                           var dd2 = String(d.getDate()).padStart(2,'0');
                           var mm2 = String(d.getMonth()+1).padStart(2,'0');
                           var dateStr2 = d.getFullYear()+'-'+mm2+'-'+dd2;
                           var studentStatus = attendanceMap[dateStr2] && attendanceMap[dateStr2][s.id];
+                          // Check if lesson is before student joined
+                          var isBeforeJoin = studentJoinDate && d < studentJoinDate;
+                          var today2 = new Date();
+                          var isToday2 = d.toDateString() === today2.toDateString();
                         %>
-                        <td class="gv-att-check-cell" data-date="<%= dateStr2 %>" data-status="<%= studentStatus || '' %>">
-                          <% if (studentStatus === 'was') { %>
-                            <div class="gv-att-hover-wrap gv-att-marked">
-                              <span class="gv-was-badge">Was</span>
-                              <div class="gv-att-hover-actions">
-                                <button class="gv-att-hover-btn gv-att-not" title="Mark as Not" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'not')">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              </div>
-                            </div>
-                          <% } else if (studentStatus === 'not') { %>
-                            <div class="gv-att-hover-wrap gv-att-marked">
-                              <span class="gv-was-badge gv-was-not">Was</span>
-                              <span class="gv-not-label">Not</span>
-                              <div class="gv-att-hover-actions">
-                                <button class="gv-att-hover-btn gv-att-was" title="Mark as Was" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'was')">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                </button>
-                              </div>
-                            </div>
-                          <% } else { %>
-                            <div class="gv-att-hover-wrap">
-                              <span class="gv-att-circle"></span>
-                              <div class="gv-att-hover-actions">
-                                <button class="gv-att-hover-btn gv-att-was" title="Was" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'was')">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                </button>
-                                <button class="gv-att-hover-btn gv-att-not" title="Not" onclick="markAttendance('<%= s.id %>', '<%= dateStr2 %>', 'not')">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              </div>
-                            </div>
-                          <% } %>
-                        </td>
+                        <% if (isBeforeJoin) { %>
+                          <td class="gv-att-check-cell gv-att-disabled" data-date="<%= dateStr2 %>" title="Student not yet enrolled">
+                            <span class="gv-att-na"></span>
+                          </td>
+                        <% } else { %>
+                          <td class="gv-att-check-cell <%= isToday2 ? 'gv-att-today-cell' : '' %>"
+                              data-date="<%= dateStr2 %>"
+                              data-student="<%= s.id %>"
+                              data-status="<%= studentStatus || '' %>"
+                              onclick="cycleAttendance(this)">
+                            <% if (studentStatus === 'was') { %>
+                              <span class="gv-att-status gv-att-present" title="Present">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                              </span>
+                            <% } else if (studentStatus === 'not') { %>
+                              <span class="gv-att-status gv-att-absent" title="Absent">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                              </span>
+                            <% } else { %>
+                              <span class="gv-att-circle" title="Click to mark"></span>
+                            <% } %>
+                          </td>
+                        <% } %>
                       <% }) %>
                     </tr>
                   <% }) %>
                 </tbody>
               </table>
-            </div>
-            <!-- Calendar icon on right -->
-            <div class="gv-att-calendar-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
             </div>
           <% } %>
         </div>
@@ -303,7 +306,7 @@
           <label>Select course</label>
           <select name="courseId" class="gv-select">
             <option value="">-- Select Course --</option>
-            <% courses.forEach(c => { %>
+            <% courses.forEach(function(c) { %>
               <option value="<%= c.id %>" <%= group.courseId === c.id ? 'selected' : '' %>><%= c.name %></option>
             <% }) %>
           </select>
@@ -314,7 +317,7 @@
           <label>Select teacher</label>
           <select name="teacherId" class="gv-select">
             <option value="">-- Select Teacher --</option>
-            <% teachers.forEach(t => { %>
+            <% teachers.forEach(function(t) { %>
               <option value="<%= t.id %>" <%= group.teacherId === t.id ? 'selected' : '' %>><%= t.firstName.toUpperCase() %> <%= t.lastName.toUpperCase() %></option>
             <% }) %>
           </select>
@@ -332,7 +335,7 @@
         <div class="gv-form-group">
           <label>Exact days</label>
           <div class="gv-days-grid">
-            <% daysOfWeek.forEach(day => { %>
+            <% daysOfWeek.forEach(function(day) { %>
               <label class="gv-day-checkbox">
                 <input type="checkbox" name="days" value="<%= day %>" <%= group.days && group.days.includes(day) ? 'checked' : '' %>>
                 <span class="gv-day-label"><%= day %></span>
@@ -346,7 +349,7 @@
           <label>Select room</label>
           <select name="roomId" class="gv-select">
             <option value="">-- Select Room --</option>
-            <% rooms.forEach(room => { %>
+            <% rooms.forEach(function(room) { %>
               <option value="<%= room %>" <%= group.room === room ? 'selected' : '' %>><%= room %></option>
             <% }) %>
           </select>
@@ -418,64 +421,71 @@ document.addEventListener('click', function(e) {
   });
 });
 
-function markAttendance(studentId, date, status) {
-  var form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/groups/<%= group.id %>/attendance';
-  form.style.display = 'none';
+// === Click-to-cycle attendance (AJAX, no page reload) ===
+// Cycle: empty -> was -> not -> empty
+function cycleAttendance(cell) {
+  var currentStatus = cell.getAttribute('data-status') || '';
+  var nextStatus;
+  if (currentStatus === '') nextStatus = 'was';
+  else if (currentStatus === 'was') nextStatus = 'not';
+  else nextStatus = 'clear'; // will clear the status
 
-  var dateInput = document.createElement('input');
-  dateInput.name = 'date';
-  dateInput.value = date;
-  form.appendChild(dateInput);
+  var studentId = cell.getAttribute('data-student');
+  var date = cell.getAttribute('data-date');
 
-  var studentInput = document.createElement('input');
-  studentInput.name = 'studentId';
-  studentInput.value = studentId;
-  form.appendChild(studentInput);
+  // Optimistically update UI
+  updateCellUI(cell, nextStatus === 'clear' ? '' : nextStatus);
+  cell.setAttribute('data-status', nextStatus === 'clear' ? '' : nextStatus);
 
-  var statusInput = document.createElement('input');
-  statusInput.name = 'status';
-  statusInput.value = status; // 'was' or 'not'
-  form.appendChild(statusInput);
-
-  document.body.appendChild(form);
-  form.submit();
+  // Send AJAX request
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/groups/<%= group.id %>/attendance', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status !== 200) {
+      // Revert on error
+      updateCellUI(cell, currentStatus);
+      cell.setAttribute('data-status', currentStatus);
+    }
+  };
+  xhr.send(JSON.stringify({ date: date, studentId: studentId, status: nextStatus }));
 }
 
-function saveAttendance(el) {
-  var date = el.dataset.date;
-  var checkboxes = document.querySelectorAll('input[data-date="' + date + '"]');
-  var form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/groups/<%= group.id %>/attendance';
-  form.style.display = 'none';
+function updateCellUI(cell, status) {
+  if (status === 'was') {
+    cell.innerHTML = '<span class="gv-att-status gv-att-present" title="Present"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  } else if (status === 'not') {
+    cell.innerHTML = '<span class="gv-att-status gv-att-absent" title="Absent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
+  } else {
+    cell.innerHTML = '<span class="gv-att-circle" title="Click to mark"></span>';
+  }
+}
 
-  var dateInput = document.createElement('input');
-  dateInput.name = 'date';
-  dateInput.value = date;
-  form.appendChild(dateInput);
+// === Bulk mark all present for today ===
+function bulkMarkAllPresent() {
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0');
+  var todayStr = today.getFullYear() + '-' + mm + '-' + dd;
 
-  var count = 0;
-  checkboxes.forEach(function(cb) {
-    if (cb.checked) {
-      var input = document.createElement('input');
-      input.name = 'present';
-      input.value = cb.dataset.student;
-      form.appendChild(input);
-      count++;
-    }
+  // Find all cells for today
+  var cells = document.querySelectorAll('.gv-att-check-cell[data-date="' + todayStr + '"][data-student]');
+  if (cells.length === 0) return;
+
+  var studentIds = [];
+  cells.forEach(function(cell) {
+    studentIds.push(cell.getAttribute('data-student'));
+    updateCellUI(cell, 'was');
+    cell.setAttribute('data-status', 'was');
   });
 
-  if (count === 0) {
-    var empty = document.createElement('input');
-    empty.name = 'present';
-    empty.value = '__none__';
-    form.appendChild(empty);
-  }
-
-  document.body.appendChild(form);
-  form.submit();
+  // Send bulk AJAX
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/groups/<%= group.id %>/attendance/bulk', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+  xhr.send(JSON.stringify({ date: todayStr, studentIds: studentIds, status: 'was' }));
 }
 </script>
 <%- include('../partials/footer') %>
