@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 
@@ -11,20 +12,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Compute sidebar badge data for all routes
-const fs = require('fs');
-app.use((req, res, next) => {
+// Compute sidebar badge data for all routes (async, no file I/O)
+const studentsRepo = require('./db/studentsRepo');
+app.use(async (req, res, next) => {
   try {
-    const students = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'students.json'), 'utf8'));
-    let debtorCount = 0;
-    students.forEach(s => {
-      const payments = s.payments || [];
-      let hasDebt = false;
-      payments.forEach(p => { if (p.status === 'unpaid' || p.status === 'partial') hasDebt = true; });
-      if (payments.length === 0) hasDebt = true;
-      if (hasDebt) debtorCount++;
-    });
-    res.locals.debtorCount = debtorCount;
+    res.locals.debtorCount = await studentsRepo.getDebtorCount();
   } catch (e) {
     res.locals.debtorCount = 0;
   }
@@ -40,6 +32,12 @@ app.use('/courses', require('./routes/courses'));
 app.use('/settings', require('./routes/settings'));
 app.use('/schedule', require('./routes/schedule'));
 app.use('/search', require('./routes/search'));
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).send('Internal Server Error');
+});
 
 app.listen(PORT, () => {
   console.log(`CRM running on http://localhost:${PORT}`);
