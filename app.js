@@ -12,13 +12,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Compute sidebar badge data for all routes (async, no file I/O)
+// Compute sidebar badge data — skip for static assets
 const studentsRepo = require('./db/studentsRepo');
+const settingsRepo = require('./db/settingsRepo');
 app.use(async (req, res, next) => {
+  // Skip DB calls for static asset requests
+  if (req.path.startsWith('/css/') || req.path.startsWith('/js/') || req.path.startsWith('/images/') || req.path.startsWith('/fonts/')) {
+    res.locals.debtorCount = 0;
+    res.locals.settings = { centreName: '', currency: 'USD' };
+    return next();
+  }
   try {
-    res.locals.debtorCount = await studentsRepo.getDebtorCount();
+    const [debtorCount, settings] = await Promise.all([
+      studentsRepo.getDebtorCount(),
+      settingsRepo.get()
+    ]);
+    res.locals.debtorCount = debtorCount;
+    res.locals.settings = settings;
   } catch (e) {
     res.locals.debtorCount = 0;
+    res.locals.settings = { centreName: '', currency: 'USD' };
   }
   next();
 });

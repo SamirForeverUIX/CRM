@@ -109,12 +109,12 @@
           </thead>
           <tbody>
             <% groups.forEach((group, i) => { %>
-              <tr class="gl-row" onclick="window.location='/groups/view/<%= group.id %>'" data-group-id="<%= group.id %>">
+              <tr class="gl-row" onclick="window.location='/groups/view/<%= group.id %>'" data-group-id="<%= group.id %>" data-teacher="<%= group.teacher ? group.teacher.id : '' %>" data-course="<%= group.course ? group.course.id : '' %>" data-days="<%= (group.days || []).join(',') %>" data-start="<%= group.startDate || '' %>" data-end="<%= group.endDate || '' %>">
                 <td class="gl-cell-num"><span class="gl-row-num"><%= i + 1 %>.</span> <a href="/groups/view/<%= group.id %>" class="gl-group-name"><%= group.name %></a></td>
                 <td class="gl-cell-course"><%= group.course ? group.course.name : '--' %></td>
                 <td class="gl-cell-teacher"><%= group.teacher ? (group.teacher.firstName + ' ' + group.teacher.lastName).toUpperCase() : '--' %></td>
-                <td class="gl-cell-days">
-                  <span class="gl-days-label"><%= group.days && group.days.length > 0 ? 'Other' : '--' %></span>
+                <td class="gl-cell-days" data-days="<%= (group.days || []).join(',') %>">
+                  <span class="gl-days-label"><%= group.days && group.days.length > 0 ? group.days.join(', ') : '--' %></span>
                   <% if (group.startTime) { %><br><span class="gl-days-time"><%= group.startTime %></span><% } %>
                 </td>
                 <td class="gl-cell-dates">
@@ -278,8 +278,18 @@ function applyFilters() {
   var teacher = document.getElementById('filterTeacher').value;
   var course = document.getElementById('filterCourse').value;
   var day = document.getElementById('filterDays').value;
+  var startDate = document.getElementById('filterStartDate').value;
+  var endDate = document.getElementById('filterEndDate').value;
   var rows = document.querySelectorAll('.gl-row');
-  rows.forEach(function(row) { row.style.display = ''; });
+  rows.forEach(function(row) {
+    var show = true;
+    if (teacher && row.getAttribute('data-teacher') !== teacher) show = false;
+    if (course && row.getAttribute('data-course') !== course) show = false;
+    if (day && !(row.getAttribute('data-days') || '').split(',').includes(day)) show = false;
+    if (startDate && row.getAttribute('data-start') && row.getAttribute('data-start') < startDate) show = false;
+    if (endDate && row.getAttribute('data-end') && row.getAttribute('data-end') > endDate) show = false;
+    row.style.display = show ? '' : 'none';
+  });
 }
 // Attach filter change listeners
 document.querySelectorAll('.gl-filter-select, .gl-filter-date').forEach(function(el) {

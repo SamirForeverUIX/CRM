@@ -169,6 +169,7 @@ router.get('/view/:id', async (req, res, next) => {
     const teacher = teachers.find(t => t.id === group.teacherId);
     const course = courses.find(c => c.id === group.courseId);
 
+    const now = new Date();
     const groupStudents = allStudents.map(s => {
       const payments = s.payments || [];
       let totalPaid = 0;
@@ -180,7 +181,15 @@ router.get('/view/:id', async (req, res, next) => {
         const g2 = allGroups.find(gr => gr.id === gid);
         if (g2 && g2.courseId) {
           const c2 = courses.find(cr => cr.id === g2.courseId);
-          if (c2 && c2.price) totalOwed += c2.price;
+          if (c2 && c2.price) {
+            const joinDate = (s.groupJoinDates && s.groupJoinDates[gid])
+              ? new Date(s.groupJoinDates[gid])
+              : new Date(s.createdAt || now);
+            const monthsSinceJoin = Math.max(1,
+              (now.getFullYear() - joinDate.getFullYear()) * 12 + (now.getMonth() - joinDate.getMonth()) + 1
+            );
+            totalOwed += c2.price * monthsSinceJoin;
+          }
         }
       });
       const joinDates = s.groupJoinDates || {};
@@ -245,7 +254,8 @@ router.get('/view/:id', async (req, res, next) => {
       lessonDates, allLessonDates, attendanceMap, endDate,
       viewMonthName, currentMonthKey, prevMonth, nextMonth, availableMonths,
       teachers, courses, rooms: settings.rooms,
-      timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK
+      timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
+      currency: settings.currency || 'USD'
     });
   } catch (err) { next(err); }
 });
