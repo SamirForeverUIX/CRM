@@ -19,7 +19,7 @@ router.get('/', async (req, res, next) => {
       filtered = teachers.filter(t =>
         t.firstName.toLowerCase().includes(search) ||
         t.lastName.toLowerCase().includes(search) ||
-        t.phone.includes(search)
+        (t.phone || '').toLowerCase().includes(search)
       );
     }
 

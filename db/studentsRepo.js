@@ -59,7 +59,7 @@ module.exports = {
 
   async addToGroup(studentId, groupId, joinedAt) {
     await db.query(
-      'INSERT INTO student_groups (student_id, group_id, joined_at) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+      'INSERT INTO student_groups (student_id, group_id, joined_at) VALUES ($1, $2, $3) ON CONFLICT (student_id, group_id) DO NOTHING',
       [studentId, groupId, joinedAt || new Date().toISOString()]
     );
   },
@@ -68,7 +68,7 @@ module.exports = {
     await db.query('DELETE FROM student_groups WHERE student_id = $1', [studentId]);
     for (const gid of groupIds) {
       await db.query(
-        'INSERT INTO student_groups (student_id, group_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        'INSERT INTO student_groups (student_id, group_id) VALUES ($1, $2) ON CONFLICT (student_id, group_id) DO NOTHING',
         [studentId, gid]
       );
     }

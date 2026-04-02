@@ -23,7 +23,7 @@ router.get('/', async (req, res, next) => {
     const teachers = allTeachers.filter(t =>
       t.firstName.toLowerCase().includes(q) ||
       t.lastName.toLowerCase().includes(q) ||
-      t.phone.includes(q)
+      (t.phone || '').includes(q)
     );
 
     const groups = allGroups.filter(g =>
@@ -33,7 +33,7 @@ router.get('/', async (req, res, next) => {
     const students = allStudents.filter(s =>
       s.firstName.toLowerCase().includes(q) ||
       s.lastName.toLowerCase().includes(q) ||
-      s.phone.includes(q)
+      (s.phone || '').includes(q)
     );
 
     const courses = allCourses.filter(c =>
