@@ -43,7 +43,7 @@ router.get('/', async (req, res, next) => {
       filtered = filtered.filter(s =>
         s.firstName.toLowerCase().includes(search) ||
         s.lastName.toLowerCase().includes(search) ||
-        s.phone.includes(search)
+        (s.phone || '').toLowerCase().includes(search)
       );
     }
     if (filterGroup) {
