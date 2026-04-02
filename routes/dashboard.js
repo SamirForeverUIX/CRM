@@ -36,23 +36,32 @@ router.get('/', async (req, res, next) => {
     let paidCount = 0;
     let debtorCount = 0;
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
     students.forEach(s => {
       const payments = s.payments || [];
-      let hasPaid = false;
+      let hasPaidThisMonth = false;
       let hasDebt = false;
       payments.forEach(p => {
-        if (p.status === 'paid' || p.status === 'partial') {
+        // Check if payment is in current month
+        const isThisMonth = p.date && (() => {
+          const pd = new Date(p.date);
+          return pd.getFullYear() === currentYear && pd.getMonth() === currentMonth;
+        })();
+        if (isThisMonth && (p.status === 'paid' || p.status === 'partial')) {
           totalIncome += p.amount || 0;
-          hasPaid = true;
+          hasPaidThisMonth = true;
         }
         if (p.status === 'unpaid' || p.status === 'partial') hasDebt = true;
       });
       if (payments.length === 0) hasDebt = true;
-      if (hasPaid) paidCount++;
+      if (hasPaidThisMonth) paidCount++;
       if (hasDebt) debtorCount++;
     });
 
-    const today = new Date();
+    const today = now;
     const todayDay = DAY_NAMES[today.getDay()];
 
     const todayGroups = groups
@@ -87,7 +96,7 @@ router.get('/', async (req, res, next) => {
     students.forEach(s => {
       activities.push({ type: 'student', text: s.firstName + ' ' + s.lastName + ' was added', time: s.createdAt, timeAgo: timeAgo(s.createdAt) });
       (s.payments || []).forEach(p => {
-        activities.push({ type: 'payment', text: (p.amount || 0).toLocaleString() + ' UZS from ' + s.firstName, time: p.date || s.createdAt, timeAgo: timeAgo(p.date || s.createdAt) });
+        activities.push({ type: 'payment', text: (p.amount || 0).toLocaleString() + ' ' + (settings.currency || 'USD') + ' from ' + s.firstName, time: p.date || s.createdAt, timeAgo: timeAgo(p.date || s.createdAt) });
       });
     });
     teachers.forEach(t => { activities.push({ type: 'teacher', text: t.firstName + ' ' + t.lastName + ' joined', time: t.createdAt, timeAgo: timeAgo(t.createdAt) }); });
@@ -106,7 +115,8 @@ router.get('/', async (req, res, next) => {
       studentCount: students.length, courseCount: courses.length,
       totalIncome, debtorCount, paidCount,
       todayGroups, scheduleRooms, scheduleTimeSlots,
-      recentActivities, recentStudents
+      recentActivities, recentStudents,
+      currency: settings.currency || 'USD'
     });
   } catch (err) {
     next(err);

@@ -106,15 +106,45 @@ module.exports = {
     await db.query('DELETE FROM payments WHERE id = $1', [paymentId]);
   },
 
-  // Get all students with their groups and payments (enriched)
+  // Get all students with their groups and payments (enriched) - batch queries
   async findAllEnriched() {
     const students = await this.findAll();
+    if (students.length === 0) return students;
+
+    const studentIds = students.map(s => s.id);
+
+    // Batch fetch all group associations
+    const { rows: groupRows } = await db.query(
+      'SELECT student_id, group_id, joined_at FROM student_groups WHERE student_id = ANY($1)',
+      [studentIds]
+    );
+
+    // Batch fetch all payments
+    const { rows: paymentRows } = await db.query(
+      'SELECT * FROM payments WHERE student_id = ANY($1) ORDER BY date',
+      [studentIds]
+    );
+
+    // Index by student_id
+    const groupsByStudent = {};
+    const paymentsByStudent = {};
+    for (const r of groupRows) {
+      if (!groupsByStudent[r.student_id]) groupsByStudent[r.student_id] = [];
+      groupsByStudent[r.student_id].push(r);
+    }
+    for (const r of paymentRows) {
+      if (!paymentsByStudent[r.student_id]) paymentsByStudent[r.student_id] = [];
+      paymentsByStudent[r.student_id].push({
+        id: r.id, amount: parseFloat(r.amount) || 0, date: r.date, status: r.status
+      });
+    }
+
     for (const s of students) {
-      const groupRows = await this.getGroupIds(s.id);
-      s.groupIds = groupRows.map(r => r.group_id);
+      const sGroups = groupsByStudent[s.id] || [];
+      s.groupIds = sGroups.map(r => r.group_id);
       s.groupJoinDates = {};
-      groupRows.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
-      s.payments = await this.getPayments(s.id);
+      sGroups.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
+      s.payments = paymentsByStudent[s.id] || [];
     }
     return students;
   },
@@ -131,7 +161,7 @@ module.exports = {
     return s;
   },
 
-  // Get students by group
+  // Get students by group - batch queries
   async findByGroupId(groupId) {
     const { rows } = await db.query(
       `SELECT s.* FROM students s
@@ -141,27 +171,50 @@ module.exports = {
       [groupId]
     );
     const students = rows.map(toObj);
+    if (students.length === 0) return students;
+
+    const studentIds = students.map(s => s.id);
+
+    const { rows: groupRows } = await db.query(
+      'SELECT student_id, group_id, joined_at FROM student_groups WHERE student_id = ANY($1)',
+      [studentIds]
+    );
+    const { rows: paymentRows } = await db.query(
+      'SELECT * FROM payments WHERE student_id = ANY($1) ORDER BY date',
+      [studentIds]
+    );
+
+    const groupsByStudent = {};
+    const paymentsByStudent = {};
+    for (const r of groupRows) {
+      if (!groupsByStudent[r.student_id]) groupsByStudent[r.student_id] = [];
+      groupsByStudent[r.student_id].push(r);
+    }
+    for (const r of paymentRows) {
+      if (!paymentsByStudent[r.student_id]) paymentsByStudent[r.student_id] = [];
+      paymentsByStudent[r.student_id].push({
+        id: r.id, amount: parseFloat(r.amount) || 0, date: r.date, status: r.status
+      });
+    }
+
     for (const s of students) {
-      const groupRows = await this.getGroupIds(s.id);
-      s.groupIds = groupRows.map(r => r.group_id);
+      const sGroups = groupsByStudent[s.id] || [];
+      s.groupIds = sGroups.map(r => r.group_id);
       s.groupJoinDates = {};
-      groupRows.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
-      s.payments = await this.getPayments(s.id);
+      sGroups.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
+      s.payments = paymentsByStudent[s.id] || [];
     }
     return students;
   },
 
-  // Get debtor count
+  // Get debtor count - uses efficient batch query instead of N+1
   async getDebtorCount() {
-    const students = await this.findAllEnriched();
-    let count = 0;
-    for (const s of students) {
-      const payments = s.payments || [];
-      let hasDebt = false;
-      payments.forEach(p => { if (p.status === 'unpaid' || p.status === 'partial') hasDebt = true; });
-      if (payments.length === 0) hasDebt = true;
-      if (hasDebt) count++;
-    }
-    return count;
+    const { rows } = await db.query(
+      `SELECT COUNT(DISTINCT s.id) as count FROM students s
+       LEFT JOIN payments p ON s.id = p.student_id
+       WHERE p.id IS NULL
+          OR p.status IN ('unpaid', 'partial')`
+    );
+    return parseInt(rows[0].count) || 0;
   }
 };

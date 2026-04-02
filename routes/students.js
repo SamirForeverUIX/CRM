@@ -5,21 +5,31 @@ const studentsRepo = require('../db/studentsRepo');
 const groupsRepo = require('../db/groupsRepo');
 const teachersRepo = require('../db/teachersRepo');
 const coursesRepo = require('../db/coursesRepo');
+const settingsRepo = require('../db/settingsRepo');
 
 function calculateBalance(student, groups, courses) {
   const payments = student.payments || [];
   let totalPaid = 0;
   payments.forEach(p => {
-    if (p.status === 'paid') totalPaid += p.amount || 0;
-    else if (p.status === 'partial') totalPaid += p.amount || 0;
+    if (p.status === 'paid' || p.status === 'partial') totalPaid += p.amount || 0;
   });
 
   let totalOwed = 0;
+  const now = new Date();
   (student.groupIds || []).forEach(gid => {
     const g = groups.find(gr => gr.id === gid);
     if (g && g.courseId) {
       const c = courses.find(cr => cr.id === g.courseId);
-      if (c && c.price) totalOwed += c.price;
+      if (c && c.price) {
+        // Calculate months since student joined this group
+        const joinDate = (student.groupJoinDates && student.groupJoinDates[gid])
+          ? new Date(student.groupJoinDates[gid])
+          : new Date(student.createdAt || now);
+        const monthsSinceJoin = Math.max(1,
+          (now.getFullYear() - joinDate.getFullYear()) * 12 + (now.getMonth() - joinDate.getMonth()) + 1
+        );
+        totalOwed += c.price * monthsSinceJoin;
+      }
     }
   });
 
@@ -127,12 +137,14 @@ router.get('/view/:id', async (req, res, next) => {
     const student = await studentsRepo.findByIdEnriched(req.params.id);
     if (!student) return res.redirect('/students');
 
-    const [groups, courses, teachers] = await Promise.all([
+    const [groups, courses, teachers, settings] = await Promise.all([
       groupsRepo.findAll(),
       coursesRepo.findAll(),
-      teachersRepo.findAll()
+      teachersRepo.findAll(),
+      settingsRepo.get()
     ]);
 
+    const currency = settings.currency || 'USD';
     const studentGroups = (student.groupIds || []).map(gid => groups.find(g => g.id === gid)).filter(Boolean);
     const balance = calculateBalance(student, groups, courses);
 
@@ -173,7 +185,7 @@ router.get('/view/:id', async (req, res, next) => {
 
     res.render('students/view', {
       page: 'students', student, studentGroups: enrichedGroups, allGroups: groups,
-      balance, totalPaid, totalOwed, courses, teachers
+      balance, totalPaid, totalOwed, courses, teachers, currency
     });
   } catch (err) { next(err); }
 });
@@ -235,6 +247,20 @@ router.post('/add-to-group/:id', async (req, res, next) => {
 
     if (groupId) {
       await studentsRepo.addToGroup(req.params.id, groupId, dateFrom || new Date().toISOString());
+    }
+
+    res.redirect('/students/view/' + req.params.id);
+  } catch (err) { next(err); }
+});
+
+router.post('/remove-from-group/:id', async (req, res, next) => {
+  try {
+    const { groupId } = req.body;
+    const student = await studentsRepo.findById(req.params.id);
+    if (!student) return res.redirect('/students');
+
+    if (groupId) {
+      await studentsRepo.removeFromGroup(req.params.id, groupId);
     }
 
     res.redirect('/students/view/' + req.params.id);
