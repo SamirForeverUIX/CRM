@@ -18,31 +18,37 @@
     <% } %>
 
     <form action="/students/add" method="POST" class="form-card">
-      <div class="form-group">
-        <label for="firstName">First Name</label>
-        <input type="text" id="firstName" name="firstName" required placeholder="Enter first name">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required placeholder="Enter first name">
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required placeholder="Enter last name">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" name="phone" required placeholder="Enter phone number">
+        </div>
+        <div class="form-group">
+          <label for="birthday">Birthday</label>
+          <input type="date" id="birthday" name="birthday">
+        </div>
       </div>
       <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" name="lastName" required placeholder="Enter last name">
-      </div>
-      <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <input type="text" id="phone" name="phone" required placeholder="Enter phone number">
-      </div>
-      <div class="form-group">
-        <label>Assign to Groups</label>
+        <label for="groupId">Assign to Group</label>
         <% if (groups.length === 0) { %>
           <p class="muted">No groups available. <a href="/groups/add">Create a group first.</a></p>
         <% } else { %>
-          <div class="checkbox-group">
+          <select id="groupId" name="groupIds">
+            <option value="">-- Select Group --</option>
             <% groups.forEach(g => { %>
-              <label class="checkbox-label">
-                <input type="checkbox" name="groupIds" value="<%= g.id %>">
-                <%= g.name %>
-              </label>
+              <option value="<%= g.id %>"><%= g.name %></option>
             <% }) %>
-          </div>
+          </select>
         <% } %>
       </div>
       <div class="form-actions">

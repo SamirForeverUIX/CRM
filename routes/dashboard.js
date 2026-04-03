@@ -40,12 +40,18 @@ router.get('/', async (req, res, next) => {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
+    const currentMonthKey = currentYear + '-' + String(currentMonth + 1).padStart(2, '0');
+
     students.forEach(s => {
       const payments = s.payments || [];
+      const charges = s.charges || [];
+      const totalCharges = charges.reduce((sum, c) => sum + c.amount, 0);
+      const totalPayments = payments.reduce((sum, p) =>
+        (p.status === 'paid' || p.status === 'partial') ? sum + (p.amount || 0) : sum, 0);
+      const balance = totalPayments - totalCharges;
+
       let hasPaidThisMonth = false;
-      let hasDebt = false;
       payments.forEach(p => {
-        // Check if payment is in current month
         const isThisMonth = p.date && (() => {
           const pd = new Date(p.date);
           return pd.getFullYear() === currentYear && pd.getMonth() === currentMonth;
@@ -54,11 +60,9 @@ router.get('/', async (req, res, next) => {
           totalIncome += p.amount || 0;
           hasPaidThisMonth = true;
         }
-        if (p.status === 'unpaid' || p.status === 'partial') hasDebt = true;
       });
-      if (payments.length === 0) hasDebt = true;
       if (hasPaidThisMonth) paidCount++;
-      if (hasDebt) debtorCount++;
+      if (balance < 0) debtorCount++;
     });
 
     const today = now;

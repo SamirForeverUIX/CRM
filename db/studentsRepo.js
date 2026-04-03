@@ -106,6 +106,36 @@ module.exports = {
     await db.query('DELETE FROM payments WHERE id = $1', [paymentId]);
   },
 
+  // Charges
+  async getCharges(studentId) {
+    const { rows } = await db.query(
+      'SELECT * FROM charges WHERE student_id = $1 ORDER BY month',
+      [studentId]
+    );
+    return rows.map(r => ({
+      id: r.id,
+      groupId: r.group_id,
+      month: r.month,
+      amount: parseFloat(r.amount) || 0,
+      description: r.description || ''
+    }));
+  },
+
+  async addCharge(charge) {
+    await db.query(
+      'INSERT INTO charges (id, student_id, group_id, month, amount, description) VALUES ($1, $2, $3, $4, $5, $6)',
+      [charge.id, charge.studentId, charge.groupId || null, charge.month, charge.amount, charge.description || '']
+    );
+  },
+
+  async deleteCharge(chargeId) {
+    await db.query('DELETE FROM charges WHERE id = $1', [chargeId]);
+  },
+
+  async skipMonth(studentId, month) {
+    await db.query('DELETE FROM charges WHERE student_id = $1 AND month = $2', [studentId, month]);
+  },
+
   // Get all students with their groups and payments (enriched) - batch queries
   async findAllEnriched() {
     const students = await this.findAll();
@@ -125,9 +155,16 @@ module.exports = {
       [studentIds]
     );
 
+    // Batch fetch all charges
+    const { rows: chargeRows } = await db.query(
+      'SELECT * FROM charges WHERE student_id = ANY($1) ORDER BY month',
+      [studentIds]
+    );
+
     // Index by student_id
     const groupsByStudent = {};
     const paymentsByStudent = {};
+    const chargesByStudent = {};
     for (const r of groupRows) {
       if (!groupsByStudent[r.student_id]) groupsByStudent[r.student_id] = [];
       groupsByStudent[r.student_id].push(r);
@@ -138,6 +175,12 @@ module.exports = {
         id: r.id, amount: parseFloat(r.amount) || 0, date: r.date, status: r.status
       });
     }
+    for (const r of chargeRows) {
+      if (!chargesByStudent[r.student_id]) chargesByStudent[r.student_id] = [];
+      chargesByStudent[r.student_id].push({
+        id: r.id, groupId: r.group_id, month: r.month, amount: parseFloat(r.amount) || 0, description: r.description || ''
+      });
+    }
 
     for (const s of students) {
       const sGroups = groupsByStudent[s.id] || [];
@@ -145,6 +188,7 @@ module.exports = {
       s.groupJoinDates = {};
       sGroups.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
       s.payments = paymentsByStudent[s.id] || [];
+      s.charges = chargesByStudent[s.id] || [];
     }
     return students;
   },
@@ -158,6 +202,7 @@ module.exports = {
     s.groupJoinDates = {};
     groupRows.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
     s.payments = await this.getPayments(s.id);
+    s.charges = await this.getCharges(s.id);
     return s;
   },
 
@@ -183,9 +228,14 @@ module.exports = {
       'SELECT * FROM payments WHERE student_id = ANY($1) ORDER BY date',
       [studentIds]
     );
+    const { rows: chargeRows2 } = await db.query(
+      'SELECT * FROM charges WHERE student_id = ANY($1) ORDER BY month',
+      [studentIds]
+    );
 
     const groupsByStudent = {};
     const paymentsByStudent = {};
+    const chargesByStudent2 = {};
     for (const r of groupRows) {
       if (!groupsByStudent[r.student_id]) groupsByStudent[r.student_id] = [];
       groupsByStudent[r.student_id].push(r);
@@ -196,6 +246,12 @@ module.exports = {
         id: r.id, amount: parseFloat(r.amount) || 0, date: r.date, status: r.status
       });
     }
+    for (const r of chargeRows2) {
+      if (!chargesByStudent2[r.student_id]) chargesByStudent2[r.student_id] = [];
+      chargesByStudent2[r.student_id].push({
+        id: r.id, groupId: r.group_id, month: r.month, amount: parseFloat(r.amount) || 0, description: r.description || ''
+      });
+    }
 
     for (const s of students) {
       const sGroups = groupsByStudent[s.id] || [];
@@ -203,6 +259,7 @@ module.exports = {
       s.groupJoinDates = {};
       sGroups.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
       s.payments = paymentsByStudent[s.id] || [];
+      s.charges = chargesByStudent2[s.id] || [];
     }
     return students;
   },

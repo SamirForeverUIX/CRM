@@ -55,6 +55,16 @@ async function migrate() {
       PRIMARY KEY (student_id, group_id)
     );
 
+    CREATE TABLE IF NOT EXISTS charges (
+      id TEXT PRIMARY KEY,
+      student_id TEXT REFERENCES students(id) ON DELETE CASCADE,
+      group_id TEXT REFERENCES groups(id) ON DELETE SET NULL,
+      month TEXT NOT NULL,
+      amount NUMERIC(12,2) DEFAULT 0,
+      description TEXT DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS payments (
       id TEXT PRIMARY KEY,
       student_id TEXT REFERENCES students(id) ON DELETE CASCADE,

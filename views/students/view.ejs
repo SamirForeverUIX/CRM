@@ -204,22 +204,15 @@
                 const mo = String(d.getMonth() + 1).padStart(2, '0');
                 const label = yr + ' M' + mo;
 
-                // Only charge for groups where the student had already joined by this month
+                const monthKey = yr + '-' + mo;
+
+                // Sum charges for this month
                 let monthlyOwed = 0;
-                let activeGroups = 0;
-                studentGroups.forEach(function(g) {
-                  if (g.coursePrice) {
-                    const joinDate = (student.groupJoinDates && student.groupJoinDates[g.id])
-                      ? new Date(student.groupJoinDates[g.id])
-                      : new Date(student.createdAt || now);
-                    // Only charge if student had joined by this month
-                    if (joinDate <= new Date(yr, d.getMonth() + 1, 0)) {
-                      monthlyOwed += g.coursePrice;
-                      activeGroups++;
-                    }
-                  }
+                (charges || []).forEach(function(c) {
+                  if (c.month === monthKey) monthlyOwed += c.amount;
                 });
 
+                // Sum payments for this month
                 let monthlyPaid = 0;
                 (student.payments || []).forEach(function(p) {
                   if (p.date) {
@@ -230,7 +223,8 @@
                   }
                 });
 
-                months.push({ label: label, groups: activeGroups, balance: monthlyPaid - monthlyOwed });
+                const chargesThisMonth = (charges || []).filter(function(c) { return c.month === monthKey; });
+                months.push({ label: label, groups: chargesThisMonth.length, balance: monthlyPaid - monthlyOwed });
               }
             %>
             <% months.forEach(function(m) { %>
@@ -243,12 +237,60 @@
           <button class="sv-scroll-arrow sv-scroll-right" onclick="scrollMonthly(1)">&rsaquo;</button>
         </div>
 
+        <!-- Charges Section -->
+        <div class="sv-section-header">
+          <h2>Charges</h2>
+        </div>
+        <div class="sv-payment-form-wrap">
+          <form action="/students/charge/<%= student.id %>" method="POST" class="sv-payment-form sv-charge-form">
+            <input type="month" name="month" value="<%= new Date().toISOString().slice(0, 7) %>">
+            <select name="groupId">
+              <option value="">Select group</option>
+              <% studentGroups.forEach(function(g) { %>
+                <option value="<%= g.id %>"><%= g.name %></option>
+              <% }) %>
+            </select>
+            <input type="number" name="amount" step="0.01" min="0" placeholder="Amount" required>
+            <button type="submit" class="sv-btn-outline sv-btn-teal">Add Charge</button>
+          </form>
+        </div>
+
+        <% if (charges.length > 0) { %>
+          <div class="sv-payments-table-wrap">
+            <table class="sv-payments-table">
+              <thead>
+                <tr><th>Month</th><th>Group</th><th>Amount</th><th></th></tr>
+              </thead>
+              <tbody>
+                <% charges.slice().reverse().forEach(function(c) { %>
+                  <tr>
+                    <td><%= c.month %></td>
+                    <td><% const cg = studentGroups.find(function(g) { return g.id === c.groupId; }); %><%= cg ? cg.name : '--' %></td>
+                    <td class="sv-pay-amount" style="color:var(--danger);">&minus;<%= c.amount.toLocaleString() %> <%= currency %></td>
+                    <td class="sv-pay-actions">
+                      <form action="/students/charge/<%= student.id %>/delete/<%= c.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, 'this charge')">
+                        <button type="submit" class="sv-dropdown-item sv-dropdown-danger" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:12px;">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+
+        <!-- Skip Month -->
+        <div class="sv-payment-form-wrap" style="margin-top:8px;">
+          <form action="/students/skip-month/<%= student.id %>" method="POST" class="sv-payment-form" style="justify-content:flex-start;gap:8px;">
+            <input type="month" name="month" value="<%= new Date().toISOString().slice(0, 7) %>">
+            <button type="submit" class="sv-btn-outline" style="border-color:var(--warning);color:var(--warning);">Skip Month</button>
+          </form>
+        </div>
+
         <!-- Payments Section -->
         <div class="sv-section-header" id="payment-section">
           <h2>Payments</h2>
         </div>
-
-        <!-- Payment Form -->
         <div class="sv-payment-form-wrap">
           <form action="/students/payment/<%= student.id %>" method="POST" class="sv-payment-form">
             <input type="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>">
