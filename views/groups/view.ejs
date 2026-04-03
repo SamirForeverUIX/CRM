@@ -218,7 +218,8 @@
                   <% students.forEach(function(s, si) { %>
                     <%
                       // Determine student's join date for this group
-                      var studentJoinDate = s.joinedAt ? new Date(s.joinedAt.split('T')[0] + 'T00:00:00') : null;
+                      var joinRaw = s.joinedAt ? (typeof s.joinedAt === 'string' ? s.joinedAt : new Date(s.joinedAt).toISOString()) : null;
+                      var studentJoinDate = joinRaw ? new Date(joinRaw.split('T')[0] + 'T00:00:00') : null;
                     %>
                     <tr data-student-id="<%= s.id %>">
                       <td class="gv-att-name-cell">

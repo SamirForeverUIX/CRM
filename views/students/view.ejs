@@ -524,5 +524,31 @@
     var container = document.querySelector('.sv-monthly-cards');
     container.scrollBy({ left: dir * 200, behavior: 'smooth' });
   }
+
+  // AJAX payment form
+  document.addEventListener('DOMContentLoaded', function() {
+    var payForm = document.querySelector('.sv-payment-form');
+    if (payForm) {
+      payForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              showToast('Payment added', 'success');
+              setTimeout(function() { window.location.reload(); }, 500);
+            } else {
+              showToast('Failed to add payment', 'error');
+            }
+          }
+        };
+        xhr.send(new URLSearchParams(new FormData(form)).toString());
+      });
+    }
+  });
 </script>
 <%- include('../partials/footer') %>

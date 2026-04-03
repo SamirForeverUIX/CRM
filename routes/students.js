@@ -257,12 +257,16 @@ router.post('/remove-from-group/:id', async (req, res, next) => {
   try {
     const { groupId } = req.body;
     const student = await studentsRepo.findById(req.params.id);
-    if (!student) return res.redirect('/students');
+    if (!student) {
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(404).json({ error: 'Student not found' });
+      return res.redirect('/students');
+    }
 
     if (groupId) {
       await studentsRepo.removeFromGroup(req.params.id, groupId);
     }
 
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
     res.redirect('/students/view/' + req.params.id);
   } catch (err) { next(err); }
 });
@@ -271,7 +275,10 @@ router.post('/payment/:id', async (req, res, next) => {
   try {
     const { amount, date, status } = req.body;
     const student = await studentsRepo.findById(req.params.id);
-    if (!student) return res.redirect('/students');
+    if (!student) {
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(404).json({ error: 'Student not found' });
+      return res.redirect('/students');
+    }
 
     await studentsRepo.addPayment({
       id: uuidv4(),
@@ -281,6 +288,7 @@ router.post('/payment/:id', async (req, res, next) => {
       status: status || 'paid'
     });
 
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
     res.redirect('/students/view/' + req.params.id);
   } catch (err) { next(err); }
 });
@@ -288,6 +296,7 @@ router.post('/payment/:id', async (req, res, next) => {
 router.post('/payment/:studentId/delete/:paymentId', async (req, res, next) => {
   try {
     await studentsRepo.deletePayment(req.params.paymentId);
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
     res.redirect('/students/view/' + req.params.studentId);
   } catch (err) { next(err); }
 });
@@ -295,6 +304,7 @@ router.post('/payment/:studentId/delete/:paymentId', async (req, res, next) => {
 router.post('/delete/:id', async (req, res, next) => {
   try {
     await studentsRepo.delete(req.params.id);
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true, redirect: '/students' });
     res.redirect('/students');
   } catch (err) { next(err); }
 });
