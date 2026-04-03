@@ -202,23 +202,23 @@
       </div>
       <form action="/students/add" method="POST" class="gv-modal-form">
         <div class="gv-form-group">
-          <label>First Name</label>
-          <input type="text" name="firstName" class="gv-input" required placeholder="Enter first name">
+          <label for="addSFirstName">First Name</label>
+          <input type="text" id="addSFirstName" name="firstName" class="gv-input" required placeholder="Enter first name">
         </div>
         <div class="gv-form-group">
-          <label>Last Name</label>
-          <input type="text" name="lastName" class="gv-input" required placeholder="Enter last name">
+          <label for="addSLastName">Last Name</label>
+          <input type="text" id="addSLastName" name="lastName" class="gv-input" required placeholder="Enter last name">
         </div>
         <div class="gv-form-group">
-          <label>Phone Number</label>
-          <input type="text" name="phone" class="gv-input" required placeholder="Enter phone number">
+          <label for="addSPhone">Phone Number</label>
+          <input type="tel" id="addSPhone" name="phone" class="gv-input" required placeholder="Enter phone number">
         </div>
         <div class="gv-form-group">
-          <label>Assign to Group</label>
+          <label for="addSGroup">Assign to Group</label>
           <% if (groups.length === 0) { %>
             <p style="font-size:13px; color:var(--text-muted);">No groups available.</p>
           <% } else { %>
-            <select name="groupIds" class="gv-select">
+            <select id="addSGroup" name="groupIds" class="gv-select">
               <option value="">-- Select Group --</option>
               <% groups.forEach(g => { %>
                 <option value="<%= g.id %>"><%= g.name %></option>

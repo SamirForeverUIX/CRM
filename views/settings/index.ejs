@@ -3,11 +3,16 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1 style="display:flex;align-items:center;gap:12px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </h1>
+
+    <!-- Page Header -->
+    <div class="st-header">
+      <h1 class="st-title">Settings</h1>
+    </div>
+
+    <!-- Sub-navigation Tabs -->
+    <div class="st-tabs">
+      <button class="st-tab active" data-tab="general">General</button>
+      <button class="st-tab" data-tab="rooms">Rooms</button>
     </div>
 
     <% if (error) { %>
@@ -17,66 +22,186 @@
       <div class="alert alert-success"><%= success %></div>
     <% } %>
 
-    <form action="/settings" method="POST" class="form-card">
-      <div class="form-group">
-        <label for="centreName">Centre Name</label>
-        <input type="text" id="centreName" name="centreName" required value="<%= settings.centreName %>">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input type="text" id="phone" name="phone" value="<%= settings.phone %>" placeholder="Centre phone number">
+    <!-- ============ GENERAL TAB ============ -->
+    <div class="st-tab-content active" id="tab-general">
+      <form action="/settings" method="POST" class="st-form-card">
+        <div class="st-form-group">
+          <label for="centreName">Centre Name</label>
+          <input type="text" id="centreName" name="centreName" class="gv-input" required value="<%= settings.centreName %>">
         </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" value="<%= settings.email %>" placeholder="Centre email address">
+        <div class="st-form-row">
+          <div class="st-form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" class="gv-input" value="<%= settings.phone %>" placeholder="Centre phone number">
+          </div>
+          <div class="st-form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="gv-input" value="<%= settings.email %>" placeholder="Centre email address">
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="address">Address</label>
-        <textarea id="address" name="address" rows="2" placeholder="Centre address"><%= settings.address %></textarea>
-      </div>
-      <div class="form-group">
-        <label for="currency">Currency</label>
-        <select id="currency" name="currency">
-          <option value="USD" <%= settings.currency === 'USD' ? 'selected' : '' %>>USD ($)</option>
-          <option value="EUR" <%= settings.currency === 'EUR' ? 'selected' : '' %>>EUR</option>
-          <option value="GBP" <%= settings.currency === 'GBP' ? 'selected' : '' %>>GBP</option>
-          <option value="UZS" <%= settings.currency === 'UZS' ? 'selected' : '' %>>UZS</option>
-          <option value="RUB" <%= settings.currency === 'RUB' ? 'selected' : '' %>>RUB</option>
-        </select>
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save Settings</button>
-      </div>
-    </form>
-
-    <!-- Rooms Section -->
-    <div class="rooms-section">
-      <h2>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Rooms
-      </h2>
-      <form action="/settings/rooms/add" method="POST" class="room-add-form">
-        <input type="text" name="roomName" placeholder="Enter room name (e.g. Room 101, Lab A)" required>
-        <button type="submit" class="btn btn-primary btn-small">Add Room</button>
+        <div class="st-form-group">
+          <label for="address">Address</label>
+          <textarea id="address" name="address" class="gv-input" rows="2" style="resize:vertical;" placeholder="Centre address"><%= settings.address %></textarea>
+        </div>
+        <div class="st-form-group">
+          <label for="currency">Currency</label>
+          <select id="currency" name="currency" class="gv-select">
+            <option value="USD" <%= settings.currency === 'USD' ? 'selected' : '' %>>USD ($)</option>
+            <option value="EUR" <%= settings.currency === 'EUR' ? 'selected' : '' %>>EUR (€)</option>
+            <option value="GBP" <%= settings.currency === 'GBP' ? 'selected' : '' %>>GBP (£)</option>
+            <option value="UZS" <%= settings.currency === 'UZS' ? 'selected' : '' %>>UZS</option>
+            <option value="RUB" <%= settings.currency === 'RUB' ? 'selected' : '' %>>RUB (₽)</option>
+          </select>
+        </div>
+        <div class="st-form-actions">
+          <button type="submit" class="gv-submit-btn">Save Settings</button>
+        </div>
       </form>
-      <% if (settings.rooms && settings.rooms.length > 0) { %>
-        <div class="room-list">
-          <% settings.rooms.forEach((room, i) => { %>
-            <div class="room-chip">
-              <span><%= room %></span>
-              <form action="/settings/rooms/delete" method="POST" style="display:inline;">
-                <input type="hidden" name="roomIndex" value="<%= i %>">
-                <button type="submit" title="Remove room">&times;</button>
-              </form>
-            </div>
-          <% }) %>
+    </div>
+
+    <!-- ============ ROOMS TAB ============ -->
+    <div class="st-tab-content" id="tab-rooms">
+      <div class="st-rooms-header">
+        <span class="st-rooms-count">Total: <strong><%= rooms.length %></strong></span>
+        <button onclick="openAddRoomPanel()" class="sl-add-btn">ADD NEW</button>
+      </div>
+
+      <% if (rooms.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <p>No rooms added yet.</p>
+          <button onclick="openAddRoomPanel()" class="btn btn-primary">Add your first room</button>
         </div>
       <% } else { %>
-        <p class="muted" style="font-size:14px;">No rooms added yet. Add rooms here to use them when creating groups.</p>
+        <div class="st-rooms-table-wrap">
+          <table class="st-rooms-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Room capacity</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% rooms.forEach(function(room, i) { %>
+                <tr>
+                  <td class="st-room-num"><%= i + 1 %></td>
+                  <td class="st-room-name"><%= room.name %></td>
+                  <td class="st-room-capacity"><%= room.capacity || '—' %></td>
+                  <td class="st-room-actions">
+                    <button class="st-action-icon" title="Edit" onclick="openEditRoomPanel('<%= room.id %>', '<%= room.name.replace(/'/g, "\\'") %>', <%= room.capacity || 0 %>)">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                    </button>
+                    <form action="/settings/rooms/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete this room?')">
+                      <input type="hidden" name="roomId" value="<%= room.id %>">
+                      <button type="submit" class="st-action-icon st-action-danger" title="Delete">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
+
   </div>
+
+  <!-- ============ ADD ROOM SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="addRoomPanel" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Add New Room</h2>
+        <button class="gv-modal-close" onclick="closeAddRoomPanel()">&times;</button>
+      </div>
+      <form action="/settings/rooms/add" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label>Room Name</label>
+          <input type="text" name="name" class="gv-input" required placeholder="e.g. Room 101, Lab A">
+        </div>
+        <div class="gv-form-group">
+          <label>Capacity</label>
+          <input type="number" name="capacity" class="gv-input" min="0" placeholder="Max number of students">
+        </div>
+        <button type="submit" class="gv-submit-btn">Add Room</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ EDIT ROOM SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="editRoomPanel" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Edit Room</h2>
+        <button class="gv-modal-close" onclick="closeEditRoomPanel()">&times;</button>
+      </div>
+      <form id="editRoomForm" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label>Room Name</label>
+          <input type="text" name="name" id="editRoomName" class="gv-input" required>
+        </div>
+        <div class="gv-form-group">
+          <label>Capacity</label>
+          <input type="number" name="capacity" id="editRoomCapacity" class="gv-input" min="0">
+        </div>
+        <button type="submit" class="gv-submit-btn">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+
+<script>
+// Tab switching
+document.querySelectorAll('.st-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.st-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.st-tab-content').forEach(function(c) { c.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.getAttribute('data-tab')).classList.add('active');
+  });
+});
+
+// Check URL hash for tab
+if (window.location.hash === '#rooms') {
+  document.querySelector('.st-tab[data-tab="rooms"]').click();
+}
+
+// Add Room panel
+function openAddRoomPanel() {
+  document.getElementById('addRoomPanel').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAddRoomPanel() {
+  document.getElementById('addRoomPanel').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Edit Room panel
+function openEditRoomPanel(id, name, capacity) {
+  document.getElementById('editRoomForm').action = '/settings/rooms/edit/' + id;
+  document.getElementById('editRoomName').value = name;
+  document.getElementById('editRoomCapacity').value = capacity;
+  document.getElementById('editRoomPanel').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeEditRoomPanel() {
+  document.getElementById('editRoomPanel').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Overlay click & Escape
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'addRoomPanel') closeAddRoomPanel();
+  if (e.target.id === 'editRoomPanel') closeEditRoomPanel();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeAddRoomPanel(); closeEditRoomPanel(); }
+});
+</script>
 <%- include('../partials/footer') %>

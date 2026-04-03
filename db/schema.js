@@ -97,6 +97,13 @@ async function migrate() {
       rooms TEXT[] DEFAULT '{}'
     );
 
+    CREATE TABLE IF NOT EXISTS rooms (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      capacity INT DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
     ALTER TABLE groups ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
     ALTER TABLE students ADD COLUMN IF NOT EXISTS group_id TEXT REFERENCES groups(id) ON DELETE SET NULL;
     ALTER TABLE students ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
@@ -122,6 +129,22 @@ async function migrate() {
         ADD CONSTRAINT students_status_check CHECK (status IN ('active', 'inactive', 'archived'));
       END IF;
     END $$;
+
+    -- Performance indexes
+    CREATE INDEX IF NOT EXISTS idx_groups_course_id ON groups(course_id);
+    CREATE INDEX IF NOT EXISTS idx_groups_teacher_id ON groups(teacher_id);
+    CREATE INDEX IF NOT EXISTS idx_groups_status ON groups(status);
+    CREATE INDEX IF NOT EXISTS idx_students_status ON students(status);
+    CREATE INDEX IF NOT EXISTS idx_students_group_id ON students(group_id);
+    CREATE INDEX IF NOT EXISTS idx_student_groups_group_id ON student_groups(group_id);
+    CREATE INDEX IF NOT EXISTS idx_student_groups_student_id ON student_groups(student_id);
+    CREATE INDEX IF NOT EXISTS idx_charges_student_id ON charges(student_id);
+    CREATE INDEX IF NOT EXISTS idx_charges_group_id ON charges(group_id);
+    CREATE INDEX IF NOT EXISTS idx_payments_student_id ON payments(student_id);
+    CREATE INDEX IF NOT EXISTS idx_attendance_group_id ON attendance(group_id);
+    CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date);
+    CREATE INDEX IF NOT EXISTS idx_students_name ON students(first_name, last_name);
+    CREATE INDEX IF NOT EXISTS idx_teachers_name ON teachers(first_name, last_name);
   `);
 
   console.log('Migration complete.');

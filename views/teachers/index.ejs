@@ -8,7 +8,7 @@
         <h1 class="sl-title">Teachers</h1>
         <span class="sl-quantity">Quantity &mdash; <strong><%= teachers.length %></strong></span>
       </div>
-      <button onclick="window.location='/teachers/add'" class="sl-add-btn">ADD NEW</button>
+      <button onclick="openAddTeacherPanel()" class="sl-add-btn">ADD NEW</button>
     </div>
 
     <% if (search) { %>
@@ -21,7 +21,7 @@
           <i data-lucide="graduation-cap" width="32" height="32"></i>
         </div>
         <p>No teachers found.</p>
-        <button onclick="window.location='/teachers/add'" class="btn btn-primary">Add your first teacher</button>
+        <button onclick="openAddTeacherPanel()" class="btn btn-primary">Add your first teacher</button>
       </div>
     <% } else { %>
       <div class="teachers-grid">
@@ -47,12 +47,50 @@
       </div>
     <% } %>
   </div>
+
+  <!-- ============ ADD NEW TEACHER SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="addTeacherPanel" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Add New Teacher</h2>
+        <button class="gv-modal-close" onclick="closeAddTeacherPanel()">&times;</button>
+      </div>
+      <form action="/teachers/add" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label for="addTFirstName">First Name</label>
+          <input type="text" id="addTFirstName" name="firstName" class="gv-input" required placeholder="Enter first name">
+        </div>
+        <div class="gv-form-group">
+          <label for="addTLastName">Last Name</label>
+          <input type="text" id="addTLastName" name="lastName" class="gv-input" required placeholder="Enter last name">
+        </div>
+        <div class="gv-form-group">
+          <label for="addTPhone">Phone Number</label>
+          <input type="tel" id="addTPhone" name="phone" class="gv-input" required placeholder="Enter phone number">
+        </div>
+        <button type="submit" class="gv-submit-btn">Add Teacher</button>
+      </form>
+    </div>
+  </div>
+
 </main>
 <script>
+function openAddTeacherPanel() {
+  document.getElementById('addTeacherPanel').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAddTeacherPanel() {
+  document.getElementById('addTeacherPanel').style.display = 'none';
+  document.body.style.overflow = '';
+}
 document.addEventListener('click', function(e) {
+  if (e.target.id === 'addTeacherPanel') closeAddTeacherPanel();
   if (!e.target.closest('.teacher-card-menu-wrap')) {
     document.querySelectorAll('.teacher-card-menu-wrap.open').forEach(function(m) { m.classList.remove('open'); });
   }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAddTeacherPanel();
 });
 </script>
 <%- include('../partials/footer') %>

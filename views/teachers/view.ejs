@@ -157,16 +157,16 @@
       </div>
       <form action="/teachers/edit/<%= teacher.id %>" method="POST" class="tv-modal-form">
         <div class="tv-form-group">
-          <label>First Name</label>
-          <input type="text" name="firstName" value="<%= teacher.firstName %>" class="tv-input" required>
+          <label for="tvFirstName">First Name</label>
+          <input type="text" id="tvFirstName" name="firstName" value="<%= teacher.firstName %>" class="tv-input" required>
         </div>
         <div class="tv-form-group">
-          <label>Last Name</label>
-          <input type="text" name="lastName" value="<%= teacher.lastName %>" class="tv-input" required>
+          <label for="tvLastName">Last Name</label>
+          <input type="text" id="tvLastName" name="lastName" value="<%= teacher.lastName %>" class="tv-input" required>
         </div>
         <div class="tv-form-group">
-          <label>Phone</label>
-          <input type="text" name="phone" value="<%= teacher.phone %>" class="tv-input" required>
+          <label for="tvPhone">Phone</label>
+          <input type="tel" id="tvPhone" name="phone" value="<%= teacher.phone %>" class="tv-input" required>
         </div>
         <button type="submit" class="tv-submit-btn">Save Changes</button>
       </form>

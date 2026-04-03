@@ -12,9 +12,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Compute sidebar badge data — skip for static assets
+// Compute sidebar badge data — skip for static assets, cache for 30s
 const studentsRepo = require('./db/studentsRepo');
 const settingsRepo = require('./db/settingsRepo');
+let _cachedSidebarData = null;
+let _cacheExpiry = 0;
+async function getSidebarData() {
+  const now = Date.now();
+  if (_cachedSidebarData && now < _cacheExpiry) return _cachedSidebarData;
+  const [debtorCount, settings] = await Promise.all([
+    studentsRepo.getDebtorCount(),
+    settingsRepo.get()
+  ]);
+  _cachedSidebarData = { debtorCount, settings };
+  _cacheExpiry = now + 30000;
+  return _cachedSidebarData;
+}
 app.use(async (req, res, next) => {
   // Skip DB calls for static asset requests
   if (req.path.startsWith('/css/') || req.path.startsWith('/js/') || req.path.startsWith('/images/') || req.path.startsWith('/fonts/')) {
@@ -23,12 +36,9 @@ app.use(async (req, res, next) => {
     return next();
   }
   try {
-    const [debtorCount, settings] = await Promise.all([
-      studentsRepo.getDebtorCount(),
-      settingsRepo.get()
-    ]);
-    res.locals.debtorCount = debtorCount;
-    res.locals.settings = settings;
+    const data = await getSidebarData();
+    res.locals.debtorCount = data.debtorCount;
+    res.locals.settings = data.settings;
   } catch (e) {
     res.locals.debtorCount = 0;
     res.locals.settings = { centreName: '', currency: 'USD' };
@@ -50,6 +60,11 @@ app.use('/reminders', require('./routes/reminders'));
 app.use('/rating', require('./routes/rating'));
 app.use('/api', require('./routes/api.groups'));
 app.use('/api/students', require('./routes/api.students'));
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).send('<h1>404 — Page Not Found</h1><p><a href="/">Go to Dashboard</a></p>');
+});
 
 // Global error handler
 app.use((err, req, res, next) => {

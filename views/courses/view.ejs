@@ -9,8 +9,8 @@
       <span class="breadcrumb-item active"><%= course.name %></span>
     </nav>
     <%
-      var courseColors = ['#f97316', '#ec4899', '#14b8a6', '#eab308', '#8b5cf6', '#06b6d4', '#16a34a', '#2563eb'];
-      var courseBgs = ['#fff7ed', '#fdf2f8', '#f0fdfa', '#fefce8', '#f5f3ff', '#ecfeff', '#f0fdf4', '#eff6ff'];
+      var courseColors = ['#4caf50', '#e91e8b', '#26a69a', '#f9a825', '#7c4dff', '#00bcd4', '#43a047', '#1e88e5'];
+      var courseBgs = ['#b8e6c8', '#f9a8c9', '#b2dfdb', '#c5b3e6', '#f9a8c9', '#80deea', '#b8e6c8', '#90caf9'];
       var ci = typeof colorIndex !== 'undefined' ? colorIndex : 0;
       var color = courseColors[ci % courseColors.length];
       var bg = courseBgs[ci % courseBgs.length];
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div>
-        <a href="/courses/edit/<%= course.id %>" class="btn btn-primary">Edit</a>
+        <button onclick="openEditCourseModal()" class="btn btn-primary">Edit</button>
         <a href="/courses" class="btn btn-secondary">Back</a>
       </div>
     </div>
@@ -87,5 +87,74 @@
       </div>
     </div>
   </div>
+
+  <!-- ============ EDIT COURSE SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="editCourseModal" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Edit Course</h2>
+        <button class="gv-modal-close" onclick="closeEditCourseModal()">&times;</button>
+      </div>
+      <form action="/courses/edit/<%= course.id %>" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label>Course Name</label>
+          <input type="text" name="name" class="gv-input" required value="<%= course.name %>">
+        </div>
+        <div class="gv-form-group">
+          <label>Course Code</label>
+          <input type="text" name="code" class="gv-input" value="<%= course.code || '' %>">
+        </div>
+        <div class="gv-form-group">
+          <label>Lessons per Month</label>
+          <select name="lessonsPerMonth" class="gv-select">
+            <option value="">Select</option>
+            <% for (var lpm = 1; lpm <= 28; lpm++) { %>
+              <option value="<%= lpm %>" <%= course.lessonsPerMonth === lpm ? 'selected' : '' %>><%= lpm %></option>
+            <% } %>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Lesson Duration (minutes)</label>
+          <select name="durationMinutes" class="gv-select">
+            <option value="">Select</option>
+            <% [30,40,45,50,60,80,90,120].forEach(function(dm) { %>
+              <option value="<%= dm %>" <%= course.durationMinutes === dm ? 'selected' : '' %>><%= dm %> min</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Course Duration (months)</label>
+          <input type="number" name="durationMonths" class="gv-input" min="1" value="<%= course.durationMonths || '' %>">
+        </div>
+        <div class="gv-form-group">
+          <label>Price</label>
+          <input type="number" name="price" class="gv-input" min="0" value="<%= course.price || '' %>">
+        </div>
+        <div class="gv-form-group">
+          <label>Description</label>
+          <textarea name="description" class="gv-input" rows="3" style="resize:vertical;"><%= course.description || '' %></textarea>
+        </div>
+        <button type="submit" class="gv-submit-btn">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+
+<script>
+function openEditCourseModal() {
+  document.getElementById('editCourseModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeEditCourseModal() {
+  document.getElementById('editCourseModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'editCourseModal') closeEditCourseModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeEditCourseModal();
+});
+</script>
 <%- include('../partials/footer') %>

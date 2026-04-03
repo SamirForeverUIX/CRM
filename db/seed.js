@@ -112,6 +112,17 @@ async function seed() {
   );
   console.log('  Seeded settings');
 
+  // Rooms (from settings.rooms array)
+  const { v4: uuidv4 } = require('uuid');
+  const roomNames = settings.rooms || [];
+  for (const roomName of roomNames) {
+    await db.query(
+      `INSERT INTO rooms (id, name, capacity) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING`,
+      [uuidv4(), roomName, 0]
+    );
+  }
+  console.log(`  Seeded ${roomNames.length} rooms`);
+
   console.log('Seed complete.');
   await db.pool.end();
 }

@@ -6,7 +6,7 @@ const teachersRepo = require('../db/teachersRepo');
 const coursesRepo = require('../db/coursesRepo');
 const studentsRepo = require('../db/studentsRepo');
 const settingsRepo = require('../db/settingsRepo');
-const { hasMinLength, ensureEnum, isIsoDate } = require('../utils/validation');
+const { hasMinLength, ensureEnum, isIsoDate, isValidDayOfWeek, isValidTimeSlot, safeJsonParse } = require('../utils/validation');
 const { GROUP_STATUS_VALUES, GROUP_STATUS } = require('../utils/domainConstants');
 const { createStudentLifecycleService } = require('../services/studentLifecycleService');
 const { buildModuleAttendanceView } = require('../utils/attendanceModules');
@@ -123,6 +123,12 @@ router.post('/add', async (req, res, next) => {
 
     if (!days) days = [];
     else if (!Array.isArray(days)) days = [days];
+    if (days.length && !days.every(isValidDayOfWeek)) {
+      return res.status(400).send('Invalid day of week selected.');
+    }
+    if (startTime && !isValidTimeSlot(startTime)) {
+      return res.status(400).send('Invalid time format.');
+    }
 
     await groupsRepo.create({
       id: uuidv4(), name: name.trim(), courseId: courseId || null,
@@ -247,6 +253,12 @@ router.post('/edit/:id', async (req, res, next) => {
 
     if (!days) days = [];
     else if (!Array.isArray(days)) days = [days];
+    if (days.length && !days.every(isValidDayOfWeek)) {
+      return res.status(400).send('Invalid day of week selected.');
+    }
+    if (startTime && !isValidTimeSlot(startTime)) {
+      return res.status(400).send('Invalid time format.');
+    }
 
     await groupsRepo.update(req.params.id, {
       name: name.trim(), courseId: courseId || null, teacherId: teacherId || null,
@@ -301,14 +313,18 @@ router.post('/:id/attendance/bulk', async (req, res, next) => {
     if (!group) return res.json({ success: false, error: 'Group not found' });
 
     if (date && studentIds) {
-      const ids = Array.isArray(studentIds) ? studentIds : JSON.parse(studentIds);
+      let ids;
+      if (Array.isArray(studentIds)) { ids = studentIds; }
+      else { const parsed = safeJsonParse(studentIds); if (parsed.error) return res.status(400).json({ success: false, error: 'Invalid studentIds format' }); ids = parsed.data; }
       const statuses = await groupsRepo.getAttendanceForDate(groupId, date);
       ids.forEach(sid => { statuses[sid] = status || 'was'; });
       await groupsRepo.saveAttendance(groupId, date, statuses);
     }
 
     if (studentId && dates) {
-      const dateList = Array.isArray(dates) ? dates : JSON.parse(dates);
+      let dateList;
+      if (Array.isArray(dates)) { dateList = dates; }
+      else { const parsed = safeJsonParse(dates); if (parsed.error) return res.status(400).json({ success: false, error: 'Invalid dates format' }); dateList = parsed.data; }
       for (const d of dateList) {
         const statuses = await groupsRepo.getAttendanceForDate(groupId, d);
         statuses[studentId] = status || 'was';
@@ -322,6 +338,10 @@ router.post('/:id/attendance/bulk', async (req, res, next) => {
 
 router.post('/delete/:id', async (req, res, next) => {
   try {
+    const students = await studentsRepo.findByGroupId(req.params.id);
+    if (students.length > 0) {
+      return res.status(400).send('Cannot delete group: has ' + students.length + ' student(s) enrolled. Remove them first.');
+    }
     await groupsRepo.delete(req.params.id);
     res.redirect('/groups');
   } catch (err) { next(err); }

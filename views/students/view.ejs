@@ -24,7 +24,7 @@
               <button type="button" class="sv-action-icon sv-icon-edit" title="Edit" onclick="openEditModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
               </button>
-              <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, '<%= student.firstName %> <%= student.lastName %>')">
+              <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, '<%= (student.firstName + ' ' + student.lastName).replace(/'/g, "\\'") %>')">
                 <button type="submit" class="sv-action-icon sv-icon-delete" title="Delete">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
@@ -503,18 +503,18 @@
       </div>
       <form id="editStudentForm" action="/students/edit/<%= student.id %>" method="POST" class="sv-modal-form">
         <div class="sv-form-group">
-          <label>Phone</label>
+          <label for="editPhone">Phone</label>
           <div class="sv-phone-input-wrap">
             <span class="sv-phone-prefix">+998</span>
-            <input type="text" name="phone" id="editPhone" value="<%= (student.phone || '').replace('+998', '').replace(/^\s+/, '') %>" placeholder="XX XXX XX XX">
+            <input type="tel" name="phone" id="editPhone" value="<%= (student.phone || '').replace('+998', '').replace(/^\s+/, '') %>" placeholder="XX XXX XX XX">
           </div>
         </div>
         <div class="sv-form-group">
-          <label>Name</label>
+          <label for="editName">Name</label>
           <input type="text" name="name" id="editName" value="<%= student.firstName %> <%= student.lastName %>">
         </div>
         <div class="sv-form-group">
-          <label>Date of birth</label>
+          <label for="editBirthday">Date of birth</label>
           <div class="sv-date-input-wrap">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <input type="date" name="birthday" id="editBirthday" value="<%= student.birthday || '' %>">

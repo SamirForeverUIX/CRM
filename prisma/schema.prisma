@@ -142,3 +142,12 @@ model Setting {
 
   @@map("settings")
 }
+
+model Room {
+  id        String   @id @db.Text
+  name      String   @db.Text
+  capacity  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("rooms")
+}

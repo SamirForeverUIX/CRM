@@ -6,7 +6,7 @@ const groupsRepo = require('../db/groupsRepo');
 const teachersRepo = require('../db/teachersRepo');
 const coursesRepo = require('../db/coursesRepo');
 const settingsRepo = require('../db/settingsRepo');
-const { hasMinLength, parsePositiveNumber, ensureEnum, isIsoMonth, isIsoDate } = require('../utils/validation');
+const { hasMinLength, parsePositiveNumber, ensureEnum, isIsoMonth, isIsoDate, isValidPhone } = require('../utils/validation');
 const { STUDENT_STATUS_VALUES, STUDENT_STATUS } = require('../utils/domainConstants');
 const { createStudentLifecycleService } = require('../services/studentLifecycleService');
 
@@ -93,9 +93,17 @@ router.post('/add', async (req, res, next) => {
     const { firstName, lastName, phone, birthday, notes, status } = req.body;
     const groupId = req.body.groupId || req.body.groupIds || '';
 
-    if (!hasMinLength(firstName, 2) || !hasMinLength(lastName, 2) || !hasMinLength(phone, 5)) {
+    if (!hasMinLength(firstName, 2) || !hasMinLength(lastName, 2)) {
       const groups = await groupsRepo.findAll();
-      return res.render('students/add', { page: 'students', groups, error: 'First name, last name, and phone are required (min length validation).' });
+      return res.render('students/add', { page: 'students', groups, error: 'First name and last name are required (min 2 characters).' });
+    }
+    if (phone && !isValidPhone(phone)) {
+      const groups = await groupsRepo.findAll();
+      return res.render('students/add', { page: 'students', groups, error: 'Invalid phone number format.' });
+    }
+    if (birthday && !isIsoDate(birthday)) {
+      const groups = await groupsRepo.findAll();
+      return res.render('students/add', { page: 'students', groups, error: 'Invalid birthday format (YYYY-MM-DD).' });
     }
 
     const now = new Date().toISOString();
@@ -206,8 +214,11 @@ router.post('/edit/:id', async (req, res, next) => {
     if (notes !== undefined) updateData.notes = String(notes).trim();
     if (status !== undefined) updateData.status = ensureEnum(status, STUDENT_STATUS_VALUES, STUDENT_STATUS.ACTIVE);
 
-    if (phone !== undefined && !hasMinLength(phone, 5)) {
-      return res.status(400).json({ error: 'Invalid phone number' });
+    if (phone !== undefined && phone !== '' && !isValidPhone(phone)) {
+      return res.status(400).json({ error: 'Invalid phone number format' });
+    }
+    if (birthday !== undefined && birthday !== '' && !isIsoDate(birthday)) {
+      return res.status(400).json({ error: 'Invalid birthday format (YYYY-MM-DD)' });
     }
 
     await studentsRepo.update(req.params.id, updateData);
@@ -308,6 +319,10 @@ router.post('/charge/:id', async (req, res, next) => {
 
 router.post('/charge/:studentId/delete/:chargeId', async (req, res, next) => {
   try {
+    const charges = await studentsRepo.getCharges(req.params.studentId);
+    if (!charges.find(c => c.id === req.params.chargeId)) {
+      return res.status(404).json({ error: 'Charge not found for this student' });
+    }
     await studentsRepo.deleteCharge(req.params.chargeId);
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
     res.redirect('/students/view/' + req.params.studentId);
@@ -380,6 +395,10 @@ router.post('/payment/:id', async (req, res, next) => {
 
 router.post('/payment/:studentId/delete/:paymentId', async (req, res, next) => {
   try {
+    const payments = await studentsRepo.getPayments(req.params.studentId);
+    if (!payments.find(p => p.id === req.params.paymentId)) {
+      return res.status(404).json({ error: 'Payment not found for this student' });
+    }
     await studentsRepo.deletePayment(req.params.paymentId);
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
     res.redirect('/students/view/' + req.params.studentId);

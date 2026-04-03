@@ -47,6 +47,15 @@ module.exports = {
     await db.query('DELETE FROM groups WHERE id = $1', [id]);
   },
 
+  async search(q) {
+    const pattern = '%' + q + '%';
+    const { rows } = await db.query(
+      `SELECT * FROM groups WHERE name ILIKE $1 ORDER BY created_at`,
+      [pattern]
+    );
+    return rows.map(toObj);
+  },
+
   // Attendance
   async getAttendance(groupId) {
     const { rows } = await db.query(

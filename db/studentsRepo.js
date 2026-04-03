@@ -111,27 +111,31 @@ module.exports = {
   },
 
   async setGroups(studentId, groupIds) {
-    await db.query('DELETE FROM student_groups WHERE student_id = $1', [studentId]);
-    for (const gid of groupIds) {
-      await db.query(
-        'INSERT INTO student_groups (student_id, group_id) VALUES ($1, $2) ON CONFLICT (student_id, group_id) DO NOTHING',
-        [studentId, gid]
-      );
-    }
-    await this.setPrimaryGroup(studentId, groupIds[0] || null);
+    await db.transaction(async (client) => {
+      await client.query('DELETE FROM student_groups WHERE student_id = $1', [studentId]);
+      for (const gid of groupIds) {
+        await client.query(
+          'INSERT INTO student_groups (student_id, group_id) VALUES ($1, $2) ON CONFLICT (student_id, group_id) DO NOTHING',
+          [studentId, gid]
+        );
+      }
+      const primaryGroupId = groupIds[0] || null;
+      await client.query('UPDATE students SET group_id = $1 WHERE id = $2', [primaryGroupId, studentId]);
+    });
   },
 
   async removeFromGroup(studentId, groupId) {
-    await db.query(
-      'DELETE FROM student_groups WHERE student_id = $1 AND group_id = $2',
-      [studentId, groupId]
-    );
-
-    const { rows } = await db.query(
-      'SELECT group_id FROM student_groups WHERE student_id = $1 ORDER BY joined_at DESC LIMIT 1',
-      [studentId]
-    );
-    await this.setPrimaryGroup(studentId, rows.length ? rows[0].group_id : null);
+    await db.transaction(async (client) => {
+      await client.query(
+        'DELETE FROM student_groups WHERE student_id = $1 AND group_id = $2',
+        [studentId, groupId]
+      );
+      const { rows } = await client.query(
+        'SELECT group_id FROM student_groups WHERE student_id = $1 ORDER BY joined_at DESC LIMIT 1',
+        [studentId]
+      );
+      await client.query('UPDATE students SET group_id = $1 WHERE id = $2', [rows.length ? rows[0].group_id : null, studentId]);
+    });
   },
 
   // Payments
@@ -360,14 +364,25 @@ module.exports = {
     return students;
   },
 
-  // Get debtor count - uses efficient batch query instead of N+1
+  // Get debtor count - matches dashboard balance logic (payments - charges < 0)
   async getDebtorCount() {
     const { rows } = await db.query(
-      `SELECT COUNT(DISTINCT s.id) as count FROM students s
-       LEFT JOIN payments p ON s.id = p.student_id
-       WHERE p.id IS NULL
-          OR p.status IN ('unpaid', 'partial')`
+      `SELECT COUNT(*) as count FROM (
+        SELECT s.id,
+          COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.student_id = s.id AND p.status IN ('paid', 'partial')), 0)
+          - COALESCE((SELECT SUM(c.amount) FROM charges c WHERE c.student_id = s.id), 0) AS balance
+        FROM students s WHERE s.status != 'archived'
+      ) sub WHERE sub.balance < 0`
     );
     return parseInt(rows[0].count) || 0;
+  },
+
+  async search(q) {
+    const pattern = '%' + q + '%';
+    const { rows } = await db.query(
+      `SELECT * FROM students WHERE status != 'archived' AND (first_name ILIKE $1 OR last_name ILIKE $1 OR phone ILIKE $1) ORDER BY created_at`,
+      [pattern]
+    );
+    return rows.map(toObj);
   }
 };
