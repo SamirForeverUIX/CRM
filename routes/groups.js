@@ -6,6 +6,12 @@ const teachersRepo = require('../db/teachersRepo');
 const coursesRepo = require('../db/coursesRepo');
 const studentsRepo = require('../db/studentsRepo');
 const settingsRepo = require('../db/settingsRepo');
+const { hasMinLength, ensureEnum, isIsoDate } = require('../utils/validation');
+const { GROUP_STATUS_VALUES, GROUP_STATUS } = require('../utils/domainConstants');
+const { createStudentLifecycleService } = require('../services/studentLifecycleService');
+const { buildModuleAttendanceView } = require('../utils/attendanceModules');
+
+const lifecycle = createStudentLifecycleService(studentsRepo, groupsRepo);
 
 function getTimeSlots() {
   const slots = [];
@@ -18,36 +24,6 @@ function getTimeSlots() {
 }
 
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const DAY_MAP = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-
-function calculateLessonDates(startDate, days, totalLessons) {
-  if (!startDate || !days || days.length === 0 || !totalLessons || totalLessons <= 0) return [];
-
-  const dayNumbers = days.map(d => DAY_MAP[d]).filter(n => n !== undefined);
-  if (dayNumbers.length === 0) return [];
-
-  const dates = [];
-  const current = new Date(startDate + 'T00:00:00');
-  const maxDate = new Date(current);
-  maxDate.setFullYear(maxDate.getFullYear() + 1);
-
-  while (dates.length < totalLessons && current <= maxDate) {
-    if (dayNumbers.includes(current.getDay())) {
-      dates.push(new Date(current));
-    }
-    current.setDate(current.getDate() + 1);
-  }
-
-  return dates;
-}
-
-function getLessonsByMonth(lessonDates, year, month) {
-  return lessonDates.filter(d => d.getFullYear() === year && d.getMonth() === month);
-}
-
-function dateToStr(d) {
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-}
 
 router.get('/', async (req, res, next) => {
   try {
@@ -59,6 +35,7 @@ router.get('/', async (req, res, next) => {
       settingsRepo.get()
     ]);
     const search = (req.query.search || '').trim().toLowerCase();
+    const statusFilter = (req.query.status || '').trim();
 
     let filtered = groups;
     if (search) {
@@ -71,6 +48,9 @@ router.get('/', async (req, res, next) => {
           (teacher && (teacher.firstName + ' ' + teacher.lastName).toLowerCase().includes(search))
         );
       });
+    }
+    if (statusFilter) {
+      filtered = filtered.filter(g => g.status === statusFilter);
     }
 
     const now = new Date();
@@ -125,17 +105,20 @@ router.get('/add', async (req, res, next) => {
 
 router.post('/add', async (req, res, next) => {
   try {
-    let { name, courseId, teacherId, startDate, days, roomId, startTime } = req.body;
+    let { name, courseId, teacherId, startDate, days, roomId, startTime, status } = req.body;
 
-    if (!name) {
+    if (!hasMinLength(name, 3)) {
       const [teachers, courses, settings] = await Promise.all([
         teachersRepo.findAll(), coursesRepo.findAll(), settingsRepo.get()
       ]);
       return res.render('groups/add', {
         page: 'groups', teachers, courses,
         rooms: settings.rooms, timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
-        error: 'Group name is required.'
+        error: 'Group name is required (min 3 characters).'
       });
+    }
+    if (startDate && !isIsoDate(startDate)) {
+      return res.status(400).send('Invalid start date.');
     }
 
     if (!days) days = [];
@@ -145,6 +128,7 @@ router.post('/add', async (req, res, next) => {
       id: uuidv4(), name: name.trim(), courseId: courseId || null,
       teacherId: teacherId || null, days, room: (roomId || '').trim(),
       startTime: (startTime || '').trim(), startDate: startDate || '',
+      status: ensureEnum(status, GROUP_STATUS_VALUES, GROUP_STATUS.ACTIVE),
       createdAt: new Date().toISOString()
     });
 
@@ -178,6 +162,10 @@ router.get('/view/:id', async (req, res, next) => {
       return { ...s, balance: totalPayments - totalCharges, joinedAt };
     });
 
+    // Split active vs archived for the group view
+    const activeStudents = groupStudents.filter(s => s.status !== 'archived');
+    const archivedStudents = groupStudents.filter(s => s.status === 'archived');
+
     let endDate = '';
     if (group.startDate && course && course.durationMonths) {
       const sd = new Date(group.startDate);
@@ -186,42 +174,15 @@ router.get('/view/:id', async (req, res, next) => {
     }
     if (group.endDate) endDate = group.endDate;
 
-    const lessonsPerMonth = course ? (course.lessonsPerMonth || 0) : 0;
+    const lessonsPerModule = course ? (course.lessonsPerMonth || 12) : 12;
     const durationMonths = course ? (course.durationMonths || 1) : 1;
-    const totalLessons = lessonsPerMonth * durationMonths;
-    const allLessonDates = calculateLessonDates(group.startDate, group.days, totalLessons);
-
-    const monthParam = req.query.month;
-    let viewYear, viewMonth;
-    if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
-      viewYear = parseInt(monthParam.split('-')[0]);
-      viewMonth = parseInt(monthParam.split('-')[1]) - 1;
-    } else {
-      const now = new Date();
-      viewYear = now.getFullYear();
-      viewMonth = now.getMonth();
-      const thisMonthLessons = getLessonsByMonth(allLessonDates, viewYear, viewMonth);
-      if (thisMonthLessons.length === 0 && allLessonDates.length > 0) {
-        viewYear = allLessonDates[0].getFullYear();
-        viewMonth = allLessonDates[0].getMonth();
-      }
-    }
-
-    const lessonDates = getLessonsByMonth(allLessonDates, viewYear, viewMonth);
-
-    const monthSet = new Set();
-    allLessonDates.forEach(d => {
-      monthSet.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+    const moduleView = buildModuleAttendanceView({
+      startDate: group.startDate,
+      days: group.days,
+      lessonsPerModule,
+      moduleCount: durationMonths,
+      requestedModule: req.query.module
     });
-    const availableMonths = Array.from(monthSet).sort();
-
-    const currentMonthKey = viewYear + '-' + String(viewMonth + 1).padStart(2, '0');
-    const currentMonthIdx = availableMonths.indexOf(currentMonthKey);
-    const prevMonth = currentMonthIdx > 0 ? availableMonths[currentMonthIdx - 1] : null;
-    const nextMonth = currentMonthIdx < availableMonths.length - 1 ? availableMonths[currentMonthIdx + 1] : null;
-
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const viewMonthName = monthNames[viewMonth] + ' ' + viewYear;
 
     const attendanceMap = {};
     attendanceRows.forEach(a => {
@@ -231,9 +192,15 @@ router.get('/view/:id', async (req, res, next) => {
     });
 
     res.render('groups/view', {
-      page: 'groups', group, teacher, course, students: groupStudents,
-      lessonDates, allLessonDates, attendanceMap, endDate,
-      viewMonthName, currentMonthKey, prevMonth, nextMonth, availableMonths,
+      page: 'groups', group, teacher, course, students: activeStudents, archivedStudents,
+      lessonDates: moduleView.lessonDates,
+      allLessonDates: moduleView.allLessonDates,
+      attendanceMap, endDate,
+      currentModule: moduleView.currentModule,
+      totalModules: moduleView.totalModules,
+      prevModule: moduleView.prevModule,
+      nextModule: moduleView.nextModule,
+      moduleLabel: moduleView.moduleLabel,
       teachers, courses, rooms: settings.rooms,
       timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
       currency: settings.currency || 'USD'
@@ -260,19 +227,22 @@ router.get('/edit/:id', async (req, res, next) => {
 
 router.post('/edit/:id', async (req, res, next) => {
   try {
-    let { name, courseId, teacherId, startDate, days, roomId, startTime } = req.body;
+    let { name, courseId, teacherId, startDate, days, roomId, startTime, status } = req.body;
     const group = await groupsRepo.findById(req.params.id);
     if (!group) return res.redirect('/groups');
 
-    if (!name) {
+    if (!hasMinLength(name, 3)) {
       const [teachers, courses, settings] = await Promise.all([
         teachersRepo.findAll(), coursesRepo.findAll(), settingsRepo.get()
       ]);
       return res.render('groups/edit', {
         page: 'groups', group, teachers, courses,
         rooms: settings.rooms, timeSlots: getTimeSlots(), daysOfWeek: DAYS_OF_WEEK,
-        error: 'Group name is required.'
+        error: 'Group name is required (min 3 characters).'
       });
+    }
+    if (startDate && !isIsoDate(startDate)) {
+      return res.status(400).send('Invalid start date.');
     }
 
     if (!days) days = [];
@@ -281,7 +251,8 @@ router.post('/edit/:id', async (req, res, next) => {
     await groupsRepo.update(req.params.id, {
       name: name.trim(), courseId: courseId || null, teacherId: teacherId || null,
       days, room: (roomId || '').trim(), startTime: (startTime || '').trim(),
-      startDate: startDate || '', endDate: req.body.endDate || ''
+      startDate: startDate || '', endDate: req.body.endDate || '',
+      status: ensureEnum(status, GROUP_STATUS_VALUES, GROUP_STATUS.ACTIVE)
     });
 
     res.redirect('/groups/view/' + req.params.id);
@@ -353,6 +324,55 @@ router.post('/delete/:id', async (req, res, next) => {
   try {
     await groupsRepo.delete(req.params.id);
     res.redirect('/groups');
+  } catch (err) { next(err); }
+});
+
+// Remove student from this group + archive the student
+router.post('/:groupId/remove-student/:studentId', async (req, res, next) => {
+  try {
+    const { groupId, studentId } = req.params;
+    const student = await studentsRepo.findById(studentId);
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    await lifecycle.removeFromGroupAndArchive(studentId, groupId);
+    return res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
+// Restore student from archived back to active (used from group detail page)
+router.post('/:groupId/restore-student/:studentId', async (req, res, next) => {
+  try {
+    const { groupId, studentId } = req.params;
+    const student = await studentsRepo.findById(studentId);
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    await lifecycle.restoreToGroup(studentId, groupId, new Date().toISOString());
+    return res.json({ success: true });
+  } catch (err) {
+    if (err && err.message === 'group_not_found') {
+      return res.status(400).json({ error: 'Group not found' });
+    }
+    next(err);
+  }
+});
+
+// Freeze student (inactive) from group detail page
+router.post('/:groupId/freeze-student/:studentId', async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const student = await studentsRepo.findById(studentId);
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    await lifecycle.freezeStudent(studentId);
+    return res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
+// Unfreeze student from group detail page
+router.post('/:groupId/unfreeze-student/:studentId', async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const student = await studentsRepo.findById(studentId);
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    await lifecycle.unfreezeStudent(studentId);
+    return res.json({ success: true });
   } catch (err) { next(err); }
 });
 

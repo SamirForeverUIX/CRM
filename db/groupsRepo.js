@@ -6,11 +6,13 @@ function toObj(row) {
     name: row.name,
     courseId: row.course_id,
     teacherId: row.teacher_id,
+    daysOfWeek: row.days || [],
     days: row.days || [],
     room: row.room,
     startTime: row.start_time,
     startDate: row.start_date,
     endDate: row.end_date || '',
+    status: row.status || 'active',
     createdAt: row.created_at
   };
 }
@@ -28,16 +30,16 @@ module.exports = {
 
   async create(group) {
     await db.query(
-      `INSERT INTO groups (id, name, course_id, teacher_id, days, room, start_time, start_date, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [group.id, group.name, group.courseId, group.teacherId, group.days, group.room, group.startTime, group.startDate, group.createdAt]
+      `INSERT INTO groups (id, name, course_id, teacher_id, days, room, start_time, start_date, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [group.id, group.name, group.courseId, group.teacherId, group.days || group.daysOfWeek || [], group.room, group.startTime, group.startDate, group.status || 'active', group.createdAt]
     );
   },
 
   async update(id, data) {
     await db.query(
-      `UPDATE groups SET name=$1, course_id=$2, teacher_id=$3, days=$4, room=$5, start_time=$6, start_date=$7, end_date=$8 WHERE id=$9`,
-      [data.name, data.courseId, data.teacherId, data.days, data.room, data.startTime, data.startDate, data.endDate || '', id]
+      `UPDATE groups SET name=$1, course_id=$2, teacher_id=$3, days=$4, room=$5, start_time=$6, start_date=$7, end_date=$8, status=$9 WHERE id=$10`,
+      [data.name, data.courseId, data.teacherId, data.days || data.daysOfWeek || [], data.room, data.startTime, data.startDate, data.endDate || '', data.status || 'active', id]
     );
   },
 

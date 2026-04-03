@@ -308,9 +308,56 @@
   color: var(--text-primary);
   text-decoration: none;
   transition: background var(--transition-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
 }
 .gv-student-dropdown-item:hover {
   background: var(--bg-body);
+}
+.gv-sdd-danger {
+  color: #ef4444;
+}
+.gv-sdd-danger:hover {
+  background: #fef2f2 !important;
+}
+.gv-sdd-success {
+  color: #16a34a;
+}
+.gv-sdd-success:hover {
+  background: #f0fdf4 !important;
+}
+.gv-sdd-action {
+  color: var(--primary);
+}
+
+/* Archived Students List */
+.gv-archived-list {
+  margin-top: 8px;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 10px;
+}
+.gv-archived-list-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+.gv-student-row--archived {
+  opacity: 0.5;
+}
+.gv-student-name--archived {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+.dot-grey {
+  background: #9ca3af !important;
 }
 
 /* Archived Students Button */
@@ -426,6 +473,18 @@
   opacity: 0.6;
 }
 
+/* Tab content panels */
+.gv-gtab-content { display: none; }
+.gv-gtab-content.active { display: block; }
+
+/* Placeholder panels for upcoming tabs */
+.gv-placeholder-panel {
+  text-align: center; padding: 60px 20px; color: var(--text-muted);
+}
+.gv-placeholder-panel svg { margin-bottom: 16px; opacity: 0.4; }
+.gv-placeholder-panel h3 { font-size: 18px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+.gv-placeholder-panel p { font-size: 14px; }
+
 /* Attendance Section */
 .gv-attendance-section {
   position: relative;
@@ -487,6 +546,13 @@
   font-weight: 500;
   padding: 0 6px;
   white-space: nowrap;
+}
+.gv-module-label {
+  font-size: 12px;
+  max-width: 340px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.4;
 }
 .gv-att-settings {
   width: 28px;

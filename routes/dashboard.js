@@ -66,7 +66,7 @@ router.get('/', async (req, res, next) => {
     });
 
     const today = now;
-    const todayDay = DAY_NAMES[today.getDay()];
+    const todayDay = req.query.day || DAY_NAMES[today.getDay()];
 
     const todayGroups = groups
       .filter(g => g.days && g.days.includes(todayDay) && g.startTime)
@@ -88,6 +88,7 @@ router.get('/', async (req, res, next) => {
     const rooms = settings.rooms || [];
     const scheduleRooms = rooms.length > 0 ? rooms : [...new Set(todayGroups.map(g => g.room).filter(Boolean))];
 
+    // Build time slots from 09:00 to 17:00 in 30-minute intervals
     const timeSet = new Set();
     todayGroups.forEach(g => timeSet.add(g.startTime));
     for (let h = 9; h <= 17; h++) {
@@ -96,31 +97,62 @@ router.get('/', async (req, res, next) => {
     }
     const scheduleTimeSlots = Array.from(timeSet).sort();
 
-    const activities = [];
-    students.forEach(s => {
-      activities.push({ type: 'student', text: s.firstName + ' ' + s.lastName + ' was added', time: s.createdAt, timeAgo: timeAgo(s.createdAt) });
-      (s.payments || []).forEach(p => {
-        activities.push({ type: 'payment', text: (p.amount || 0).toLocaleString() + ' ' + (settings.currency || 'USD') + ' from ' + s.firstName, time: p.date || s.createdAt, timeAgo: timeAgo(p.date || s.createdAt) });
-      });
+    // Compute "new X days" badge: days since group was created
+    todayGroups.forEach(g => {
+      const grp = groups.find(gr => gr.id === g.id);
+      if (grp && grp.createdAt) {
+        const created = new Date(grp.createdAt);
+        const diffDays = Math.floor((now - created) / 86400000);
+        if (diffDays <= 30) g.newDays = diffDays;
+      }
+      // Add max student capacity from course if available
+      const course = courses.find(c => c.id === (grp && grp.courseId));
+      g.maxStudents = (course && course.maxStudents) || 0;
     });
-    teachers.forEach(t => { activities.push({ type: 'teacher', text: t.firstName + ' ' + t.lastName + ' joined', time: t.createdAt, timeAgo: timeAgo(t.createdAt) }); });
-    groups.forEach(g => { activities.push({ type: 'group', text: 'Group "' + g.name + '" created', time: g.createdAt, timeAgo: timeAgo(g.createdAt) }); });
 
-    activities.sort((a, b) => new Date(b.time) - new Date(a.time));
-    const recentActivities = activities.slice(0, 8);
+    // Build schedule data for all days (for client-side day switching)
+    const allDaysGroups = {};
+    DAY_NAMES.forEach(day => {
+      allDaysGroups[day] = groups
+        .filter(g => g.days && g.days.includes(day) && g.startTime)
+        .map(g => {
+          const teacher = teachers.find(t => t.id === g.teacherId);
+          const course = courses.find(c => c.id === g.courseId);
+          const studentCount = students.filter(s => s.groupIds && s.groupIds.includes(g.id)).length;
+          const created = g.createdAt ? new Date(g.createdAt) : null;
+          const diffDays = created ? Math.floor((now - created) / 86400000) : 999;
+          return {
+            id: g.id, name: g.name,
+            room: g.room || '',
+            startTime: g.startTime,
+            teacherName: teacher ? teacher.firstName + ' ' + teacher.lastName : '--',
+            courseCode: course ? (course.code || course.name) : '--',
+            daysStr: (g.days || []).join(', '),
+            dateRange: (g.startDate || '') + (g.endDate ? '—' + g.endDate : ''),
+            studentCount: studentCount,
+            maxStudents: (course && course.maxStudents) || 0,
+            newDays: diffDays <= 30 ? diffDays : null
+          };
+        });
+    });
 
-    const recentStudents = [...students]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 5)
-      .map(s => ({ ...s, groupNames: (s.groupIds || []).map(gid => { const g = groups.find(gr => gr.id === gid); return g ? g.name : 'Unknown'; }) }));
+    // Determine active leads count (placeholder — 0 for now)
+    const activeLeadsCount = 0;
+    // Trial lesson / left active group / left after trial are placeholders
+    const trialLessonCount = 0;
+    const leftActiveGroupCount = 0;
+    const leftAfterTrialCount = 0;
 
     res.render('dashboard', {
       page: 'dashboard', teacherCount: teachers.length, groupCount: groups.length,
       studentCount: students.length, courseCount: courses.length,
       totalIncome, debtorCount, paidCount,
       todayGroups, scheduleRooms, scheduleTimeSlots,
-      recentActivities, recentStudents,
-      currency: settings.currency || 'USD'
+      allDaysGroups: JSON.stringify(allDaysGroups),
+      todayDay,
+      activeLeadsCount, trialLessonCount, leftActiveGroupCount, leftAfterTrialCount,
+      currency: settings.currency || 'USD',
+      rooms: scheduleRooms
     });
   } catch (err) {
     next(err);

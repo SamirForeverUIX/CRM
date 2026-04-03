@@ -1,102 +1,176 @@
 /* ============================================================
-   TEACHER DETAIL — Profile card, groups list, group detail
+   TEACHER DETAIL — Modme-style tabbed layout
+   Profile card left, groups right, tabs (Profile/History/Salary)
    ============================================================ */
 
+/* === Page Header === */
+.tv-page-header { margin-bottom: 4px; }
+.tv-page-title {
+  font-size: 26px; font-weight: 700;
+  color: var(--text-primary); letter-spacing: -0.3px;
+}
+
+/* === Tabs === */
+.tv-tabs {
+  display: flex; gap: 0; border-bottom: 2px solid var(--border);
+  margin-bottom: 24px;
+}
+.tv-tab {
+  padding: 12px 24px; font-size: 14px; font-weight: 600;
+  color: var(--text-secondary); background: none; border: none;
+  cursor: pointer; position: relative; transition: color 0.2s;
+  font-family: inherit; letter-spacing: 0.3px;
+}
+.tv-tab:hover { color: var(--primary); }
+.tv-tab.active { color: var(--primary); }
+.tv-tab.active::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+  height: 2px; background: var(--primary); border-radius: 2px 2px 0 0;
+}
+
+/* Tab content */
+.tv-tab-content { display: none; }
+.tv-tab-content.active { display: block; }
+
+/* === Layout (2 columns) === */
 .teacher-view-layout {
-  display:grid;
-  grid-template-columns:320px 1fr 320px;
-  gap:24px; align-items:start;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 28px; align-items: start;
 }
 
+/* === Profile Card === */
 .teacher-profile-card {
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-card);
-  padding:24px; text-align:center;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+  padding: 28px 24px;
 }
+.tv-profile-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 16px;
+}
+.tv-profile-actions { display: flex; gap: 6px; }
+.tv-action-icon {
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); transition: all 0.15s;
+}
+.tv-action-icon:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.tv-action-danger:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+
 .teacher-profile-avatar {
-  width:80px; height:80px;
-  border-radius:var(--radius-lg);
-  background:var(--bg-body);
-  display:flex; align-items:center; justify-content:center;
-  margin:0 auto 12px;
-  color:var(--text-muted);
+  width: 80px; height: 80px; border-radius: var(--radius-lg);
+  background: var(--bg-body); display: flex; align-items: center;
+  justify-content: center; color: var(--text-muted);
 }
-.teacher-profile-avatar svg { width:40px; height:40px; }
-.teacher-profile-name { font-size:16px; font-weight:700; margin-bottom:8px; }
-.teacher-profile-info { font-size:13px; color:var(--text-secondary); margin-bottom:4px; }
-.teacher-profile-info a { color:var(--primary); font-weight:500; }
+.teacher-profile-avatar svg { width: 40px; height: 40px; }
+.teacher-profile-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+
+.tv-divider { height: 1px; background: var(--border-light); margin: 12px 0; }
+
+.tv-info-row { display: flex; align-items: center; gap: 8px; }
+.tv-info-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+.tv-phone-link { font-size: 14px; color: var(--primary); font-weight: 600; text-decoration: none; }
+.tv-phone-link:hover { text-decoration: underline; }
+.tv-info-value { font-size: 13px; color: var(--text-secondary); }
+
 .teacher-profile-badge {
-  display:inline-block;
-  padding:4px 12px;
-  border-radius:var(--radius-full);
-  font-size:12px; font-weight:600;
-  margin-top:8px;
+  display: inline-block; padding: 4px 12px;
+  border-radius: var(--radius-full); font-size: 12px; font-weight: 600;
 }
-.teacher-profile-badge.role { border:1.5px solid var(--primary); color:var(--primary); }
-.teacher-profile-badge.branch { border:1.5px solid var(--success); color:var(--success); }
+.teacher-profile-badge.role { border: 1.5px solid var(--primary); color: var(--primary); }
+.teacher-profile-badge.branch { border: 1.5px solid var(--success); color: var(--success); }
 
-/* Groups List */
-.teacher-groups-list {
-  display:flex; flex-direction:column; gap:12px;
+/* === Groups Section === */
+.tv-groups-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
 }
-.teacher-group-card {
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius-md);
-  padding:16px 20px;
-  display:flex; align-items:center; gap:16px;
-  cursor:pointer;
-  transition:all var(--transition-fast);
+.tv-groups-title { font-size: 18px; font-weight: 700; }
+.tv-groups-count {
+  font-size: 12px; font-weight: 700; color: #fff;
+  background: var(--primary); width: 24px; height: 24px;
+  border-radius: var(--radius-full); display: flex;
+  align-items: center; justify-content: center;
 }
-.teacher-group-card:hover { box-shadow:var(--shadow-md); border-color:var(--primary-border); }
-.teacher-group-card.active { border-color:var(--primary); background:var(--primary-bg); }
 
-.teacher-group-code {
-  font-size:11px; font-weight:700; padding:2px 8px;
-  background:var(--bg-body); border:1px solid var(--border);
-  border-radius:4px; white-space:nowrap;
+.tv-empty-groups {
+  text-align: center; padding: 40px 20px; color: var(--text-muted);
 }
-.teacher-group-name { font-size:14px; font-weight:600; }
-.teacher-group-meta { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-.teacher-group-students {
-  margin-left:auto;
-  width:28px; height:28px;
-  border-radius:var(--radius-full);
-  background:var(--primary);
-  color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px; font-weight:700;
+.tv-empty-groups svg { margin-bottom: 12px; }
+.tv-empty-groups p { font-size: 14px; }
+
+/* Group Cards Grid */
+.tv-groups-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
 }
+.tv-group-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px 16px;
+  cursor: pointer; transition: all 0.15s;
+}
+.tv-group-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary-border); }
+.tv-group-card.active { border-color: var(--primary); background: var(--primary-bg); }
+.tv-group-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.tv-group-code-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  background: var(--primary); color: #fff; border-radius: 4px;
+  white-space: nowrap; letter-spacing: 0.2px;
+}
+.tv-group-student-count {
+  font-size: 12px; font-weight: 700; color: var(--text-secondary);
+  background: var(--bg-body); width: 24px; height: 24px;
+  border-radius: var(--radius-full); display: flex;
+  align-items: center; justify-content: center;
+}
+.tv-group-card-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.tv-group-card-meta { font-size: 12px; color: var(--text-secondary); }
+.tv-group-card-dates { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
 /* Group Detail Panel */
-.teacher-group-detail {
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-card);
-  padding:24px;
+.tv-group-detail-panel {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+  padding: 20px; margin-bottom: 16px;
 }
-.teacher-group-detail-header { text-align:center; margin-bottom:20px; }
-.teacher-group-detail-header h3 { font-size:16px; font-weight:700; }
-.teacher-group-detail-header p { font-size:13px; color:var(--text-secondary); margin-top:4px; }
+.tv-detail-header { margin-bottom: 16px; }
+.tv-detail-header h3 { font-size: 16px; font-weight: 700; margin: 6px 0 8px; }
+.tv-detail-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); }
+.tv-detail-meta strong { color: var(--text-primary); }
 
-.teacher-student-row {
-  display:flex; align-items:center; gap:10px;
-  padding:8px 0;
-  border-bottom:1px solid var(--border-light);
-  font-size:13px;
+.tv-student-list { border-top: 1px solid var(--border-light); }
+.tv-student-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border-light);
+  text-decoration: none; transition: background 0.1s;
 }
-.teacher-student-row:last-child { border-bottom:none; }
-.teacher-student-row .name { flex:1; font-weight:500; }
-.teacher-student-row .phone { color:var(--text-secondary); font-size:12px; }
+.tv-student-row:hover { background: #fafbfc; margin: 0 -20px; padding: 10px 20px; }
+.tv-student-row:last-child { border-bottom: none; }
+.tv-student-num { font-size: 12px; color: var(--text-muted); width: 20px; text-align: right; }
+.tv-student-avatar {
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary), #f97316);
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.tv-student-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.tv-student-phone { font-size: 12px; color: var(--text-secondary); }
 
-.go-to-group-link {
-  display:block; text-align:right; margin-top:16px;
-  font-size:13px; font-weight:600; color:var(--text-secondary);
+.tv-goto-group-link {
+  display: flex; align-items: center; gap: 6px;
+  justify-content: flex-end; margin-top: 12px;
+  font-size: 13px; font-weight: 600; color: var(--primary);
+  text-decoration: none;
 }
-.go-to-group-link:hover { color:var(--primary); }
+.tv-goto-group-link:hover { text-decoration: underline; }
+
+/* Placeholder panels for upcoming tabs */
+.tv-placeholder-panel {
+  text-align: center; padding: 60px 20px; color: var(--text-muted);
+}
+.tv-placeholder-panel svg { margin-bottom: 16px; opacity: 0.4; }
+.tv-placeholder-panel h3 { font-size: 18px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+.tv-placeholder-panel p { font-size: 14px; }
 
 /* ===================================================================
    EDIT TEACHER SLIDE-IN PANEL

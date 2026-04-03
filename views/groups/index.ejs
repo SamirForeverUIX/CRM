@@ -19,6 +19,7 @@
         <select class="gl-filter-select" id="filterStatus">
           <option value="">Active groups</option>
           <option value="active">Active</option>
+          <option value="completed">Completed</option>
           <option value="archived">Archived</option>
         </select>
       </div>
@@ -102,6 +103,7 @@
               <th class="gl-th-sortable">Training dates</th>
               <th class="gl-th-sortable">Week of study</th>
               <th class="gl-th-sortable">Room</th>
+              <th class="gl-th-sortable">Status</th>
               <th class="gl-th-sortable">Tags</th>
               <th class="gl-th-sortable">Students</th>
               <th>Actions</th>
@@ -109,7 +111,7 @@
           </thead>
           <tbody>
             <% groups.forEach((group, i) => { %>
-              <tr class="gl-row" onclick="window.location='/groups/view/<%= group.id %>'" data-group-id="<%= group.id %>" data-teacher="<%= group.teacher ? group.teacher.id : '' %>" data-course="<%= group.course ? group.course.id : '' %>" data-days="<%= (group.days || []).join(',') %>" data-start="<%= group.startDate || '' %>" data-end="<%= group.endDate || '' %>">
+              <tr class="gl-row" onclick="window.location='/groups/view/<%= group.id %>'" data-group-id="<%= group.id %>" data-teacher="<%= group.teacher ? group.teacher.id : '' %>" data-course="<%= group.course ? group.course.id : '' %>" data-days="<%= (group.days || []).join(',') %>" data-start="<%= group.startDate || '' %>" data-end="<%= group.endDate || '' %>" data-status="<%= group.status || 'active' %>">
                 <td class="gl-cell-num"><span class="gl-row-num"><%= i + 1 %>.</span> <a href="/groups/view/<%= group.id %>" class="gl-group-name"><%= group.name %></a></td>
                 <td class="gl-cell-course"><%= group.course ? group.course.name : '--' %></td>
                 <td class="gl-cell-teacher"><%= group.teacher ? (group.teacher.firstName + ' ' + group.teacher.lastName).toUpperCase() : '--' %></td>
@@ -138,6 +140,7 @@
                   <br><span class="gl-week-sub"><%= group.weekOfStudy.weeks %> weeks</span>
                 </td>
                 <td class="gl-cell-room"><%= group.room ? group.room.replace('Room ', '') : '--' %></td>
+                <td class="gl-cell-status"><%= (group.status || 'active').toUpperCase() %></td>
                 <td class="gl-cell-tags"></td>
                 <td class="gl-cell-students"><span class="gl-student-count<%= group.studentCount > 5 ? ' highlight' : '' %>"><%= group.studentCount %></span></td>
                 <td class="gl-cell-actions" onclick="event.stopPropagation();">
@@ -156,6 +159,12 @@
             <% }) %>
           </tbody>
         </table>
+      </div>
+      <div class="empty-state" id="groupsFilteredEmpty" style="display:none;">
+        <div class="empty-state-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <p>No groups match current filters.</p>
       </div>
     <% } %>
   </div>
@@ -229,6 +238,14 @@
             <input type="date" name="startDate" placeholder="No date selected">
           </div>
         </div>
+        <div class="gv-form-group">
+          <label>Status</label>
+          <select name="status" class="gv-select">
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
         <button type="submit" class="gv-submit-btn">Submit</button>
       </form>
     </div>
@@ -237,6 +254,22 @@
 </main>
 
 <script>
+var state = {
+  rows: [],
+  filters: {
+    status: '',
+    teacher: '',
+    course: '',
+    day: '',
+    startDate: '',
+    endDate: ''
+  }
+};
+
+function initState() {
+  state.rows = Array.prototype.slice.call(document.querySelectorAll('.gl-row'));
+}
+
 function openAddGroupPanel() {
   document.getElementById('addGroupPanel').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -277,28 +310,55 @@ function toggleColumns() {
 function clearFilters() {
   document.querySelectorAll('.gl-filter-select').forEach(function(s) { s.selectedIndex = 0; });
   document.querySelectorAll('.gl-filter-date').forEach(function(d) { d.value = ''; });
-  applyFilters();
+  state.filters = { status: '', teacher: '', course: '', day: '', startDate: '', endDate: '' };
+  render(state);
 }
-function applyFilters() {
-  var teacher = document.getElementById('filterTeacher').value;
-  var course = document.getElementById('filterCourse').value;
-  var day = document.getElementById('filterDays').value;
-  var startDate = document.getElementById('filterStartDate').value;
-  var endDate = document.getElementById('filterEndDate').value;
-  var rows = document.querySelectorAll('.gl-row');
-  rows.forEach(function(row) {
+
+function render(appState) {
+  var visibleCount = 0;
+  appState.rows.forEach(function(row) {
     var show = true;
-    if (teacher && row.getAttribute('data-teacher') !== teacher) show = false;
-    if (course && row.getAttribute('data-course') !== course) show = false;
-    if (day && !(row.getAttribute('data-days') || '').split(',').includes(day)) show = false;
-    if (startDate && row.getAttribute('data-start') && row.getAttribute('data-start') < startDate) show = false;
-    if (endDate && row.getAttribute('data-end') && row.getAttribute('data-end') > endDate) show = false;
+    if (appState.filters.status && row.getAttribute('data-status') !== appState.filters.status) show = false;
+    if (appState.filters.teacher && row.getAttribute('data-teacher') !== appState.filters.teacher) show = false;
+    if (appState.filters.course && row.getAttribute('data-course') !== appState.filters.course) show = false;
+    if (appState.filters.day && !(row.getAttribute('data-days') || '').split(',').includes(appState.filters.day)) show = false;
+    if (appState.filters.startDate && row.getAttribute('data-start') && row.getAttribute('data-start') < appState.filters.startDate) show = false;
+    if (appState.filters.endDate && row.getAttribute('data-end') && row.getAttribute('data-end') > appState.filters.endDate) show = false;
     row.style.display = show ? '' : 'none';
+    if (show) visibleCount += 1;
   });
+
+  var emptyFiltered = document.getElementById('groupsFilteredEmpty');
+  if (emptyFiltered) {
+    emptyFiltered.style.display = visibleCount === 0 ? '' : 'none';
+  }
+
+  var qtyEl = document.querySelector('.gl-subtitle');
+  if (qtyEl) {
+    qtyEl.textContent = 'Quantity - ' + visibleCount;
+  }
 }
+
+function syncFiltersFromDom() {
+  state.filters.status = document.getElementById('filterStatus').value;
+  state.filters.teacher = document.getElementById('filterTeacher').value;
+  state.filters.course = document.getElementById('filterCourse').value;
+  state.filters.day = document.getElementById('filterDays').value;
+  state.filters.startDate = document.getElementById('filterStartDate').value;
+  state.filters.endDate = document.getElementById('filterEndDate').value;
+}
+
 // Attach filter change listeners
 document.querySelectorAll('.gl-filter-select, .gl-filter-date').forEach(function(el) {
-  el.addEventListener('change', applyFilters);
+  el.addEventListener('change', function() {
+    syncFiltersFromDom();
+    render(state);
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  initState();
+  render(state);
 });
 </script>
 <%- include('../partials/footer') %>

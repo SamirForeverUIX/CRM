@@ -1,5 +1,5 @@
 /* ============================================================
-   TEACHERS — Two-column card grid list page
+   TEACHERS — Two-column card grid list page (Modme style)
    ============================================================ */
 
 .teachers-grid {
@@ -9,7 +9,6 @@
   background:#fff;
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-card);
   overflow:hidden;
 }
 
@@ -20,7 +19,7 @@
   transition: all var(--transition-base);
   gap:16px;
 }
-.teacher-card:hover { background:var(--primary-bg); transform: translateX(2px); }
+.teacher-card:hover { background:#fafbfc; }
 .teacher-card:nth-child(odd) { border-right:1px solid var(--border-light); }
 
 .teacher-card-name {
@@ -34,9 +33,58 @@
 .teacher-card-groups {
   font-size:12px; color:var(--text-secondary); min-width:70px;
 }
-.teacher-card-menu {
-  background:none; border:none; cursor:pointer;
-  color:var(--text-muted); font-size:18px; padding:4px;
-  line-height:1; letter-spacing:1px;
+
+/* 3-dot menu */
+.teacher-card-menu-wrap {
+  position: relative;
+  display: inline-flex;
 }
-.teacher-card-menu:hover { color:var(--primary); }
+.teacher-card-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  color: var(--primary);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.teacher-card-menu-btn:hover {
+  background: var(--primary-bg);
+}
+.teacher-card-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 6px 0;
+  min-width: 120px;
+}
+.teacher-card-menu-wrap.open .teacher-card-dropdown {
+  display: block;
+}
+.teacher-dd-item {
+  display: block;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: inherit;
+  text-align: left;
+}
+.teacher-dd-item:hover { background: var(--bg-body); }
+.teacher-dd-danger { color: #ef4444; }
+.teacher-dd-danger:hover { background: #fef2f2; }
