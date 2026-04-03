@@ -169,32 +169,13 @@ router.get('/view/:id', async (req, res, next) => {
     const teacher = teachers.find(t => t.id === group.teacherId);
     const course = courses.find(c => c.id === group.courseId);
 
-    const now = new Date();
     const groupStudents = allStudents.map(s => {
-      const payments = s.payments || [];
-      let totalPaid = 0;
-      payments.forEach(p => {
-        if (p.status === 'paid' || p.status === 'partial') totalPaid += p.amount || 0;
-      });
-      let totalOwed = 0;
-      (s.groupIds || []).forEach(gid => {
-        const g2 = allGroups.find(gr => gr.id === gid);
-        if (g2 && g2.courseId) {
-          const c2 = courses.find(cr => cr.id === g2.courseId);
-          if (c2 && c2.price) {
-            const joinDate = (s.groupJoinDates && s.groupJoinDates[gid])
-              ? new Date(s.groupJoinDates[gid])
-              : new Date(s.createdAt || now);
-            const monthsSinceJoin = Math.max(1,
-              (now.getFullYear() - joinDate.getFullYear()) * 12 + (now.getMonth() - joinDate.getMonth()) + 1
-            );
-            totalOwed += c2.price * monthsSinceJoin;
-          }
-        }
-      });
+      const totalCharges = (s.charges || []).reduce((sum, c) => sum + c.amount, 0);
+      const totalPayments = (s.payments || []).reduce((sum, p) =>
+        (p.status === 'paid' || p.status === 'partial') ? sum + (p.amount || 0) : sum, 0);
       const joinDates = s.groupJoinDates || {};
       const joinedAt = joinDates[group.id] || s.createdAt || '';
-      return { ...s, balance: totalPaid - totalOwed, joinedAt };
+      return { ...s, balance: totalPayments - totalCharges, joinedAt };
     });
 
     let endDate = '';

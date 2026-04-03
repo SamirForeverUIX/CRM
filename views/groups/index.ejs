@@ -214,7 +214,12 @@
           <label>Lesson start time</label>
           <div class="gv-time-input-wrap">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <input type="text" name="startTime" placeholder="No time selected" class="gv-time-input">
+            <select name="startTime" class="gv-time-input">
+              <option value="">No time selected</option>
+              <% timeSlots.forEach(function(slot) { %>
+                <option value="<%= slot %>"><%= slot %></option>
+              <% }) %>
+            </select>
           </div>
         </div>
         <div class="gv-form-group">

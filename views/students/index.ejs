@@ -160,18 +160,16 @@
           <input type="text" name="phone" class="gv-input" required placeholder="Enter phone number">
         </div>
         <div class="gv-form-group">
-          <label>Assign to Groups</label>
+          <label>Assign to Group</label>
           <% if (groups.length === 0) { %>
             <p style="font-size:13px; color:var(--text-muted);">No groups available.</p>
           <% } else { %>
-            <div class="gv-days-grid" style="grid-template-columns: 1fr;">
+            <select name="groupIds" class="gv-select">
+              <option value="">-- Select Group --</option>
               <% groups.forEach(g => { %>
-                <label class="gv-day-checkbox">
-                  <input type="checkbox" name="groupIds" value="<%= g.id %>">
-                  <span class="gv-day-label"><%= g.name %></span>
-                </label>
+                <option value="<%= g.id %>"><%= g.name %></option>
               <% }) %>
-            </div>
+            </select>
           <% } %>
         </div>
         <button type="submit" class="gv-submit-btn">Add Student</button>

@@ -30,21 +30,31 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label for="lessonsPerMonth">Lessons per Month</label>
-          <input type="number" id="lessonsPerMonth" name="lessonsPerMonth" min="0" value="<%= course.lessonsPerMonth || '' %>">
+          <label for="lessonsPerMonth">Lessons per Module</label>
+          <select id="lessonsPerMonth" name="lessonsPerMonth">
+            <option value="0">-- Select --</option>
+            <% for (let i = 1; i <= 28; i++) { %>
+              <option value="<%= i %>" <%= course.lessonsPerMonth === i ? 'selected' : '' %>><%= i %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label for="durationMinutes">Lesson Duration (minutes)</label>
-          <input type="number" id="durationMinutes" name="durationMinutes" min="0" value="<%= course.durationMinutes || '' %>">
+          <select id="durationMinutes" name="durationMinutes">
+            <option value="0">-- Select --</option>
+            <% [30, 60, 90, 120, 150, 180, 210, 240, 270, 300].forEach(function(m) { %>
+              <option value="<%= m %>" <%= course.durationMinutes === m ? 'selected' : '' %>><%= m %> min</option>
+            <% }) %>
+          </select>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="durationMonths">Course Duration (months)</label>
-          <input type="number" id="durationMonths" name="durationMonths" min="0" value="<%= course.durationMonths || '' %>">
+          <input type="number" id="durationMonths" name="durationMonths" min="1" max="36" value="<%= course.durationMonths || '' %>">
         </div>
         <div class="form-group">
-          <label for="price">Price</label>
+          <label for="price">Price (per month)</label>
           <input type="number" id="price" name="price" step="0.01" min="0" value="<%= course.price || '' %>">
         </div>
       </div>
