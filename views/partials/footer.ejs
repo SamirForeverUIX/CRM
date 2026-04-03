@@ -40,7 +40,33 @@
 
     function confirmDelete(btn) {
       var overlay = btn.closest('.modal-overlay');
-      overlay._form.submit();
+      var form = overlay._form;
+      // Use AJAX for delete so we don't full-reload
+      var xhr = new XMLHttpRequest();
+      xhr.open(form.method || 'POST', form.action, true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          closeModal(btn);
+          if (xhr.status === 200) {
+            try {
+              var data = JSON.parse(xhr.responseText);
+              if (data.redirect) { window.location.href = data.redirect; return; }
+            } catch(e) {}
+            showToast('Deleted successfully', 'success');
+            // Remove the row from the table or reload
+            var row = form.closest('tr') || form.closest('.sv-group-card') || form.closest('.gv-student-row');
+            if (row) { row.style.transition = 'opacity 0.3s'; row.style.opacity = '0'; setTimeout(function() { row.remove(); }, 300); }
+            else { window.location.reload(); }
+          } else {
+            showToast('Delete failed', 'error');
+          }
+        }
+      };
+      var formData = new FormData(form);
+      var encoded = new URLSearchParams(formData).toString();
+      xhr.send(encoded);
     }
 
     // Attach delete modals to all delete forms
