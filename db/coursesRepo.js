@@ -6,8 +6,10 @@ function toObj(row) {
     name: row.name,
     code: row.code,
     lessonsPerMonth: row.lessons_per_month,
+    lessonsPerModule: row.lessons_per_month,
     durationMinutes: row.duration_minutes,
     durationMonths: row.duration_months,
+    duration: row.duration_months,
     price: parseFloat(row.price) || 0,
     description: row.description || '',
     createdAt: row.created_at

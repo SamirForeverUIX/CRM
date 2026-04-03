@@ -1,6 +1,6 @@
 /* ============================================================
-   SIDEBAR — Icon-centered navigation (120px wide, 90px items)
-   Matches reference: vertical icon + label layout
+   SIDEBAR — Modme-style icon-centered navigation (100px wide)
+   Vertical icon + label layout, scrollable, no user section
    ============================================================ */
 
 .sidebar {
@@ -20,14 +20,12 @@
 }
 .sidebar::-webkit-scrollbar { display: none; }
 
-/* Hide brand in sidebar — it's now in the header */
-.sidebar-brand {
-  display: none;
-}
+/* Hide brand in sidebar — it's in the header */
+.sidebar-brand { display: none; }
 
 .sidebar-nav {
   flex: 1;
-  padding: 0;
+  padding: 8px 0;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -40,13 +38,12 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px 6px;
+  padding: 14px 6px;
   font-size: 11px;
   font-weight: 500;
   color: var(--text-secondary);
   transition: all var(--transition-base);
   width: 100%;
-  height: 90px;
   text-align: center;
   line-height: 1.2;
   position: relative;
@@ -57,14 +54,12 @@
   color: var(--primary);
   background: var(--primary-bg);
 }
-.nav-link:hover .nav-icon svg { stroke: var(--primary); }
 .nav-link.active {
   color: var(--primary);
   background: rgba(241, 128, 36, 0.06);
   border-left: 3px solid var(--primary);
   font-weight: 600;
 }
-.nav-link.active .nav-icon svg { stroke: var(--primary); stroke-width: 2; }
 .nav-link:active { transform: scale(0.96); }
 
 .nav-icon {
@@ -74,16 +69,19 @@
   width: 40px;
   height: 40px;
 }
-.nav-icon svg {
-  stroke: var(--text-secondary);
-  transition: stroke var(--transition-fast);
-  width: 28px;
-  height: 28px;
+
+.nav-label {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+  max-width: 100px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .nav-badge {
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 14px;
   min-width: 18px;
   height: 18px;
@@ -101,35 +99,6 @@
 }
 
 .nav-divider { height: 1px; background: var(--border); margin: 4px 16px; width: calc(100% - 32px); }
-
-.sidebar-user {
-  padding: 10px 6px;
-  border-top: 1px solid var(--border);
-}
-.sidebar-user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  transition: background var(--transition-fast);
-}
-.sidebar-user-info:hover { background: var(--bg-body); }
-.sidebar-user-avatar {
-  width: 32px; height: 32px;
-  border-radius: var(--radius-full);
-  background: var(--primary);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-.sidebar-user-details { display: flex; flex-direction: column; align-items: center; overflow: hidden; }
-.sidebar-user-name { font-size: 10px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
-.sidebar-user-role { font-size: 9px; color: var(--text-muted); }
 
 /* Sidebar Overlay (Mobile) */
 .sidebar-overlay {

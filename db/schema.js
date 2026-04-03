@@ -2,7 +2,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const db = require('./index');
 
 async function migrate() {
-  console.log('Running database migration...');
+  console.log('Running LEGACY SQL migration fallback... Prefer Prisma migrations via "npm run db:prepare".');
 
   await db.query(`
     CREATE TABLE IF NOT EXISTS teachers (
@@ -35,6 +35,7 @@ async function migrate() {
       start_time TEXT DEFAULT '',
       start_date TEXT DEFAULT '',
       end_date TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'archived')),
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
@@ -45,6 +46,9 @@ async function migrate() {
       phone TEXT NOT NULL DEFAULT '',
       birthday TEXT DEFAULT '',
       gender TEXT DEFAULT '',
+      group_id TEXT REFERENCES groups(id) ON DELETE SET NULL,
+      notes TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'archived')),
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
@@ -71,6 +75,7 @@ async function migrate() {
       amount NUMERIC(12,2) DEFAULT 0,
       date TEXT DEFAULT '',
       status TEXT DEFAULT 'paid',
+      description TEXT DEFAULT '',
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
@@ -91,6 +96,32 @@ async function migrate() {
       currency TEXT DEFAULT 'USD',
       rooms TEXT[] DEFAULT '{}'
     );
+
+    ALTER TABLE groups ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS group_id TEXT REFERENCES groups(id) ON DELETE SET NULL;
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+    ALTER TABLE payments ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'groups_status_check'
+      ) THEN
+        ALTER TABLE groups
+        ADD CONSTRAINT groups_status_check CHECK (status IN ('active', 'completed', 'archived'));
+      END IF;
+    END $$;
+
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'students_status_check'
+      ) THEN
+        ALTER TABLE students
+        ADD CONSTRAINT students_status_check CHECK (status IN ('active', 'inactive', 'archived'));
+      END IF;
+    END $$;
   `);
 
   console.log('Migration complete.');

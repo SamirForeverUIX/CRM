@@ -81,6 +81,15 @@
         <input type="date" id="startDate" name="startDate" value="<%= group.startDate %>">
       </div>
 
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="active" <%= group.status === 'active' ? 'selected' : '' %>>Active</option>
+          <option value="completed" <%= group.status === 'completed' ? 'selected' : '' %>>Completed</option>
+          <option value="archived" <%= group.status === 'archived' ? 'selected' : '' %>>Archived</option>
+        </select>
+      </div>
+
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save Changes</button>
         <a href="/groups" class="btn btn-secondary">Cancel</a>

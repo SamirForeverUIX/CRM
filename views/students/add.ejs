@@ -19,37 +19,39 @@
 
     <form action="/students/add" method="POST" class="form-card">
       <div class="form-row">
-        <div class="form-group">
-          <label for="firstName">First Name</label>
-          <input type="text" id="firstName" name="firstName" required placeholder="Enter first name">
-        </div>
-        <div class="form-group">
-          <label for="lastName">Last Name</label>
-          <input type="text" id="lastName" name="lastName" required placeholder="Enter last name">
-        </div>
+        <%- include('../components/input', { id: 'firstName', label: 'First Name', name: 'firstName', required: true, placeholder: 'Enter first name' }) %>
+        <%- include('../components/input', { id: 'lastName', label: 'Last Name', name: 'lastName', required: true, placeholder: 'Enter last name' }) %>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input type="text" id="phone" name="phone" required placeholder="Enter phone number">
-        </div>
-        <div class="form-group">
-          <label for="birthday">Birthday</label>
-          <input type="date" id="birthday" name="birthday">
-        </div>
+        <%- include('../components/input', { id: 'phone', label: 'Phone Number', name: 'phone', required: true, placeholder: 'Enter phone number' }) %>
+        <%- include('../components/input', { id: 'birthday', label: 'Birthday', name: 'birthday', type: 'date', required: false }) %>
       </div>
       <div class="form-group">
         <label for="groupId">Assign to Group</label>
         <% if (groups.length === 0) { %>
           <p class="muted">No groups available. <a href="/groups/add">Create a group first.</a></p>
         <% } else { %>
-          <select id="groupId" name="groupIds">
+          <select id="groupId" name="groupId">
             <option value="">-- Select Group --</option>
             <% groups.forEach(g => { %>
               <option value="<%= g.id %>"><%= g.name %></option>
             <% }) %>
           </select>
         <% } %>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="notes">Notes</label>
+          <input type="text" id="notes" name="notes" placeholder="Optional notes">
+        </div>
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Add Student</button>

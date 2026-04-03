@@ -1,13 +1,70 @@
 /* ============================================================
-   COURSES — Colored card grid, course detail view
+   COURSES — Modme-style colored banner card grid
    ============================================================ */
 
 .courses-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-  gap:16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
+/* Modme-style course card */
+.course-card-modme {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+}
+.course-card-modme:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
+}
+
+.course-card-banner {
+  position: relative;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.course-card-banner-name {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  text-align: center;
+  padding: 0 16px;
+}
+.course-card-banner-illustration {
+  position: absolute;
+  bottom: 0;
+  right: 10px;
+  opacity: 0.7;
+}
+
+.course-card-body {
+  padding: 16px;
+}
+.course-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.course-card-price-row {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Legacy card styles (kept for course view page) */
 .course-card {
   background:#fff;
   border:1px solid var(--border);
@@ -23,8 +80,6 @@
   transform:translateY(-3px);
   border-color: transparent;
 }
-.course-card:active { transform: translateY(-1px); }
-
 .course-card-icon {
   width:44px; height:44px;
   border-radius:var(--radius-md);

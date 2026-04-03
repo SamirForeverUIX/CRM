@@ -3,63 +3,104 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1>Schedule</h1>
-    </div>
-
-    <div class="schedule-days-filter">
-      <% days.forEach(function(day) { %>
-        <button class="schedule-day-btn active"><%= day %></button>
-      <% }) %>
-    </div>
-
-    <% if (timeSlots.length === 0) { %>
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <div class="dash-schedule-section">
+      <div class="dash-schedule-header">
+        <div class="dash-schedule-tabs">
+          <button class="dash-tab" data-filter="odd">Odd days</button>
+          <button class="dash-tab" data-filter="even">Even days</button>
+          <button class="dash-tab active" data-filter="other">Other</button>
         </div>
-        <p>No scheduled groups yet. Add groups with days and times to see the timetable.</p>
-        <a href="/groups/add" class="btn btn-primary">Add Group</a>
+        <h2 class="dash-schedule-title">Schedule</h2>
+        <div class="dash-schedule-toggle">
+          <span>Horizontal</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="scheduleOrientationToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
-    <% } else { %>
-      <div class="schedule-table-wrap">
-        <table class="schedule-table">
-          <thead>
-            <tr>
-              <th class="schedule-time-col">Time</th>
-              <% days.forEach(function(day) { %>
-                <th class="schedule-day-col"><%= day %></th>
-              <% }) %>
-            </tr>
-          </thead>
-          <tbody>
-            <% var colors = ['color-green','color-blue','color-pink','color-cyan','color-orange','color-purple']; %>
-            <% var colorIdx = 0; %>
-            <% timeSlots.forEach(function(time) { %>
+
+      <div class="dash-day-selector">
+        <% days.forEach(function(day) { %>
+          <button class="dash-day-btn active"><%= day %></button>
+        <% }) %>
+      </div>
+
+      <% if (timeSlots.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <p>No scheduled groups yet. Add groups with days and times to see the timetable.</p>
+          <a href="/groups/add" class="btn btn-primary">Add Group</a>
+        </div>
+      <% } else { %>
+        <div class="schedule-table-wrap">
+          <table class="schedule-table schedule-horizontal">
+            <thead>
               <tr>
-                <td class="schedule-time-cell"><%= time %></td>
-                <% days.forEach(function(day) { %>
-                  <td class="schedule-cell">
-                    <% var groups = (timetable[time] && timetable[time][day]) || []; %>
-                    <% groups.forEach(function(g) { %>
-                      <a href="/groups/view/<%= g.id %>" class="schedule-block <%= colors[colorIdx++ % colors.length] %>">
-                        <span class="schedule-block-name"><%= g.name %></span>
-                        <% if (g.teacher) { %>
-                          <span class="schedule-block-teacher"><%= g.teacher.firstName %> <%= g.teacher.lastName.charAt(0) %>.</span>
-                        <% } %>
-                        <% if (g.room) { %>
-                          <span class="schedule-block-meta"><%= g.room %></span>
-                        <% } %>
-                      </a>
-                    <% }) %>
-                  </td>
+                <th class="schedule-room-col">Room / Time</th>
+                <% timeSlots.forEach(function(t) { %>
+                  <th><%= t %></th>
                 <% }) %>
               </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    <% } %>
+            </thead>
+            <tbody>
+              <% var colors = ['color-green','color-blue','color-pink','color-cyan','color-orange','color-purple']; %>
+              <% var colorMap = {}; var colorIdx = 0; %>
+              <%
+                // Gather all rooms
+                var allRooms = new Set();
+                Object.keys(timetable).forEach(function(time) {
+                  Object.keys(timetable[time]).forEach(function(day) {
+                    timetable[time][day].forEach(function(g) {
+                      allRooms.add(g.room || 'No room');
+                    });
+                  });
+                });
+                var roomList = Array.from(allRooms);
+                if (roomList.length === 0) roomList = [''];
+              %>
+              <% roomList.forEach(function(room) { %>
+                <tr>
+                  <td class="schedule-room-cell"><%= room %></td>
+                  <% timeSlots.forEach(function(time) { %>
+                    <td class="schedule-cell">
+                      <%
+                        // Find groups in this time slot that match this room on ANY active day
+                        var cellGroups = [];
+                        days.forEach(function(day) {
+                          var groups = (timetable[time] && timetable[time][day]) || [];
+                          groups.forEach(function(g) {
+                            if ((g.room || 'No room') === room) cellGroups.push(g);
+                          });
+                        });
+                      %>
+                      <% cellGroups.forEach(function(g) { %>
+                        <% var code = g.course ? (g.course.code || g.course.name) : '--'; %>
+                        <% if (!colorMap[code]) { colorMap[code] = colors[colorIdx++ % colors.length]; } %>
+                        <a href="/groups/view/<%= g.id %>" class="schedule-block <%= colorMap[code] %>">
+                          <div class="schedule-block-top">
+                            <span class="schedule-block-code"><%= code %></span>
+                            <span class="schedule-block-name"><%= g.name %></span>
+                          </div>
+                          <% if (g.teacher) { %>
+                            <span class="schedule-block-teacher"><%= g.teacher.firstName %> <%= g.teacher.lastName %></span>
+                          <% } %>
+                          <% if (g.days) { %>
+                            <span class="schedule-block-meta"><%= g.days.join(', ') %></span>
+                          <% } %>
+                        </a>
+                      <% }) %>
+                    </td>
+                  <% }) %>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
   </div>
 </main>
 <%- include('../partials/footer') %>

@@ -4,6 +4,8 @@ const { v4: uuidv4 } = require('uuid');
 const coursesRepo = require('../db/coursesRepo');
 const groupsRepo = require('../db/groupsRepo');
 const studentsRepo = require('../db/studentsRepo');
+const settingsRepo = require('../db/settingsRepo');
+const { hasMinLength, parsePositiveNumber } = require('../utils/validation');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -18,7 +20,8 @@ router.get('/', async (req, res, next) => {
       );
     }
 
-    res.render('courses/index', { page: 'courses', courses: filtered, search });
+    const settings = await settingsRepo.get();
+    res.render('courses/index', { page: 'courses', courses: filtered, search, currency: settings.currency || 'UZS' });
   } catch (err) { next(err); }
 });
 
@@ -49,15 +52,21 @@ router.get('/add', (req, res) => {
 router.post('/add', async (req, res, next) => {
   try {
     const { name, code, lessonsPerMonth, durationMinutes, durationMonths, price, description } = req.body;
-    if (!name) {
+    if (!hasMinLength(name, 3)) {
       return res.render('courses/add', { page: 'courses', error: 'Course name is required.' });
     }
+
+    const parsedPrice = parsePositiveNumber(price);
+    if (price !== undefined && price !== '' && parsedPrice === null) {
+      return res.render('courses/add', { page: 'courses', error: 'Price must be a positive number.' });
+    }
+
     await coursesRepo.create({
       id: uuidv4(), name: name.trim(), code: (code || '').trim(),
       lessonsPerMonth: lessonsPerMonth ? parseInt(lessonsPerMonth) : 0,
       durationMinutes: durationMinutes ? parseInt(durationMinutes) : 0,
       durationMonths: durationMonths ? parseInt(durationMonths) : 0,
-      price: price ? parseFloat(price) : 0,
+      price: parsedPrice === null ? 0 : parsedPrice,
       description: (description || '').trim(),
       createdAt: new Date().toISOString()
     });
@@ -78,15 +87,21 @@ router.post('/edit/:id', async (req, res, next) => {
     const { name, code, lessonsPerMonth, durationMinutes, durationMonths, price, description } = req.body;
     const course = await coursesRepo.findById(req.params.id);
     if (!course) return res.redirect('/courses');
-    if (!name) {
+    if (!hasMinLength(name, 3)) {
       return res.render('courses/edit', { page: 'courses', course, error: 'Course name is required.' });
     }
+
+    const parsedPrice = parsePositiveNumber(price);
+    if (price !== undefined && price !== '' && parsedPrice === null) {
+      return res.render('courses/edit', { page: 'courses', course, error: 'Price must be a positive number.' });
+    }
+
     await coursesRepo.update(req.params.id, {
       name: name.trim(), code: (code || '').trim(),
       lessonsPerMonth: lessonsPerMonth ? parseInt(lessonsPerMonth) : 0,
       durationMinutes: durationMinutes ? parseInt(durationMinutes) : 0,
       durationMonths: durationMonths ? parseInt(durationMonths) : 0,
-      price: price ? parseFloat(price) : 0,
+      price: parsedPrice === null ? 0 : parsedPrice,
       description: (description || '').trim()
     });
     res.redirect('/courses');

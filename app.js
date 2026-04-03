@@ -45,6 +45,11 @@ app.use('/courses', require('./routes/courses'));
 app.use('/settings', require('./routes/settings'));
 app.use('/schedule', require('./routes/schedule'));
 app.use('/search', require('./routes/search'));
+app.use('/leads', require('./routes/leads'));
+app.use('/reminders', require('./routes/reminders'));
+app.use('/rating', require('./routes/rating'));
+app.use('/api', require('./routes/api.groups'));
+app.use('/api/students', require('./routes/api.students'));
 
 // Global error handler
 app.use((err, req, res, next) => {

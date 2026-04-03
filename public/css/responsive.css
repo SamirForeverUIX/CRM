@@ -5,7 +5,6 @@
 /* Large tablets / small desktops */
 @media (max-width: 1200px) {
   .teacher-view-layout { grid-template-columns:280px 1fr; }
-  .teacher-view-layout > :nth-child(3) { grid-column:1 / -1; }
   .sv-layout { grid-template-columns: 340px 1fr; }
 }
 
@@ -29,17 +28,16 @@
   .sidebar .nav-link {
     flex-direction: row;
     width: auto;
-    height: auto;
-    font-size: 13px;
     padding: 12px 16px;
     border-radius: var(--radius-sm);
     border-left: none;
+    gap: 10px;
   }
   .sidebar .nav-link.active {
     border-left: none;
     border-radius: var(--radius-sm);
   }
-  .sidebar .nav-icon svg { width: 20px; height: 20px; }
+  .sidebar .nav-label { font-size: 13px; }
   .sidebar-brand { display: flex; padding: 16px; }
 
   /* Layout */
@@ -48,15 +46,19 @@
   .content-area { padding: 20px 16px; }
   .top-header { padding: 0 16px; }
   .header-brand-name { display: none; }
+  .header-user-name { display: none; }
 
   /* Dashboard */
-  .stats-grid { grid-template-columns:1fr 1fr; gap: 12px; }
-  .dashboard-grid { grid-template-columns:1fr; }
+  .stats-grid { flex-wrap: nowrap; overflow-x: auto; }
+  .stat-card { min-width: 120px; }
+  .dash-schedule-header { flex-direction: column; align-items: flex-start; }
+  .dash-schedule-title { order: -1; }
 
   /* Grids */
   .detail-grid { grid-template-columns:1fr; }
   .group-view-layout { grid-template-columns:1fr; }
   .teacher-view-layout { grid-template-columns:1fr; }
+  .tv-groups-grid { grid-template-columns:1fr; }
   .teachers-grid { grid-template-columns:1fr; }
   .teachers-grid .teacher-card { border-right:none !important; }
   .student-view-layout { grid-template-columns:1fr; }
@@ -84,12 +86,12 @@
 
   /* Header */
   .search-form { max-width: 100%; }
-  .profile-label { display: none; }
 
   /* Students List */
   .sl-header { flex-direction: column; align-items: flex-start; }
   .sl-filter-row { flex-direction: column; }
-  .sl-filter-input, .sl-filter-select { width: 100%; min-width: unset; }
+  .sl-filter-input, .sl-filter-select, .sl-filter-date { width: 100%; min-width: unset; }
+  .sl-filter-actions { flex-wrap: wrap; }
   .sl-title { font-size: 22px; }
   .sl-table-wrap { margin: 0 -16px; border-radius: 0; border-left: none; border-right: none; }
 }

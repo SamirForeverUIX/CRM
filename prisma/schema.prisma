@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id        String   @id @db.Text
+  firstName String   @map("first_name") @db.Text
+  lastName  String   @map("last_name") @db.Text
+  phone     String   @default("") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  groups Group[]
+
+  @@map("teachers")
+}
+
+model Course {
+  id             String   @id @db.Text
+  name           String   @db.Text
+  code           String   @default("") @db.Text
+  lessonsPerMonth Int     @default(0) @map("lessons_per_month")
+  durationMinutes Int     @default(0) @map("duration_minutes")
+  durationMonths Int      @default(0) @map("duration_months")
+  price          Decimal  @default(0) @db.Decimal(12, 2)
+  description    String   @default("") @db.Text
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  groups Group[]
+
+  @@map("courses")
+}
+
+model Group {
+  id        String   @id @db.Text
+  name      String   @db.Text
+  courseId  String?  @map("course_id") @db.Text
+  teacherId String?  @map("teacher_id") @db.Text
+  days      String[] @default([])
+  room      String   @default("") @db.Text
+  startTime String   @default("") @map("start_time") @db.Text
+  startDate String   @default("") @map("start_date") @db.Text
+  endDate   String   @default("") @map("end_date") @db.Text
+  status    String   @default("active") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  course       Course?        @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  teacher      Teacher?       @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  students     StudentGroup[]
+  charges      Charge[]
+  attendance   Attendance[]
+  primaryFor   Student[]      @relation("PrimaryStudentGroup")
+
+  @@map("groups")
+}
+
+model Student {
+  id        String   @id @db.Text
+  firstName String   @map("first_name") @db.Text
+  lastName  String   @map("last_name") @db.Text
+  phone     String   @default("") @db.Text
+  birthday  String   @default("") @db.Text
+  gender    String   @default("") @db.Text
+  groupId   String?  @map("group_id") @db.Text
+  notes     String   @default("") @db.Text
+  status    String   @default("active") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  primaryGroup Group?         @relation("PrimaryStudentGroup", fields: [groupId], references: [id], onDelete: SetNull)
+  groups       StudentGroup[]
+  charges      Charge[]
+  payments     Payment[]
+
+  @@map("students")
+}
+
+model StudentGroup {
+  studentId String   @map("student_id") @db.Text
+  groupId   String   @map("group_id") @db.Text
+  joinedAt  DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, groupId])
+  @@map("student_groups")
+}
+
+model Charge {
+  id          String   @id @db.Text
+  studentId   String   @map("student_id") @db.Text
+  groupId     String?  @map("group_id") @db.Text
+  month       String   @db.Text
+  amount      Decimal  @default(0) @db.Decimal(12, 2)
+  description String   @default("") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  group   Group?  @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  @@map("charges")
+}
+
+model Payment {
+  id          String   @id @db.Text
+  studentId   String   @map("student_id") @db.Text
+  amount      Decimal  @default(0) @db.Decimal(12, 2)
+  date        String   @default("") @db.Text
+  status      String   @default("paid") @db.Text
+  description String   @default("") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Attendance {
+  id       Int    @id @default(autoincrement())
+  groupId  String @map("group_id") @db.Text
+  date     String @db.Text
+  statuses Json   @default("{}")
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, date])
+  @@map("attendance")
+}
+
+model Setting {
+  id         Int      @id @default(1)
+  centreName String   @default("") @map("centre_name") @db.Text
+  phone      String   @default("") @db.Text
+  email      String   @default("") @db.Text
+  address    String   @default("") @db.Text
+  currency   String   @default("USD") @db.Text
+  rooms      String[] @default([])
+
+  @@map("settings")
+}
