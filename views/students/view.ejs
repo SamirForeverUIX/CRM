@@ -59,9 +59,9 @@
 
           <!-- Birthday -->
           <% if (student.birthday) { %>
-          <div class="sv-info-section" style="margin-top: 12px;">
-            <span class="sv-info-label" style="display:inline;">Birthday:</span>
-            <span class="sv-info-value" style="margin-left: 6px;">
+          <div class="sv-info-section sv-birthday-row">
+            <span class="sv-info-label">Birthday:</span>
+            <span class="sv-info-value">
               <% const bd = new Date(student.birthday); %>
               <%= String(bd.getDate()).padStart(2,'0') %>.<%= String(bd.getMonth()+1).padStart(2,'0') %>.<%= bd.getFullYear() %>
             </span>
@@ -248,12 +248,12 @@
                 });
 
                 const chargesThisMonth = (charges || []).filter(function(c) { return c.month === monthKey; });
-                months.push({ label: label, groups: chargesThisMonth.length, balance: monthlyPaid - monthlyOwed });
+                months.push({ label: label, chargeCount: chargesThisMonth.length, balance: monthlyPaid - monthlyOwed });
               }
             %>
             <% months.forEach(function(m) { %>
               <div class="sv-month-card <%= m.balance < 0 ? 'negative' : m.balance > 0 ? 'positive' : '' %>">
-                <div class="sv-month-label"><%= m.label %> <span><%= m.groups %></span></div>
+                <div class="sv-month-label"><%= m.label %><% if (m.chargeCount > 0) { %> <span title="<%= m.chargeCount %> charge(s)"><%= m.chargeCount %></span><% } %></div>
                 <div class="sv-month-amount"><%= m.balance.toLocaleString() %></div>
               </div>
             <% }) %>
@@ -291,10 +291,10 @@
                   <tr>
                     <td><%= c.month %></td>
                     <td><% const cg = studentGroups.find(function(g) { return g.id === c.groupId; }); %><%= cg ? cg.name : '--' %></td>
-                    <td class="sv-pay-amount" style="color:var(--danger);">&minus;<%= c.amount.toLocaleString() %> <%= currency %></td>
+                    <td class="sv-pay-amount sv-charge-amount">&minus;<%= c.amount.toLocaleString() %> <%= currency %></td>
                     <td class="sv-pay-actions">
                       <form action="/students/charge/<%= student.id %>/delete/<%= c.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, 'this charge')">
-                        <button type="submit" class="sv-dropdown-item sv-dropdown-danger" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:12px;">Delete</button>
+                        <button type="submit" class="sv-dropdown-item sv-dropdown-danger sv-charge-delete-btn">Delete</button>
                       </form>
                     </td>
                   </tr>
@@ -305,10 +305,10 @@
         <% } %>
 
         <!-- Skip Month -->
-        <div class="sv-payment-form-wrap" style="margin-top:8px;">
-          <form action="/students/skip-month/<%= student.id %>" method="POST" class="sv-payment-form" style="justify-content:flex-start;gap:8px;">
+        <div class="sv-payment-form-wrap sv-skip-month-wrap">
+          <form id="skipMonthForm" action="/students/skip-month/<%= student.id %>" method="POST" class="sv-payment-form sv-skip-month-form">
             <input type="month" name="month" value="<%= new Date().toISOString().slice(0, 7) %>">
-            <button type="submit" class="sv-btn-outline" style="border-color:var(--warning);color:var(--warning);">Skip Month</button>
+            <button type="button" class="sv-btn-outline sv-btn-warning" onclick="confirmSkipMonth()">Clear all charges for month</button>
           </form>
         </div>
 
@@ -803,6 +803,37 @@
       wrap.classList.remove('open');
     }
   });
+
+  // Skip Month confirmation
+  function confirmSkipMonth() {
+    var form = document.getElementById('skipMonthForm');
+    var monthInput = form.querySelector('input[name="month"]');
+    var month = monthInput ? monthInput.value : '';
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML =
+      '<div class="modal-box">' +
+        '<div class="modal-icon danger">' +
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+        '</div>' +
+        '<h3>Clear All Charges</h3>' +
+        '<p>This will delete <strong>all charges</strong> for <strong>' + month + '</strong>. This cannot be undone.</p>' +
+        '<div class="modal-actions">' +
+          '<button class="btn btn-secondary" onclick="closeModal(this)">Cancel</button>' +
+          '<button class="btn" onclick="doSkipMonth(this)" style="background:var(--warning);color:#fff;">Clear charges</button>' +
+        '</div>' +
+      '</div>';
+    overlay._form = form;
+    document.body.appendChild(overlay);
+  }
+
+  function doSkipMonth(btn) {
+    var overlay = btn.closest('.modal-overlay');
+    var form = overlay._form;
+    overlay.classList.add('hiding');
+    setTimeout(function() { overlay.remove(); }, 200);
+    form.submit();
+  }
 
   // Monthly balance scroll
   function scrollMonthly(dir) {
