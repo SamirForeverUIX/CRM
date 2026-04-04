@@ -1,36 +1,158 @@
 /* ============================================================
-   SETTINGS — Room management
+   SETTINGS — Modme-style Settings Page
    ============================================================ */
 
-.rooms-section { margin-top:32px; }
-.rooms-section h2 {
-  font-size:17px; font-weight:600; margin-bottom:16px;
-  display:flex; align-items:center; gap:8px;
+/* Header */
+.st-header { margin-bottom: 8px; }
+.st-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
-.room-add-form { display:flex; gap:10px; margin-bottom:16px; }
-.room-add-form input {
-  flex:1; padding:10px 14px;
-  background:#fff; border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  font-family:inherit; font-size:14px;
+
+/* Sub-navigation tabs */
+.st-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border-light);
+  margin-bottom: 24px;
 }
-.room-add-form input:focus {
-  outline:none; border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(249,115,22,0.1);
+.st-tab {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
 }
-.room-list { display:flex; flex-wrap:wrap; gap:8px; }
-.room-chip {
-  display:inline-flex; align-items:center; gap:8px;
-  padding:8px 14px;
-  background:var(--bg-body); border:1px solid var(--border);
-  border-radius:var(--radius-full);
-  font-size:13px; font-weight:500;
-  transition: all var(--transition-base);
+.st-tab:hover { color: var(--text-primary); }
+.st-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
 }
-.room-chip:hover { border-color: #d1d5db; background: #fff; }
-.room-chip button {
-  background:none; border:none; cursor:pointer;
-  color:var(--text-muted); font-size:16px; padding:0;
-  line-height:1; display:flex; align-items:center;
+
+/* Tab content */
+.st-tab-content { display: none; }
+.st-tab-content.active { display: block; }
+
+/* Form card */
+.st-form-card {
+  background: #fff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  padding: 28px 32px;
+  max-width: 700px;
 }
-.room-chip button:hover { color:var(--danger); }
+.st-form-group {
+  margin-bottom: 20px;
+}
+.st-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.st-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.st-form-actions {
+  margin-top: 8px;
+}
+
+/* Rooms tab header */
+.st-rooms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.st-rooms-count {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Rooms table */
+.st-rooms-table-wrap {
+  background: #fff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+.st-rooms-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.st-rooms-table thead th {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-body);
+}
+.st-rooms-table tbody td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+}
+.st-rooms-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.st-rooms-table tbody tr:hover {
+  background: var(--bg-body);
+}
+.st-room-num {
+  width: 50px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.st-room-name { font-weight: 500; }
+.st-room-capacity { color: var(--text-secondary); }
+.st-room-actions {
+  width: 100px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Action icons */
+.st-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.st-action-icon:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #fff7ed;
+}
+.st-action-danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: #fef2f2;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .st-form-row { grid-template-columns: 1fr; }
+  .st-form-card { padding: 20px; }
+  .st-tab { padding: 10px 16px; font-size: 13px; }
+}

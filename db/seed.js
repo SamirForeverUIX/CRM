@@ -43,10 +43,10 @@ async function seed() {
   // Groups
   for (const g of groups) {
     await db.query(
-      `INSERT INTO groups (id, name, course_id, teacher_id, days, room, start_time, start_date, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO groups (id, name, course_id, teacher_id, days, room, start_time, start_date, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (id) DO NOTHING`,
-      [g.id, g.name, g.courseId || null, g.teacherId || null, g.days || [], g.room || '', g.startTime || '', g.startDate || '', g.createdAt]
+      [g.id, g.name, g.courseId || null, g.teacherId || null, g.days || [], g.room || '', g.startTime || '', g.startDate || '', g.status || 'active', g.createdAt]
     );
 
     // Attendance
@@ -66,11 +66,12 @@ async function seed() {
 
   // Students
   for (const s of students) {
+    const primaryGroupId = (s.groupId || (s.groupIds || [])[0] || null);
     await db.query(
-      `INSERT INTO students (id, first_name, last_name, phone, birthday, gender, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO students (id, first_name, last_name, phone, birthday, gender, group_id, notes, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (id) DO NOTHING`,
-      [s.id, s.firstName, s.lastName, s.phone, s.birthday || '', s.gender || '', s.createdAt]
+      [s.id, s.firstName, s.lastName, s.phone, s.birthday || '', s.gender || '', primaryGroupId, s.notes || '', s.status || 'active', s.createdAt]
     );
 
     // Student-Group associations
@@ -87,10 +88,10 @@ async function seed() {
     // Payments
     for (const p of (s.payments || [])) {
       await db.query(
-        `INSERT INTO payments (id, student_id, amount, date, status)
-         VALUES ($1, $2, $3, $4, $5)
+        `INSERT INTO payments (id, student_id, amount, date, status, description)
+         VALUES ($1, $2, $3, $4, $5, $6)
          ON CONFLICT (id) DO NOTHING`,
-        [p.id, s.id, p.amount || 0, p.date || '', p.status || 'paid']
+        [p.id, s.id, p.amount || 0, p.date || '', p.status || 'paid', p.description || '']
       );
     }
   }
@@ -110,6 +111,17 @@ async function seed() {
     [settings.centreName, settings.phone || '', settings.email || '', settings.address || '', settings.currency || 'UZS', settings.rooms || []]
   );
   console.log('  Seeded settings');
+
+  // Rooms (from settings.rooms array)
+  const { v4: uuidv4 } = require('uuid');
+  const roomNames = settings.rooms || [];
+  for (const roomName of roomNames) {
+    await db.query(
+      `INSERT INTO rooms (id, name, capacity) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING`,
+      [uuidv4(), roomName, 0]
+    );
+  }
+  console.log(`  Seeded ${roomNames.length} rooms`);
 
   console.log('Seed complete.');
   await db.pool.end();

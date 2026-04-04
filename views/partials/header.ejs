@@ -4,25 +4,62 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <a href="/" class="header-brand">
-      <span class="header-brand-logo">B</span>
+      <span class="header-brand-logo">
+        <img src="/assets/logo/logo.jpg" alt="Logo" class="header-brand-logo-img">
+      </span>
       <span class="header-brand-name"><%= (settings && settings.centreName) ? settings.centreName : 'Backpack LC' %></span>
     </a>
+    <div class="header-quick-add">
+      <button class="header-add-btn" onclick="toggleQuickAdd()" aria-label="Quick add">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <div class="quick-add-dropdown" id="quickAddDropdown">
+        <a href="/students/add" class="quick-add-item"><i data-lucide="user-plus" width="16" height="16"></i> Add Student</a>
+        <a href="/groups/add" class="quick-add-item"><i data-lucide="folder-plus" width="16" height="16"></i> Add Group</a>
+        <a href="/teachers/add" class="quick-add-item"><i data-lucide="user-check" width="16" height="16"></i> Add Teacher</a>
+        <a href="/courses/add" class="quick-add-item"><i data-lucide="book-plus" width="16" height="16"></i> Add Course</a>
+      </div>
+    </div>
   </div>
   <div class="header-center">
     <form class="search-form" action="/search" method="GET">
+      <input type="text" name="q" placeholder="Search" value="" autocomplete="off">
       <button type="submit" aria-label="Search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
-      <input type="text" name="q" placeholder="Search" value="" autocomplete="off">
     </form>
   </div>
   <div class="header-right">
     <button class="header-icon-btn" title="Notifications">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </button>
-    <a href="/settings" class="profile-btn">
-      <span class="profile-icon">A</span>
-      <span class="profile-label">Admin</span>
-    </a>
+    <div class="header-user">
+      <button class="header-user-btn" onclick="toggleUserMenu()">
+        <span class="header-user-name">Admin</span>
+        <span class="header-user-avatar">
+          <img src="/assets/logo/logo.jpg" alt="User">
+        </span>
+      </button>
+      <div class="header-user-dropdown" id="userDropdown">
+        <a href="/settings" class="user-dropdown-item">Account</a>
+        <div class="user-dropdown-divider"></div>
+        <a href="#" class="user-dropdown-item">Sign out</a>
+      </div>
+    </div>
   </div>
 </header>
+<script>
+function toggleQuickAdd(){
+  document.getElementById('quickAddDropdown').classList.toggle('show');
+  document.getElementById('userDropdown').classList.remove('show');
+}
+function toggleUserMenu(){
+  document.getElementById('userDropdown').classList.toggle('show');
+  document.getElementById('quickAddDropdown').classList.remove('show');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.header-quick-add')) document.getElementById('quickAddDropdown').classList.remove('show');
+  if(!e.target.closest('.header-user')) document.getElementById('userDropdown').classList.remove('show');
+});
+document.addEventListener('DOMContentLoaded',function(){ if(window.lucide) lucide.createIcons(); });
+</script>

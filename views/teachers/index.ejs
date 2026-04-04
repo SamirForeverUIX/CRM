@@ -3,9 +3,12 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1>Teachers <span class="page-subtitle">Quantity &mdash; <%= teachers.length %></span></h1>
-      <a href="/teachers/add" class="btn btn-primary">ADD NEW</a>
+    <div class="sl-header">
+      <div class="sl-header-left">
+        <h1 class="sl-title">Teachers</h1>
+        <span class="sl-quantity">Quantity &mdash; <strong><%= teachers.length %></strong></span>
+      </div>
+      <button onclick="openAddTeacherPanel()" class="sl-add-btn">ADD NEW</button>
     </div>
 
     <% if (search) { %>
@@ -15,22 +18,79 @@
     <% if (teachers.length === 0) { %>
       <div class="empty-state">
         <div class="empty-state-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <i data-lucide="graduation-cap" width="32" height="32"></i>
         </div>
         <p>No teachers found.</p>
-        <a href="/teachers/add" class="btn btn-primary">Add your first teacher</a>
+        <button onclick="openAddTeacherPanel()" class="btn btn-primary">Add your first teacher</button>
       </div>
     <% } else { %>
       <div class="teachers-grid">
         <% teachers.forEach((teacher, i) => { %>
-          <a href="/teachers/view/<%= teacher.id %>" class="teacher-card">
+          <div class="teacher-card" onclick="window.location='/teachers/view/<%= teacher.id %>'" style="cursor:pointer;">
             <span class="teacher-card-name"><%= teacher.firstName %> <%= teacher.lastName %></span>
             <span class="teacher-card-phone"><%= teacher.phone %></span>
             <span class="teacher-card-groups"><%= teacher.groupCount || 0 %> group<%= (teacher.groupCount || 0) !== 1 ? 's' : '' %></span>
-          </a>
+            <div class="teacher-card-menu-wrap" onclick="event.stopPropagation();">
+              <button class="teacher-card-menu-btn" onclick="this.parentElement.classList.toggle('open')">
+                <svg width="4" height="16" viewBox="0 0 4 16" fill="currentColor"><circle cx="2" cy="2" r="1.5"/><circle cx="2" cy="8" r="1.5"/><circle cx="2" cy="14" r="1.5"/></svg>
+              </button>
+              <div class="teacher-card-dropdown">
+                <a href="/teachers/view/<%= teacher.id %>" class="teacher-dd-item">View</a>
+                <a href="/teachers/edit/<%= teacher.id %>" class="teacher-dd-item">Edit</a>
+                <form action="/teachers/delete/<%= teacher.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this teacher?')">
+                  <button type="submit" class="teacher-dd-item teacher-dd-danger">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
         <% }) %>
       </div>
     <% } %>
   </div>
+
+  <!-- ============ ADD NEW TEACHER SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="addTeacherPanel" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Add New Teacher</h2>
+        <button class="gv-modal-close" onclick="closeAddTeacherPanel()">&times;</button>
+      </div>
+      <form action="/teachers/add" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label for="addTFirstName">First Name</label>
+          <input type="text" id="addTFirstName" name="firstName" class="gv-input" required placeholder="Enter first name">
+        </div>
+        <div class="gv-form-group">
+          <label for="addTLastName">Last Name</label>
+          <input type="text" id="addTLastName" name="lastName" class="gv-input" required placeholder="Enter last name">
+        </div>
+        <div class="gv-form-group">
+          <label for="addTPhone">Phone Number</label>
+          <input type="tel" id="addTPhone" name="phone" class="gv-input" required placeholder="Enter phone number">
+        </div>
+        <button type="submit" class="gv-submit-btn">Add Teacher</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+<script>
+function openAddTeacherPanel() {
+  document.getElementById('addTeacherPanel').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAddTeacherPanel() {
+  document.getElementById('addTeacherPanel').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'addTeacherPanel') closeAddTeacherPanel();
+  if (!e.target.closest('.teacher-card-menu-wrap')) {
+    document.querySelectorAll('.teacher-card-menu-wrap.open').forEach(function(m) { m.classList.remove('open'); });
+  }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAddTeacherPanel();
+});
+</script>
 <%- include('../partials/footer') %>

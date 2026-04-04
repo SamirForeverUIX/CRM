@@ -18,32 +18,33 @@
     <% } %>
 
     <form action="/students/edit/<%= student.id %>" method="POST" class="form-card">
+      <%- include('../components/input', { id: 'firstName', label: 'First Name', name: 'firstName', required: true, value: student.firstName }) %>
+      <%- include('../components/input', { id: 'lastName', label: 'Last Name', name: 'lastName', required: true, value: student.lastName }) %>
+      <%- include('../components/input', { id: 'phone', label: 'Phone Number', name: 'phone', type: 'tel', required: true, value: student.phone }) %>
       <div class="form-group">
-        <label for="firstName">First Name</label>
-        <input type="text" id="firstName" name="firstName" required value="<%= student.firstName %>">
-      </div>
-      <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" name="lastName" required value="<%= student.lastName %>">
-      </div>
-      <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <input type="text" id="phone" name="phone" required value="<%= student.phone %>">
-      </div>
-      <div class="form-group">
-        <label>Assign to Groups</label>
+        <label for="groupId">Assign to Group</label>
         <% if (groups.length === 0) { %>
           <p class="muted">No groups available.</p>
         <% } else { %>
-          <div class="checkbox-group">
+          <select id="groupId" name="groupId">
+            <option value="">-- None --</option>
             <% groups.forEach(g => { %>
-              <label class="checkbox-label">
-                <input type="checkbox" name="groupIds" value="<%= g.id %>" <%= (student.groupIds || []).includes(g.id) ? 'checked' : '' %>>
-                <%= g.name %>
-              </label>
+              <option value="<%= g.id %>" <%= student.groupId === g.id || (student.groupIds || []).includes(g.id) ? 'selected' : '' %>><%= g.name %></option>
             <% }) %>
-          </div>
+          </select>
         <% } %>
+      </div>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="active" <%= student.status === 'active' ? 'selected' : '' %>>Active</option>
+          <option value="inactive" <%= student.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+          <option value="archived" <%= student.status === 'archived' ? 'selected' : '' %>>Archived</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="notes">Notes</label>
+        <input type="text" id="notes" name="notes" value="<%= student.notes || '' %>">
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save Changes</button>

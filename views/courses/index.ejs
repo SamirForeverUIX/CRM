@@ -3,9 +3,11 @@
 <main class="main-content">
   <%- include('../partials/header') %>
   <div class="content-area">
-    <div class="page-header">
-      <h1>Courses <span class="page-subtitle">Quantity &mdash; <%= courses.length %></span></h1>
-      <a href="/courses/add" class="btn btn-primary">ADD NEW</a>
+    <div class="sl-header">
+      <div class="sl-header-left">
+        <h1 class="sl-title">Courses</h1>
+      </div>
+      <button onclick="openAddCoursePanel()" class="sl-add-btn">ADD NEW</button>
     </div>
 
     <% if (search) { %>
@@ -15,41 +17,117 @@
     <% if (courses.length === 0) { %>
       <div class="empty-state">
         <div class="empty-state-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <i data-lucide="book-open" width="32" height="32"></i>
         </div>
         <p>No courses found.</p>
-        <a href="/courses/add" class="btn btn-primary">Add your first course</a>
+        <button onclick="openAddCoursePanel()" class="btn btn-primary">Add your first course</button>
       </div>
     <% } else { %>
       <%
-        var courseColors = ['#f97316', '#ec4899', '#14b8a6', '#eab308', '#8b5cf6', '#06b6d4', '#16a34a', '#2563eb'];
-        var courseBgs = ['#fff7ed', '#fdf2f8', '#f0fdfa', '#fefce8', '#f5f3ff', '#ecfeff', '#f0fdf4', '#eff6ff'];
+        var bannerColors = ['#b8e6c8','#f9a8c9','#b2dfdb','#c5b3e6','#f9a8c9','#80deea','#b8e6c8','#90caf9','#ffe0b2','#ce93d8'];
       %>
       <div class="courses-grid">
         <% courses.forEach((course, i) => { %>
-          <% var color = courseColors[i % courseColors.length]; var bg = courseBgs[i % courseBgs.length]; %>
-          <a href="/courses/view/<%= course.id %>" class="course-card" style="border-top:4px solid <%= color %>;">
-            <div class="course-card-icon" style="background:<%= bg %>;color:<%= color %>;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <% var bannerBg = bannerColors[i % bannerColors.length]; %>
+          <a href="/courses/view/<%= course.id %>" class="course-card-modme">
+            <div class="course-card-banner" style="background:<%= bannerBg %>;">
+              <span class="course-card-banner-name"><%= course.name %></span>
+              <div class="course-card-banner-illustration">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="25" y="30" width="50" height="8" rx="2" fill="rgba(255,255,255,0.5)"/>
+                  <rect x="20" y="40" width="50" height="8" rx="2" fill="rgba(255,255,255,0.35)"/>
+                  <rect x="30" y="50" width="50" height="8" rx="2" fill="rgba(255,255,255,0.45)"/>
+                  <rect x="22" y="60" width="55" height="8" rx="2" fill="rgba(255,255,255,0.3)"/>
+                  <circle cx="75" cy="35" r="8" fill="rgba(255,255,255,0.4)"/>
+                  <rect x="68" y="55" width="4" height="20" rx="1" fill="rgba(255,200,50,0.6)"/>
+                  <polygon points="70,50 74,55 66,55" fill="rgba(255,200,50,0.5)"/>
+                </svg>
+              </div>
             </div>
-            <div class="course-card-name"><%= course.name %></div>
-            <% if (course.code) { %>
-              <div class="course-card-code"><%= course.code %></div>
-            <% } %>
-            <div class="course-card-price" style="color:<%= color %>;">
-              <%= course.price ? course.price.toLocaleString() : '0' %>
-            </div>
-            <div class="course-card-meta">
-              <% if (course.durationMonths) { %><span><%= course.durationMonths %> months</span><% } %>
-              <% if (course.lessonsPerMonth) { %><span><%= course.lessonsPerMonth %> lessons/mo</span><% } %>
-            </div>
-            <div class="course-card-actions">
-              <span class="btn btn-small btn-edit" onclick="event.preventDefault();window.location='/courses/edit/<%= course.id %>';">Edit</span>
+            <div class="course-card-body">
+              <div class="course-card-title"><%= course.name %></div>
+              <div class="course-card-price-row">
+                <%= course.price ? course.price.toLocaleString() : '0' %> <%= typeof currency !== 'undefined' ? currency : 'UZS' %>
+              </div>
             </div>
           </a>
         <% }) %>
       </div>
     <% } %>
   </div>
+
+  <!-- ============ ADD NEW COURSE SLIDE-IN PANEL ============ -->
+  <div class="gv-modal-overlay" id="addCoursePanel" style="display:none;">
+    <div class="gv-modal-container">
+      <div class="gv-modal-header">
+        <h2>Add New Course</h2>
+        <button class="gv-modal-close" onclick="closeAddCoursePanel()">&times;</button>
+      </div>
+      <form action="/courses/add" method="POST" class="gv-modal-form">
+        <div class="gv-form-group">
+          <label>Course Name</label>
+          <input type="text" name="name" class="gv-input" required placeholder="Enter course name">
+        </div>
+        <div class="gv-form-group">
+          <label>Course Code</label>
+          <input type="text" name="code" class="gv-input" placeholder="e.g. ENG, MATH">
+        </div>
+        <div class="gv-form-group">
+          <label>Lessons per Month</label>
+          <select name="lessonsPerMonth" class="gv-select">
+            <option value="">Select</option>
+            <% for (var i = 1; i <= 28; i++) { %>
+              <option value="<%= i %>"><%= i %></option>
+            <% } %>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Lesson Duration (minutes)</label>
+          <select name="durationMinutes" class="gv-select">
+            <option value="">Select</option>
+            <option value="30">30 min</option>
+            <option value="40">40 min</option>
+            <option value="45">45 min</option>
+            <option value="50">50 min</option>
+            <option value="60">60 min</option>
+            <option value="80">80 min</option>
+            <option value="90">90 min</option>
+            <option value="120">120 min</option>
+          </select>
+        </div>
+        <div class="gv-form-group">
+          <label>Course Duration (months)</label>
+          <input type="number" name="durationMonths" class="gv-input" min="1" placeholder="e.g. 6">
+        </div>
+        <div class="gv-form-group">
+          <label>Price</label>
+          <input type="number" name="price" class="gv-input" min="0" placeholder="Enter price">
+        </div>
+        <div class="gv-form-group">
+          <label>Description</label>
+          <textarea name="description" class="gv-input" rows="3" placeholder="Course description (optional)" style="resize:vertical;"></textarea>
+        </div>
+        <button type="submit" class="gv-submit-btn">Add Course</button>
+      </form>
+    </div>
+  </div>
+
 </main>
+
+<script>
+function openAddCoursePanel() {
+  document.getElementById('addCoursePanel').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAddCoursePanel() {
+  document.getElementById('addCoursePanel').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'addCoursePanel') closeAddCoursePanel();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAddCoursePanel();
+});
+</script>
 <%- include('../partials/footer') %>

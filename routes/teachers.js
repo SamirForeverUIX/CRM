@@ -5,6 +5,7 @@ const teachersRepo = require('../db/teachersRepo');
 const groupsRepo = require('../db/groupsRepo');
 const coursesRepo = require('../db/coursesRepo');
 const studentsRepo = require('../db/studentsRepo');
+const { isValidPhone } = require('../utils/validation');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -65,6 +66,9 @@ router.post('/add', async (req, res, next) => {
     if (!firstName || !lastName || !phone) {
       return res.render('teachers/add', { page: 'teachers', error: 'All fields are required.' });
     }
+    if (!isValidPhone(phone)) {
+      return res.render('teachers/add', { page: 'teachers', error: 'Invalid phone number format.' });
+    }
     await teachersRepo.create({
       id: uuidv4(), firstName: firstName.trim(), lastName: lastName.trim(),
       phone: phone.trim(), createdAt: new Date().toISOString()
@@ -89,6 +93,9 @@ router.post('/edit/:id', async (req, res, next) => {
     if (!firstName || !lastName || !phone) {
       return res.render('teachers/edit', { page: 'teachers', teacher, error: 'All fields are required.' });
     }
+    if (!isValidPhone(phone)) {
+      return res.render('teachers/edit', { page: 'teachers', teacher, error: 'Invalid phone number format.' });
+    }
     await teachersRepo.update(req.params.id, { firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim() });
     res.redirect('/teachers/view/' + req.params.id);
   } catch (err) { next(err); }
@@ -96,6 +103,11 @@ router.post('/edit/:id', async (req, res, next) => {
 
 router.post('/delete/:id', async (req, res, next) => {
   try {
+    const groups = await groupsRepo.findAll();
+    const dependentGroups = groups.filter(g => g.teacherId === req.params.id);
+    if (dependentGroups.length > 0) {
+      return res.status(400).send('Cannot delete teacher: assigned to ' + dependentGroups.length + ' group(s). Reassign them first.');
+    }
     await teachersRepo.delete(req.params.id);
     res.redirect('/teachers');
   } catch (err) { next(err); }

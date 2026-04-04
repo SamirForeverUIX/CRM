@@ -8,82 +8,143 @@
       <span class="breadcrumb-item"><a href="/teachers">Teachers</a></span>
       <span class="breadcrumb-item active"><%= teacher.firstName %> <%= teacher.lastName %></span>
     </nav>
-    <div class="page-header">
-      <h1><%= teacher.firstName %> <%= teacher.lastName %></h1>
-      <div>
-        <button onclick="openEditTeacherModal()" class="btn btn-primary">Edit</button>
-        <a href="/teachers" class="btn btn-secondary">Back</a>
-      </div>
+
+    <!-- Page Title -->
+    <div class="tv-page-header">
+      <h1 class="tv-page-title"><%= teacher.firstName %> <%= teacher.lastName %></h1>
     </div>
 
-    <div class="teacher-view-layout">
-      <!-- LEFT: Profile Card -->
-      <div>
-        <div class="teacher-profile-card">
-          <div class="teacher-profile-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <div class="teacher-profile-name"><%= teacher.firstName %> <%= teacher.lastName %></div>
-          <div class="teacher-profile-info">Phone: <a href="tel:<%= teacher.phone %>"><%= teacher.phone %></a></div>
-          <div style="margin-top:12px;">
-            <span class="teacher-profile-badge role">Teacher</span>
-          </div>
-          <div style="margin-top:8px;">
-            <span class="teacher-profile-badge branch">Backpack LC</span>
+    <!-- Tab Bar -->
+    <div class="tv-tabs">
+      <button class="tv-tab active" data-tab="profile">PROFILE</button>
+      <button class="tv-tab" data-tab="history">History</button>
+      <button class="tv-tab" data-tab="salary">Salary</button>
+    </div>
+
+    <!-- TAB: PROFILE -->
+    <div class="tv-tab-content active" id="tab-profile">
+      <div class="teacher-view-layout">
+        <!-- LEFT: Profile Card -->
+        <div>
+          <div class="teacher-profile-card">
+            <div class="tv-profile-top">
+              <div class="teacher-profile-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="tv-profile-actions">
+                <button type="button" class="tv-action-icon" title="Edit" onclick="openEditTeacherModal()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                </button>
+                <form action="/teachers/delete/<%= teacher.id %>" method="POST" class="inline-form" onsubmit="return confirm('Delete this teacher?')">
+                  <button type="submit" class="tv-action-icon tv-action-danger" title="Delete">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="teacher-profile-name"><%= teacher.firstName %> <%= teacher.lastName %></div>
+            <div class="tv-divider"></div>
+            <div class="tv-info-row">
+              <span class="tv-info-label">Phone:</span>
+              <a href="tel:<%= teacher.phone %>" class="tv-phone-link"><%= teacher.phone %></a>
+            </div>
+            <div class="tv-divider"></div>
+            <div class="tv-info-row">
+              <span class="tv-info-label">Added at:</span>
+              <span class="tv-info-value"><%= teacher.createdAt ? new Date(teacher.createdAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : 'Unknown' %></span>
+            </div>
+            <div class="tv-divider"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+              <span class="teacher-profile-badge role">Teacher</span>
+              <span class="teacher-profile-badge branch">Backpack LC</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- MIDDLE: Groups List -->
-      <div>
-        <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;">Groups</h2>
-        <% if (teacherGroups.length === 0) { %>
-          <p class="muted">No groups assigned to this teacher.</p>
-        <% } else { %>
-          <div class="teacher-groups-list">
+        <!-- RIGHT: Groups -->
+        <div>
+          <div class="tv-groups-header">
+            <h2 class="tv-groups-title">Groups</h2>
+            <span class="tv-groups-count"><%= teacherGroups.length %></span>
+          </div>
+          <% if (teacherGroups.length === 0) { %>
+            <div class="tv-empty-groups">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <p>No groups assigned to this teacher.</p>
+            </div>
+          <% } else { %>
+            <div class="tv-groups-grid">
+              <% teacherGroups.forEach((g, i) => { %>
+                <div class="tv-group-card" onclick="selectGroup(<%= i %>)" data-group-idx="<%= i %>">
+                  <div class="tv-group-card-top">
+                    <span class="tv-group-code-badge"><%= g.course ? (g.course.code || g.course.name) : '--' %></span>
+                    <span class="tv-group-student-count"><%= g.studentCount %></span>
+                  </div>
+                  <div class="tv-group-card-name"><%= g.name %></div>
+                  <div class="tv-group-card-meta">
+                    <% if (g.days && g.days.length) { %><%= g.days.join(', ') %><% } %>
+                    <% if (g.startTime) { %> &bull; <%= g.startTime %><% } %>
+                  </div>
+                  <% if (g.startDate) { %>
+                    <div class="tv-group-card-dates"><%= g.startDate %></div>
+                  <% } %>
+                </div>
+              <% }) %>
+            </div>
+
+            <!-- Group Detail Panel (shows selected group's students) -->
             <% teacherGroups.forEach((g, i) => { %>
-              <a href="/groups/view/<%= g.id %>" class="teacher-group-card" data-group="<%= g.id %>">
-                <div>
-                  <span class="teacher-group-code"><%= g.course ? (g.course.code || g.course.name) : '--' %></span>
-                  <div class="teacher-group-name"><%= g.name %></div>
-                  <div class="teacher-group-meta">
-                    <%= g.startDate || '' %><br>
-                    <%= g.days ? g.days.join(', ') : '' %> · <%= g.startTime || '' %>
+              <div class="tv-group-detail-panel" id="groupDetail<%= i %>" style="<%= i === 0 ? '' : 'display:none;' %>">
+                <div class="tv-detail-header">
+                  <span class="tv-group-code-badge"><%= g.course ? (g.course.code || g.course.name) : '' %></span>
+                  <h3><%= g.name %></h3>
+                  <div class="tv-detail-meta">
+                    <span>Room: <strong><%= g.room || '--' %></strong></span>
+                    <span>Start: <strong><%= g.startTime || '--' %></strong></span>
+                    <span>Students: <strong><%= g.studentCount %></strong></span>
                   </div>
                 </div>
-                <span class="teacher-group-students"><%= g.studentCount %></span>
-              </a>
-            <% }) %>
-          </div>
-        <% } %>
-      </div>
-
-      <!-- RIGHT: First group detail preview -->
-      <% if (teacherGroups.length > 0) { %>
-        <% var fg = teacherGroups[0]; %>
-        <div class="teacher-group-detail">
-          <div class="teacher-group-detail-header">
-            <span class="teacher-group-code"><%= fg.course ? (fg.course.code || fg.course.name) : '' %></span>
-            <h3><%= fg.name %></h3>
-            <p>Room: <strong><%= fg.room || '--' %></strong></p>
-            <p>Start: <strong><%= fg.startTime || '--' %></strong></p>
-          </div>
-          <% if (fg.students.length === 0) { %>
-            <p class="muted" style="text-align:center;font-size:13px;">No students in this group.</p>
-          <% } else { %>
-            <% fg.students.forEach(function(s) { %>
-              <div class="teacher-student-row">
-                <div class="avatar avatar-sm avatar-gradient-1" style="width:24px;height:24px;font-size:9px;"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
-                <span class="name"><%= s.firstName %> <%= s.lastName %></span>
-                <span class="phone"><%= s.phone %></span>
+                <% if (g.students.length === 0) { %>
+                  <p class="muted" style="text-align:center;font-size:13px;padding:20px 0;">No students in this group.</p>
+                <% } else { %>
+                  <div class="tv-student-list">
+                    <% g.students.forEach(function(s, si) { %>
+                      <a href="/students/view/<%= s.id %>" class="tv-student-row">
+                        <span class="tv-student-num"><%= si + 1 %></span>
+                        <div class="tv-student-avatar"><%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %></div>
+                        <span class="tv-student-name"><%= s.firstName %> <%= s.lastName %></span>
+                        <span class="tv-student-phone"><%= s.phone %></span>
+                      </a>
+                    <% }) %>
+                  </div>
+                <% } %>
+                <a href="/groups/view/<%= g.id %>" class="tv-goto-group-link">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Go to group
+                </a>
               </div>
             <% }) %>
           <% } %>
-          <a href="/groups/view/<%= fg.id %>" class="go-to-group-link">Go to group &rarr;</a>
         </div>
-      <% } else { %>
-        <div></div>
-      <% } %>
+      </div>
+    </div>
+
+    <!-- TAB: HISTORY (placeholder) -->
+    <div class="tv-tab-content" id="tab-history">
+      <div class="tv-placeholder-panel">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <h3>History</h3>
+        <p>Teacher activity history will appear here.</p>
+      </div>
+    </div>
+
+    <!-- TAB: SALARY (placeholder) -->
+    <div class="tv-tab-content" id="tab-salary">
+      <div class="tv-placeholder-panel">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <h3>Salary</h3>
+        <p>Salary calculation and payment records will appear here.</p>
+      </div>
     </div>
   </div>
 
@@ -96,16 +157,16 @@
       </div>
       <form action="/teachers/edit/<%= teacher.id %>" method="POST" class="tv-modal-form">
         <div class="tv-form-group">
-          <label>First Name</label>
-          <input type="text" name="firstName" value="<%= teacher.firstName %>" class="tv-input" required>
+          <label for="tvFirstName">First Name</label>
+          <input type="text" id="tvFirstName" name="firstName" value="<%= teacher.firstName %>" class="tv-input" required>
         </div>
         <div class="tv-form-group">
-          <label>Last Name</label>
-          <input type="text" name="lastName" value="<%= teacher.lastName %>" class="tv-input" required>
+          <label for="tvLastName">Last Name</label>
+          <input type="text" id="tvLastName" name="lastName" value="<%= teacher.lastName %>" class="tv-input" required>
         </div>
         <div class="tv-form-group">
-          <label>Phone</label>
-          <input type="text" name="phone" value="<%= teacher.phone %>" class="tv-input" required>
+          <label for="tvPhone">Phone</label>
+          <input type="tel" id="tvPhone" name="phone" value="<%= teacher.phone %>" class="tv-input" required>
         </div>
         <button type="submit" class="tv-submit-btn">Save Changes</button>
       </form>
@@ -129,5 +190,25 @@ document.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeEditTeacherModal();
 });
+
+// Tabs
+document.querySelectorAll('.tv-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tv-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tv-tab-content').forEach(function(c) { c.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Group selection
+function selectGroup(idx) {
+  document.querySelectorAll('.tv-group-card').forEach(function(c) { c.classList.remove('active'); });
+  document.querySelectorAll('.tv-group-detail-panel').forEach(function(p) { p.style.display = 'none'; });
+  var card = document.querySelector('[data-group-idx="' + idx + '"]');
+  if (card) card.classList.add('active');
+  var panel = document.getElementById('groupDetail' + idx);
+  if (panel) panel.style.display = '';
+}
 </script>
 <%- include('../partials/footer') %>

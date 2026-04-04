@@ -4,157 +4,156 @@
   <%- include('partials/header') %>
   <div class="content-area">
 
+    <!-- Stat Cards Row (Modme style) -->
     <div class="stats-grid">
+      <a href="/leads" class="stat-card stat-card-link">
+        <div class="stat-icon">
+          <i data-lucide="download" width="36" height="36"></i>
+        </div>
+        <div class="stat-label">Active leads</div>
+        <div class="stat-number"><%= activeLeadsCount %></div>
+      </a>
       <a href="/students" class="stat-card stat-card-link">
-        <div class="stat-icon students">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="stat-icon">
+          <i data-lucide="graduation-cap" width="36" height="36"></i>
         </div>
         <div class="stat-label">Active students</div>
         <div class="stat-number"><%= studentCount %></div>
       </a>
       <a href="/groups" class="stat-card stat-card-link">
-        <div class="stat-icon groups">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <div class="stat-icon">
+          <i data-lucide="layers" width="36" height="36"></i>
         </div>
         <div class="stat-label">Groups</div>
         <div class="stat-number"><%= groupCount %></div>
       </a>
       <a href="/students?debt=unpaid" class="stat-card stat-card-link">
         <div class="stat-icon debtors">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <i data-lucide="triangle-alert" width="36" height="36"></i>
         </div>
         <div class="stat-label">Debtors</div>
         <div class="stat-number danger"><%= debtorCount %></div>
       </a>
       <div class="stat-card">
-        <div class="stat-icon income">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <div class="stat-icon">
+          <i data-lucide="user-check" width="36" height="36"></i>
         </div>
-        <div class="stat-label">Paid this month</div>
+        <div class="stat-label">In a trial lesson</div>
+        <div class="stat-number"><%= trialLessonCount %></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i data-lucide="banknote" width="36" height="36"></i>
+        </div>
+        <div class="stat-label">Paid during the month</div>
         <div class="stat-number"><%= paidCount %></div>
       </div>
-      <a href="/teachers" class="stat-card stat-card-link">
-        <div class="stat-icon teachers">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i data-lucide="user-minus" width="36" height="36"></i>
         </div>
-        <div class="stat-label">Teachers</div>
-        <div class="stat-number"><%= teacherCount %></div>
-      </a>
-      <a href="/courses" class="stat-card stat-card-link">
-        <div class="stat-icon courses">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div class="stat-label">Left active group</div>
+        <div class="stat-number"><%= leftActiveGroupCount %></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i data-lucide="user-x" width="36" height="36"></i>
         </div>
-        <div class="stat-label">Courses</div>
-        <div class="stat-number"><%= courseCount %></div>
-      </a>
+        <div class="stat-label">Left after trial period</div>
+        <div class="stat-number"><%= leftAfterTrialCount %></div>
+      </div>
     </div>
 
-    <h2 class="section-title">Schedule</h2>
-
-    <% if (todayGroups.length === 0) { %>
-      <div class="empty-state" style="padding:40px;">
-        <p>No groups scheduled for today. <a href="/schedule" style="color:var(--primary);font-weight:600;">View full schedule</a></p>
+    <!-- Schedule Section -->
+    <div class="dash-schedule-section">
+      <div class="dash-schedule-header">
+        <div class="dash-schedule-tabs">
+          <button class="dash-tab" data-filter="odd">Odd days</button>
+          <button class="dash-tab" data-filter="even">Even days</button>
+          <button class="dash-tab active" data-filter="other">Other</button>
+        </div>
+        <h2 class="dash-schedule-title">Schedule</h2>
+        <div class="dash-schedule-toggle">
+          <span>Horizontal</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="scheduleOrientationToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
-    <% } else { %>
-      <div class="schedule-table-wrap">
-        <table class="schedule-table">
-          <thead>
-            <tr>
-              <th class="schedule-time-col">Room</th>
-              <% scheduleTimeSlots.forEach(function(t) { %>
-                <th><%= t %></th>
-              <% }) %>
-            </tr>
-          </thead>
-          <tbody>
-            <% scheduleRooms.forEach(function(room) { %>
+
+      <div class="dash-day-selector">
+        <% var allDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; %>
+        <% allDays.forEach(function(day) { %>
+          <button class="dash-day-btn<%= day === todayDay ? ' active' : '' %>" data-day="<%= day %>"><%= day %>.</button>
+        <% }) %>
+      </div>
+
+      <% if (scheduleRooms.length === 0 && todayGroups.length === 0) { %>
+        <div class="empty-state" style="padding:40px;">
+          <p>No groups scheduled. <a href="/groups/add" style="color:var(--primary);font-weight:600;">Add a group</a> with days and room to see the schedule.</p>
+        </div>
+      <% } else { %>
+        <div class="schedule-table-wrap" id="dashScheduleTable">
+          <table class="schedule-table schedule-horizontal">
+            <thead>
               <tr>
-                <td class="schedule-time-cell"><%= room %></td>
+                <th class="schedule-room-col"></th>
                 <% scheduleTimeSlots.forEach(function(t) { %>
-                  <td class="schedule-cell">
-                    <% var matches = todayGroups.filter(function(g) { return g.room === room && g.startTime === t; }); %>
-                    <% var colors = ['color-green','color-blue','color-pink','color-cyan','color-orange','color-purple']; %>
-                    <% matches.forEach(function(g, gi) { %>
-                      <a href="/groups/view/<%= g.id %>" class="schedule-block <%= colors[gi % colors.length] %>">
-                        <span class="schedule-block-code"><%= g.courseCode %></span>
-                        <span class="schedule-block-name"><%= g.name %></span>
-                        <span class="schedule-block-teacher"><%= g.teacherName %></span>
-                        <span class="schedule-block-meta"><%= g.dateRange %> · <%= g.daysStr %></span>
-                        <span class="schedule-block-students"><%= g.studentCount %> st.</span>
-                      </a>
-                    <% }) %>
-                  </td>
+                  <th><%= t %></th>
                 <% }) %>
               </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    <% } %>
-
-    <div class="dashboard-grid">
-      <div class="recent-activity">
-        <h2 class="section-title">Recent Activity</h2>
-        <% if (recentActivities.length === 0) { %>
-          <div class="activity-list">
-            <div class="activity-item">
-              <span class="activity-text">No activity yet. Start by adding some data!</span>
-            </div>
-          </div>
-        <% } else { %>
-          <div class="activity-list">
-            <% recentActivities.forEach(function(a) { %>
-              <div class="activity-item">
-                <div class="activity-icon <%= a.type === 'student' ? 'student-add' : a.type === 'payment' ? 'payment' : a.type === 'group' ? 'group' : 'teacher' %>">
-                  <% if (a.type === 'student') { %>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                  <% } else if (a.type === 'payment') { %>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  <% } else if (a.type === 'group') { %>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                  <% } else { %>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                  <% } %>
-                </div>
-                <div class="activity-text"><%= a.text %></div>
-                <div class="activity-time"><%= a.timeAgo %></div>
-              </div>
-            <% }); %>
-          </div>
-        <% } %>
-      </div>
-
-      <div class="recent-activity">
-        <h2 class="section-title">Recent Students</h2>
-        <% if (recentStudents.length === 0) { %>
-          <div class="activity-list">
-            <div class="activity-item">
-              <span class="activity-text">No students yet. <a href="/students/add" style="color:var(--primary);">Add your first student</a></span>
-            </div>
-          </div>
-        <% } else { %>
-          <div class="activity-list">
-            <% recentStudents.forEach(function(s, i) { %>
-              <a href="/students/view/<%= s.id %>" class="activity-item">
-                <div class="avatar avatar-md avatar-gradient-<%= (i % 6) + 1 %>">
-                  <%= s.firstName.charAt(0) %><%= s.lastName.charAt(0) %>
-                </div>
-                <div class="activity-text">
-                  <strong><%= s.firstName %> <%= s.lastName %></strong>
-                  <br><span style="font-size:12px;color:var(--text-muted);"><%= s.phone %></span>
-                </div>
-                <div class="activity-time">
-                  <% if (s.groupNames.length > 0) { %>
-                    <span class="tag"><%= s.groupNames[0] %></span>
-                  <% } %>
-                </div>
-              </a>
-            <% }); %>
-          </div>
-        <% } %>
-      </div>
+            </thead>
+            <tbody>
+              <% var colors = ['color-green','color-blue','color-pink','color-cyan','color-orange','color-purple']; %>
+              <% var colorMap = {}; var colorIdx = 0; %>
+              <% scheduleRooms.forEach(function(room) { %>
+                <tr>
+                  <td class="schedule-room-cell"><%= room %></td>
+                  <% scheduleTimeSlots.forEach(function(t) { %>
+                    <td class="schedule-cell">
+                      <% var matches = todayGroups.filter(function(g) { return g.room === room && g.startTime === t; }); %>
+                      <% matches.forEach(function(g) { %>
+                        <% if (!colorMap[g.courseCode]) { colorMap[g.courseCode] = colors[colorIdx++ % colors.length]; } %>
+                        <a href="/groups/view/<%= g.id %>" class="schedule-block <%= colorMap[g.courseCode] %>">
+                          <% if (g.newDays !== null && g.newDays !== undefined) { %>
+                            <span class="schedule-block-badge">new <%= g.newDays %> days</span>
+                          <% } %>
+                          <div class="schedule-block-top">
+                            <span class="schedule-block-code"><%= g.courseCode %></span>
+                            <span class="schedule-block-name"><%= g.name %></span>
+                          </div>
+                          <span class="schedule-block-teacher"><%= g.teacherName %></span>
+                          <span class="schedule-block-meta"><%= g.dateRange %> · <%= g.daysStr %></span>
+                          <span class="schedule-block-students"><%= g.studentCount %> st.<% if (g.maxStudents) { %> / <%= g.maxStudents %><% } %></span>
+                        </a>
+                      <% }) %>
+                    </td>
+                  <% }) %>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
     </div>
 
   </div>
 </main>
+<script>
+// Day selector: client-side switching
+(function(){
+  var allDaysData = <%- allDaysGroups %>;
+  var dayBtns = document.querySelectorAll('.dash-day-btn');
+  dayBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      dayBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      // For full client-side day switch we'd rebuild the table.
+      // For now, navigate with query param
+      window.location.href = '/?day=' + btn.dataset.day;
+    });
+  });
+})();
+</script>
 <%- include('partials/footer') %>

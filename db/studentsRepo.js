@@ -8,13 +8,18 @@ function toObj(row) {
     phone: row.phone,
     birthday: row.birthday || '',
     gender: row.gender || '',
+    groupId: row.group_id || null,
+    notes: row.notes || '',
+    status: row.status || 'active',
     createdAt: row.created_at
   };
 }
 
 module.exports = {
-  async findAll() {
-    const { rows } = await db.query('SELECT * FROM students ORDER BY created_at');
+  async findAll({ includeArchived = false } = {}) {
+    const { rows } = includeArchived
+      ? await db.query('SELECT * FROM students ORDER BY created_at')
+      : await db.query("SELECT * FROM students WHERE status != 'archived' ORDER BY created_at");
     return rows.map(toObj);
   },
 
@@ -25,8 +30,19 @@ module.exports = {
 
   async create(student) {
     await db.query(
-      'INSERT INTO students (id, first_name, last_name, phone, birthday, gender, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      [student.id, student.firstName, student.lastName, student.phone, student.birthday || '', student.gender || '', student.createdAt]
+      'INSERT INTO students (id, first_name, last_name, phone, birthday, gender, group_id, notes, status, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+      [
+        student.id,
+        student.firstName,
+        student.lastName,
+        student.phone,
+        student.birthday || '',
+        student.gender || '',
+        student.groupId || null,
+        student.notes || '',
+        student.status || 'active',
+        student.createdAt
+      ]
     );
   },
 
@@ -39,13 +55,42 @@ module.exports = {
     if (data.phone !== undefined) { sets.push(`phone = $${n++}`); vals.push(data.phone); }
     if (data.birthday !== undefined) { sets.push(`birthday = $${n++}`); vals.push(data.birthday); }
     if (data.gender !== undefined) { sets.push(`gender = $${n++}`); vals.push(data.gender); }
+    if (data.groupId !== undefined) { sets.push(`group_id = $${n++}`); vals.push(data.groupId); }
+    if (data.notes !== undefined) { sets.push(`notes = $${n++}`); vals.push(data.notes); }
+    if (data.status !== undefined) { sets.push(`status = $${n++}`); vals.push(data.status); }
     if (sets.length === 0) return;
     vals.push(id);
     await db.query(`UPDATE students SET ${sets.join(', ')} WHERE id = $${n}`, vals);
   },
 
+  async setPrimaryGroup(studentId, groupId) {
+    try {
+      await db.query('UPDATE students SET group_id = $1 WHERE id = $2', [groupId || null, studentId]);
+    } catch (err) {
+      // Backward compatibility: older databases may not have students.group_id yet.
+      if (err && err.code === '42703') return;
+      throw err;
+    }
+  },
+
   async delete(id) {
     await db.query('DELETE FROM students WHERE id = $1', [id]);
+  },
+
+  async archive(id) {
+    await db.query("UPDATE students SET status = 'archived' WHERE id = $1", [id]);
+  },
+
+  async restore(id) {
+    await db.query("UPDATE students SET status = 'active' WHERE id = $1", [id]);
+  },
+
+  async freeze(id) {
+    await db.query("UPDATE students SET status = 'inactive' WHERE id = $1", [id]);
+  },
+
+  async unfreeze(id) {
+    await db.query("UPDATE students SET status = 'active' WHERE id = $1", [id]);
   },
 
   // Group associations
@@ -62,23 +107,35 @@ module.exports = {
       'INSERT INTO student_groups (student_id, group_id, joined_at) VALUES ($1, $2, $3) ON CONFLICT (student_id, group_id) DO NOTHING',
       [studentId, groupId, joinedAt || new Date().toISOString()]
     );
+    await this.setPrimaryGroup(studentId, groupId);
   },
 
   async setGroups(studentId, groupIds) {
-    await db.query('DELETE FROM student_groups WHERE student_id = $1', [studentId]);
-    for (const gid of groupIds) {
-      await db.query(
-        'INSERT INTO student_groups (student_id, group_id) VALUES ($1, $2) ON CONFLICT (student_id, group_id) DO NOTHING',
-        [studentId, gid]
-      );
-    }
+    await db.transaction(async (client) => {
+      await client.query('DELETE FROM student_groups WHERE student_id = $1', [studentId]);
+      for (const gid of groupIds) {
+        await client.query(
+          'INSERT INTO student_groups (student_id, group_id) VALUES ($1, $2) ON CONFLICT (student_id, group_id) DO NOTHING',
+          [studentId, gid]
+        );
+      }
+      const primaryGroupId = groupIds[0] || null;
+      await client.query('UPDATE students SET group_id = $1 WHERE id = $2', [primaryGroupId, studentId]);
+    });
   },
 
   async removeFromGroup(studentId, groupId) {
-    await db.query(
-      'DELETE FROM student_groups WHERE student_id = $1 AND group_id = $2',
-      [studentId, groupId]
-    );
+    await db.transaction(async (client) => {
+      await client.query(
+        'DELETE FROM student_groups WHERE student_id = $1 AND group_id = $2',
+        [studentId, groupId]
+      );
+      const { rows } = await client.query(
+        'SELECT group_id FROM student_groups WHERE student_id = $1 ORDER BY joined_at DESC LIMIT 1',
+        [studentId]
+      );
+      await client.query('UPDATE students SET group_id = $1 WHERE id = $2', [rows.length ? rows[0].group_id : null, studentId]);
+    });
   },
 
   // Payments
@@ -91,14 +148,15 @@ module.exports = {
       id: r.id,
       amount: parseFloat(r.amount) || 0,
       date: r.date,
-      status: r.status
+      status: r.status,
+      description: r.description || ''
     }));
   },
 
   async addPayment(payment) {
     await db.query(
-      'INSERT INTO payments (id, student_id, amount, date, status) VALUES ($1, $2, $3, $4, $5)',
-      [payment.id, payment.studentId, payment.amount, payment.date, payment.status]
+      'INSERT INTO payments (id, student_id, amount, date, status, description) VALUES ($1, $2, $3, $4, $5, $6)',
+      [payment.id, payment.studentId, payment.amount, payment.date, payment.status, payment.description || '']
     );
   },
 
@@ -136,9 +194,41 @@ module.exports = {
     await db.query('DELETE FROM charges WHERE student_id = $1 AND month = $2', [studentId, month]);
   },
 
+  async getTransactions(studentId) {
+    const [charges, payments] = await Promise.all([
+      this.getCharges(studentId),
+      this.getPayments(studentId)
+    ]);
+
+    const chargeTx = charges.map(c => ({
+      id: c.id,
+      type: 'charge',
+      amount: c.amount,
+      date: c.month ? `${c.month}-01` : '',
+      label: c.description || 'Monthly charge',
+      groupId: c.groupId || null
+    }));
+
+    const paymentTx = payments.map(p => ({
+      id: p.id,
+      type: 'payment',
+      amount: p.amount,
+      date: p.date || '',
+      label: p.description || (p.status === 'partial' ? 'Partial payment' : 'Payment'),
+      status: p.status
+    }));
+
+    return [...chargeTx, ...paymentTx].sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date.localeCompare(b.date);
+    });
+  },
+
   // Get all students with their groups and payments (enriched) - batch queries
-  async findAllEnriched() {
-    const students = await this.findAll();
+  async findAllEnriched({ includeArchived = false } = {}) {
+    const students = await this.findAll({ includeArchived });
     if (students.length === 0) return students;
 
     const studentIds = students.map(s => s.id);
@@ -185,6 +275,9 @@ module.exports = {
     for (const s of students) {
       const sGroups = groupsByStudent[s.id] || [];
       s.groupIds = sGroups.map(r => r.group_id);
+      if (s.groupId && !s.groupIds.includes(s.groupId)) {
+        s.groupIds.unshift(s.groupId);
+      }
       s.groupJoinDates = {};
       sGroups.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
       s.payments = paymentsByStudent[s.id] || [];
@@ -199,10 +292,14 @@ module.exports = {
     if (!s) return null;
     const groupRows = await this.getGroupIds(s.id);
     s.groupIds = groupRows.map(r => r.group_id);
+    if (s.groupId && !s.groupIds.includes(s.groupId)) {
+      s.groupIds.unshift(s.groupId);
+    }
     s.groupJoinDates = {};
     groupRows.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
     s.payments = await this.getPayments(s.id);
     s.charges = await this.getCharges(s.id);
+    s.transactions = await this.getTransactions(s.id);
     return s;
   },
 
@@ -256,6 +353,9 @@ module.exports = {
     for (const s of students) {
       const sGroups = groupsByStudent[s.id] || [];
       s.groupIds = sGroups.map(r => r.group_id);
+      if (s.groupId && !s.groupIds.includes(s.groupId)) {
+        s.groupIds.unshift(s.groupId);
+      }
       s.groupJoinDates = {};
       sGroups.forEach(r => { s.groupJoinDates[r.group_id] = r.joined_at; });
       s.payments = paymentsByStudent[s.id] || [];
@@ -264,14 +364,25 @@ module.exports = {
     return students;
   },
 
-  // Get debtor count - uses efficient batch query instead of N+1
+  // Get debtor count - matches dashboard balance logic (payments - charges < 0)
   async getDebtorCount() {
     const { rows } = await db.query(
-      `SELECT COUNT(DISTINCT s.id) as count FROM students s
-       LEFT JOIN payments p ON s.id = p.student_id
-       WHERE p.id IS NULL
-          OR p.status IN ('unpaid', 'partial')`
+      `SELECT COUNT(*) as count FROM (
+        SELECT s.id,
+          COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.student_id = s.id AND p.status IN ('paid', 'partial')), 0)
+          - COALESCE((SELECT SUM(c.amount) FROM charges c WHERE c.student_id = s.id), 0) AS balance
+        FROM students s WHERE s.status != 'archived'
+      ) sub WHERE sub.balance < 0`
     );
     return parseInt(rows[0].count) || 0;
+  },
+
+  async search(q) {
+    const pattern = '%' + q + '%';
+    const { rows } = await db.query(
+      `SELECT * FROM students WHERE status != 'archived' AND (first_name ILIKE $1 OR last_name ILIKE $1 OR phone ILIKE $1) ORDER BY created_at`,
+      [pattern]
+    );
+    return rows.map(toObj);
   }
 };

@@ -282,6 +282,18 @@
   cursor: default;
 }
 
+/* Tab content panels */
+.sv-stab-content { display: none; }
+.sv-stab-content.active { display: block; }
+
+/* Placeholder panels for upcoming tabs */
+.sv-placeholder-panel {
+  text-align: center; padding: 60px 20px; color: var(--text-muted);
+}
+.sv-placeholder-panel svg { margin-bottom: 16px; opacity: 0.4; }
+.sv-placeholder-panel h3 { font-size: 18px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+.sv-placeholder-panel p { font-size: 14px; }
+
 /* Group Cards */
 .sv-group-card {
   display: flex;

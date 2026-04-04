@@ -6,8 +6,10 @@ function toObj(row) {
     name: row.name,
     code: row.code,
     lessonsPerMonth: row.lessons_per_month,
+    lessonsPerModule: row.lessons_per_month,
     durationMinutes: row.duration_minutes,
     durationMonths: row.duration_months,
+    duration: row.duration_months,
     price: parseFloat(row.price) || 0,
     description: row.description || '',
     createdAt: row.created_at
@@ -42,5 +44,14 @@ module.exports = {
 
   async delete(id) {
     await db.query('DELETE FROM courses WHERE id = $1', [id]);
+  },
+
+  async search(q) {
+    const pattern = '%' + q + '%';
+    const { rows } = await db.query(
+      `SELECT * FROM courses WHERE name ILIKE $1 OR code ILIKE $1 ORDER BY created_at`,
+      [pattern]
+    );
+    return rows.map(toObj);
   }
 };

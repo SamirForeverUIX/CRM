@@ -6,6 +6,11 @@ const groupsRepo = require('../db/groupsRepo');
 const teachersRepo = require('../db/teachersRepo');
 const coursesRepo = require('../db/coursesRepo');
 const settingsRepo = require('../db/settingsRepo');
+const { hasMinLength, parsePositiveNumber, ensureEnum, isIsoMonth, isIsoDate, isValidPhone } = require('../utils/validation');
+const { STUDENT_STATUS_VALUES, STUDENT_STATUS } = require('../utils/domainConstants');
+const { createStudentLifecycleService } = require('../services/studentLifecycleService');
+
+const lifecycle = createStudentLifecycleService(studentsRepo, groupsRepo);
 
 function calculateBalance(student) {
   const charges = student.charges || [];
@@ -17,8 +22,9 @@ function calculateBalance(student) {
 
 router.get('/', async (req, res, next) => {
   try {
+    const showArchived = req.query.archived === '1';
     const [students, groups, teachers, courses] = await Promise.all([
-      studentsRepo.findAllEnriched(),
+      studentsRepo.findAllEnriched({ includeArchived: showArchived }),
       groupsRepo.findAll(),
       teachersRepo.findAll(),
       coursesRepo.findAll()
@@ -71,7 +77,7 @@ router.get('/', async (req, res, next) => {
       };
     });
 
-    res.render('students/index', { page: 'students', students: enriched, groups, search, filterGroup, filterDebt });
+    res.render('students/index', { page: 'students', students: enriched, groups, courses, search, filterGroup, filterDebt, showArchived });
   } catch (err) { next(err); }
 });
 
@@ -84,27 +90,36 @@ router.get('/add', async (req, res, next) => {
 
 router.post('/add', async (req, res, next) => {
   try {
-    const { firstName, lastName, phone } = req.body;
-    let { groupIds } = req.body;
+    const { firstName, lastName, phone, birthday, notes, status } = req.body;
+    const groupId = req.body.groupId || req.body.groupIds || '';
 
-    if (!firstName || !lastName || !phone) {
+    if (!hasMinLength(firstName, 2) || !hasMinLength(lastName, 2)) {
       const groups = await groupsRepo.findAll();
-      return res.render('students/add', { page: 'students', groups, error: 'First name, last name, and phone are required.' });
+      return res.render('students/add', { page: 'students', groups, error: 'First name and last name are required (min 2 characters).' });
     }
-
-    if (!groupIds) groupIds = [];
-    else if (!Array.isArray(groupIds)) groupIds = [groupIds];
+    if (phone && !isValidPhone(phone)) {
+      const groups = await groupsRepo.findAll();
+      return res.render('students/add', { page: 'students', groups, error: 'Invalid phone number format.' });
+    }
+    if (birthday && !isIsoDate(birthday)) {
+      const groups = await groupsRepo.findAll();
+      return res.render('students/add', { page: 'students', groups, error: 'Invalid birthday format (YYYY-MM-DD).' });
+    }
 
     const now = new Date().toISOString();
     const studentId = uuidv4();
 
     await studentsRepo.create({
       id: studentId, firstName: firstName.trim(), lastName: lastName.trim(),
-      phone: phone.trim(), birthday: '', gender: '', createdAt: now
+      phone: phone.trim(), birthday: birthday || '', gender: '',
+      groupId: groupId || null,
+      notes: (notes || '').trim(),
+      status: ensureEnum(status, STUDENT_STATUS_VALUES, STUDENT_STATUS.ACTIVE),
+      createdAt: now
     });
 
-    for (const gid of groupIds) {
-      await studentsRepo.addToGroup(studentId, gid, now);
+    if (groupId) {
+      await studentsRepo.addToGroup(studentId, groupId, now);
     }
 
     res.redirect('/students');
@@ -156,7 +171,8 @@ router.get('/view/:id', async (req, res, next) => {
     res.render('students/view', {
       page: 'students', student, studentGroups: enrichedGroups, allGroups: groups,
       balance, totalPaid, totalOwed, courses, teachers, currency,
-      charges: student.charges || []
+      charges: student.charges || [],
+      transactions: student.transactions || []
     });
   } catch (err) { next(err); }
 });
@@ -172,8 +188,8 @@ router.get('/edit/:id', async (req, res, next) => {
 
 router.post('/edit/:id', async (req, res, next) => {
   try {
-    const { name, phone, birthday, gender } = req.body;
-    let { groupIds } = req.body;
+    const { name, phone, birthday, gender, notes, status } = req.body;
+    const groupId = req.body.groupId || '';
 
     const student = await studentsRepo.findById(req.params.id);
     if (!student) {
@@ -195,12 +211,24 @@ router.post('/edit/:id', async (req, res, next) => {
     if (phone) updateData.phone = phone.trim();
     if (birthday !== undefined) updateData.birthday = birthday;
     if (gender !== undefined) updateData.gender = gender;
+    if (notes !== undefined) updateData.notes = String(notes).trim();
+    if (status !== undefined) updateData.status = ensureEnum(status, STUDENT_STATUS_VALUES, STUDENT_STATUS.ACTIVE);
+
+    if (phone !== undefined && phone !== '' && !isValidPhone(phone)) {
+      return res.status(400).json({ error: 'Invalid phone number format' });
+    }
+    if (birthday !== undefined && birthday !== '' && !isIsoDate(birthday)) {
+      return res.status(400).json({ error: 'Invalid birthday format (YYYY-MM-DD)' });
+    }
 
     await studentsRepo.update(req.params.id, updateData);
 
-    if (groupIds) {
-      if (!Array.isArray(groupIds)) groupIds = [groupIds];
-      await studentsRepo.setGroups(req.params.id, groupIds);
+    if (groupId !== '') {
+      if (groupId) {
+        await studentsRepo.setGroups(req.params.id, [groupId]);
+      } else {
+        await studentsRepo.setGroups(req.params.id, []);
+      }
     }
 
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
@@ -214,11 +242,29 @@ router.post('/add-to-group/:id', async (req, res, next) => {
   try {
     const { groupId, dateFrom } = req.body;
     const student = await studentsRepo.findById(req.params.id);
-    if (!student) return res.redirect('/students');
-
-    if (groupId) {
-      await studentsRepo.addToGroup(req.params.id, groupId, dateFrom || new Date().toISOString());
+    if (!student) {
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.status(404).json({ error: 'Student not found' });
+      }
+      return res.redirect('/students');
     }
+
+    if (!groupId) {
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.status(400).json({ error: 'Group is required' });
+      }
+      return res.redirect('/students/view/' + req.params.id);
+    }
+
+    const group = await groupsRepo.findById(groupId);
+    if (!group) {
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.status(400).json({ error: 'Invalid group selected' });
+      }
+      return res.redirect('/students/view/' + req.params.id);
+    }
+
+    await studentsRepo.addToGroup(req.params.id, groupId, dateFrom || new Date().toISOString());
 
     res.redirect('/students/view/' + req.params.id);
   } catch (err) { next(err); }
@@ -234,10 +280,10 @@ router.post('/remove-from-group/:id', async (req, res, next) => {
     }
 
     if (groupId) {
-      await studentsRepo.removeFromGroup(req.params.id, groupId);
+      await lifecycle.removeFromGroupAndArchive(req.params.id, groupId);
     }
 
-    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true, archived: true });
     res.redirect('/students/view/' + req.params.id);
   } catch (err) { next(err); }
 });
@@ -262,11 +308,17 @@ router.post('/charge/:id', async (req, res, next) => {
       return res.redirect('/students');
     }
 
+    const parsedAmount = parsePositiveNumber(amount);
+    if (!isIsoMonth(month || '') || parsedAmount === null) {
+      return res.status(400).json({ error: 'Invalid month or amount' });
+    }
+
     await studentsRepo.addCharge({
       id: uuidv4(),
       studentId: req.params.id,
       groupId: groupId || null,
       month,
+      month: month || new Date().toISOString().slice(0, 7),
       amount: parsedAmount,
       description: description || ''
     });
@@ -278,6 +330,10 @@ router.post('/charge/:id', async (req, res, next) => {
 
 router.post('/charge/:studentId/delete/:chargeId', async (req, res, next) => {
   try {
+    const charges = await studentsRepo.getCharges(req.params.studentId);
+    if (!charges.find(c => c.id === req.params.chargeId)) {
+      return res.status(404).json({ error: 'Charge not found for this student' });
+    }
     await studentsRepo.deleteCharge(req.params.chargeId);
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
     res.redirect('/students/view/' + req.params.studentId);
@@ -290,6 +346,8 @@ router.post('/skip-month/:id', async (req, res, next) => {
     if (!month || !/^\d{4}-\d{2}$/.test(month)) {
       if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(400).json({ error: 'Invalid month format.' });
       return res.redirect('/students/view/' + req.params.id);
+    if (!isIsoMonth(month || '')) {
+      return res.status(400).json({ error: 'Invalid month format' });
     }
     await studentsRepo.skipMonth(req.params.id, month);
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
@@ -299,28 +357,62 @@ router.post('/skip-month/:id', async (req, res, next) => {
 
 router.post('/payment/:id', async (req, res, next) => {
   try {
-    const { amount, date, status } = req.body;
+    const { amount, date, status, description } = req.body;
     const student = await studentsRepo.findById(req.params.id);
     if (!student) {
       if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(404).json({ error: 'Student not found' });
       return res.redirect('/students');
     }
 
+    const parsedAmount = parsePositiveNumber(amount);
+    if (parsedAmount === null || (date && !isIsoDate(date))) {
+      return res.status(400).json({ error: 'Invalid payment data' });
+    }
+
+    const paymentId = uuidv4();
+    const savedDate = date || new Date().toISOString().split('T')[0];
+    const savedStatus = status || 'paid';
+    const savedDescription = (description || '').trim();
+
     await studentsRepo.addPayment({
-      id: uuidv4(),
+      id: paymentId,
       studentId: req.params.id,
-      amount: parseFloat(amount) || 0,
-      date: date || new Date().toISOString().split('T')[0],
-      status: status || 'paid'
+      amount: parsedAmount,
+      date: savedDate,
+      status: savedStatus,
+      description: savedDescription
     });
 
-    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      return res.json({
+        success: true,
+        payment: {
+          id: paymentId,
+          amount: parsedAmount,
+          date: savedDate,
+          status: savedStatus,
+          description: savedDescription
+        },
+        transaction: {
+          id: paymentId,
+          type: 'payment',
+          amount: parsedAmount,
+          date: savedDate,
+          label: savedDescription || (savedStatus === 'partial' ? 'Partial payment' : 'Payment'),
+          status: savedStatus
+        }
+      });
+    }
     res.redirect('/students/view/' + req.params.id);
   } catch (err) { next(err); }
 });
 
 router.post('/payment/:studentId/delete/:paymentId', async (req, res, next) => {
   try {
+    const payments = await studentsRepo.getPayments(req.params.studentId);
+    if (!payments.find(p => p.id === req.params.paymentId)) {
+      return res.status(404).json({ error: 'Payment not found for this student' });
+    }
     await studentsRepo.deletePayment(req.params.paymentId);
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
     res.redirect('/students/view/' + req.params.studentId);
@@ -329,9 +421,42 @@ router.post('/payment/:studentId/delete/:paymentId', async (req, res, next) => {
 
 router.post('/delete/:id', async (req, res, next) => {
   try {
+    // Soft delete: archive instead of hard delete
+    await lifecycle.archiveStudent(req.params.id);
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true, redirect: '/students' });
+    res.redirect('/students');
+  } catch (err) { next(err); }
+});
+
+router.post('/hard-delete/:id', async (req, res, next) => {
+  try {
     await studentsRepo.delete(req.params.id);
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true, redirect: '/students' });
     res.redirect('/students');
+  } catch (err) { next(err); }
+});
+
+router.post('/restore/:id', async (req, res, next) => {
+  try {
+    await lifecycle.restoreStudent(req.params.id);
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
+    res.redirect('/students?archived=1');
+  } catch (err) { next(err); }
+});
+
+router.post('/freeze/:id', async (req, res, next) => {
+  try {
+    await lifecycle.freezeStudent(req.params.id);
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
+    res.redirect('/students/view/' + req.params.id);
+  } catch (err) { next(err); }
+});
+
+router.post('/unfreeze/:id', async (req, res, next) => {
+  try {
+    await lifecycle.unfreezeStudent(req.params.id);
+    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });
+    res.redirect('/students/view/' + req.params.id);
   } catch (err) { next(err); }
 });
 

@@ -10,27 +10,61 @@
         <h1 class="sl-title">Students</h1>
         <span class="sl-quantity">Quantity &mdash; <strong><%= students.length %></strong></span>
       </div>
-      <button onclick="openAddStudentPanel()" class="sl-add-btn">ADD NEW</button>
+      <div class="sl-header-actions">
+        <% if (showArchived) { %>
+          <a href="/students<%= search || filterGroup || filterDebt ? '?' + new URLSearchParams({search, group: filterGroup, debt: filterDebt}).toString() : '' %>" class="sl-archived-toggle sl-archived-toggle--hide">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            Hide Archived
+          </a>
+        <% } else { %>
+          <a href="/students?archived=1<%= search ? '&search=' + encodeURIComponent(search) : '' %><%= filterGroup ? '&group=' + filterGroup : '' %><%= filterDebt ? '&debt=' + filterDebt : '' %>" class="sl-archived-toggle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            Show Archived
+          </a>
+        <% } %>
+        <button onclick="openAddStudentPanel()" class="sl-add-btn">ADD NEW</button>
+      </div>
     </div>
 
     <!-- Filter Bar -->
     <form action="/students" method="GET" class="sl-filters">
+      <% if (showArchived) { %><input type="hidden" name="archived" value="1"><% } %>
       <div class="sl-filter-row">
         <input type="text" name="search" placeholder="Search by name or phone" value="<%= search %>" class="sl-filter-input">
-        <select name="group" class="sl-filter-select">
-          <option value="">By Groups</option>
-          <% groups.forEach(g => { %>
-            <option value="<%= g.id %>" <%= filterGroup === g.id ? 'selected' : '' %>><%= g.name %></option>
+        <select name="course" class="sl-filter-select">
+          <option value="">By Courses</option>
+          <% courses.forEach(c => { %>
+            <option value="<%= c.id %>"><%= c.name %></option>
           <% }) %>
+        </select>
+        <select name="status" class="sl-filter-select">
+          <option value="">Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Frozen</option>
+          <option value="archived">Archived</option>
         </select>
         <select name="debt" class="sl-filter-select">
           <option value="">Financial situation</option>
           <option value="unpaid" <%= filterDebt === 'unpaid' ? 'selected' : '' %>>Has debt</option>
           <option value="paid" <%= filterDebt === 'paid' ? 'selected' : '' %>>Fully paid</option>
         </select>
+        <select name="group" class="sl-filter-select">
+          <option value="">By Groups</option>
+          <% groups.forEach(g => { %>
+            <option value="<%= g.id %>" <%= filterGroup === g.id ? 'selected' : '' %>><%= g.name %></option>
+          <% }) %>
+        </select>
+        <input type="date" name="startDate" class="sl-filter-date" placeholder="Start date">
+        <input type="date" name="endDate" class="sl-filter-date" placeholder="End date">
+      </div>
+      <div class="sl-filter-actions">
         <button type="submit" class="sl-filter-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Filters
+        </button>
+        <button type="button" class="sl-filter-btn" onclick="toggleColumns()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Columns
         </button>
         <% if (search || filterGroup || filterDebt) { %>
           <a href="/students" class="sl-filter-btn sl-filter-clear">Clear</a>
@@ -65,7 +99,7 @@
           </thead>
           <tbody>
             <% students.forEach(function(student, i) { %>
-              <tr class="sl-row" onclick="window.location='/students/view/<%= student.id %>'" style="cursor:pointer;">
+              <tr class="sl-row <%= student.status === 'archived' ? 'sl-row--archived' : student.status === 'inactive' ? 'sl-row--frozen' : '' %>" onclick="window.location='/students/view/<%= student.id %>'" style="cursor:pointer;">
                 <td class="sl-cell-num"><%= i + 1 %>.</td>
                 <td class="sl-cell-photo">
                   <div class="sl-photo-placeholder">
@@ -117,16 +151,36 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         View
                       </a>
-                      <a href="/students/edit/<%= student.id %>" class="sl-dropdown-item">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-                        Edit
-                      </a>
-                      <form action="/students/delete/<%= student.id %>" method="POST" class="inline-form" onsubmit="return showDeleteModal(event, '<%= student.firstName %> <%= student.lastName %>')">
-                        <button type="submit" class="sl-dropdown-item sl-dropdown-danger">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                          Delete
+                      <% if (student.status === 'archived') { %>
+                        <button class="sl-dropdown-item sl-dropdown-success" onclick="studentAction(event, '/students/restore/<%= student.id %>', 'restore', '<%= student.firstName %> <%= student.lastName %>')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.88"/></svg>
+                          Restore
                         </button>
-                      </form>
+                        <button class="sl-dropdown-item sl-dropdown-danger" onclick="studentAction(event, '/students/hard-delete/<%= student.id %>', 'delete', '<%= student.firstName %> <%= student.lastName %>')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          Delete Permanently
+                        </button>
+                      <% } else { %>
+                        <a href="/students/edit/<%= student.id %>" class="sl-dropdown-item">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                          Edit
+                        </a>
+                        <% if (student.status === 'inactive') { %>
+                          <button class="sl-dropdown-item" onclick="studentAction(event, '/students/unfreeze/<%= student.id %>', 'unfreeze', '<%= student.firstName %> <%= student.lastName %>')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg>
+                            Unfreeze
+                          </button>
+                        <% } else { %>
+                          <button class="sl-dropdown-item" onclick="studentAction(event, '/students/freeze/<%= student.id %>', 'freeze', '<%= student.firstName %> <%= student.lastName %>')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg>
+                            Freeze
+                          </button>
+                        <% } %>
+                        <button class="sl-dropdown-item sl-dropdown-danger" onclick="studentAction(event, '/students/delete/<%= student.id %>', 'archive', '<%= student.firstName %> <%= student.lastName %>')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                          Archive
+                        </button>
+                      <% } %>
                     </div>
                   </div>
                 </td>
@@ -148,16 +202,16 @@
       </div>
       <form action="/students/add" method="POST" class="gv-modal-form">
         <div class="gv-form-group">
-          <label>First Name</label>
-          <input type="text" name="firstName" class="gv-input" required placeholder="Enter first name">
+          <label for="addSFirstName">First Name</label>
+          <input type="text" id="addSFirstName" name="firstName" class="gv-input" required placeholder="Enter first name">
         </div>
         <div class="gv-form-group">
-          <label>Last Name</label>
-          <input type="text" name="lastName" class="gv-input" required placeholder="Enter last name">
+          <label for="addSLastName">Last Name</label>
+          <input type="text" id="addSLastName" name="lastName" class="gv-input" required placeholder="Enter last name">
         </div>
         <div class="gv-form-group">
-          <label>Phone Number</label>
-          <input type="text" name="phone" class="gv-input" required placeholder="Enter phone number">
+          <label for="addSPhone">Phone Number</label>
+          <input type="tel" id="addSPhone" name="phone" class="gv-input" required placeholder="Enter phone number">
         </div>
         <div class="gv-form-group">
           <label>Assign to Groups</label>
@@ -165,6 +219,12 @@
             <p style="font-size:13px; color:var(--text-muted);">No groups available.</p>
           <% } else { %>
             <div class="gv-days-grid" style="grid-template-columns: 1fr;">
+          <label for="addSGroup">Assign to Group</label>
+          <% if (groups.length === 0) { %>
+            <p style="font-size:13px; color:var(--text-muted);">No groups available.</p>
+          <% } else { %>
+            <select id="addSGroup" name="groupIds" class="gv-select">
+              <option value="">-- Select Group --</option>
               <% groups.forEach(g => { %>
                 <label class="gv-day-checkbox">
                   <input type="checkbox" name="groupIds" value="<%= g.id %>">
@@ -192,9 +252,41 @@ function closeAddStudentPanel() {
 }
 document.addEventListener('click', function(e) {
   if (e.target.id === 'addStudentPanel') closeAddStudentPanel();
+  // Close all dropdowns on outside click
+  if (!e.target.closest('.sl-menu-wrapper')) {
+    document.querySelectorAll('.sl-menu-wrapper.open').forEach(function(m) { m.classList.remove('open'); });
+  }
 });
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeAddStudentPanel();
 });
+
+function studentAction(e, url, type, name) {
+  e.stopPropagation();
+  var labels = {
+    archive: 'Archive "' + name + '"? They will be hidden from the main list.',
+    delete: 'Permanently delete "' + name + '"? This cannot be undone.',
+    restore: 'Restore "' + name + '" to active?',
+    freeze: 'Freeze "' + name + '"? Their status will become inactive.',
+    unfreeze: 'Unfreeze "' + name + '"?'
+  };
+  if (!confirm(labels[type] || 'Are you sure?')) return;
+  var row = e.target.closest('tr');
+  fetch(url, {
+    method: 'POST',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) {
+      if (type === 'delete' || type === 'archive') {
+        if (row) row.remove();
+      } else if (type === 'restore') {
+        if (row) row.remove();
+      } else {
+        // freeze/unfreeze: reload to reflect new status
+        window.location.reload();
+      }
+    }
+  }).catch(function() { window.location.reload(); });
+}
 </script>
 <%- include('../partials/footer') %>

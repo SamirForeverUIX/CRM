@@ -37,5 +37,14 @@ module.exports = {
 
   async delete(id) {
     await db.query('DELETE FROM teachers WHERE id = $1', [id]);
+  },
+
+  async search(q) {
+    const pattern = '%' + q + '%';
+    const { rows } = await db.query(
+      `SELECT * FROM teachers WHERE first_name ILIKE $1 OR last_name ILIKE $1 OR phone ILIKE $1 ORDER BY created_at`,
+      [pattern]
+    );
+    return rows.map(toObj);
   }
 };
