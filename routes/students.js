@@ -292,15 +292,6 @@ router.post('/remove-from-group/:id', async (req, res, next) => {
 router.post('/charge/:id', async (req, res, next) => {
   try {
     const { month, amount, groupId, description } = req.body;
-    const parsedAmount = parseFloat(amount);
-    if (!parsedAmount || parsedAmount <= 0) {
-      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(400).json({ error: 'Amount must be a positive number.' });
-      return res.redirect('/students/view/' + req.params.id);
-    }
-    if (!month || !/^\d{4}-\d{2}$/.test(month)) {
-      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(400).json({ error: 'Invalid month format.' });
-      return res.redirect('/students/view/' + req.params.id);
-    }
 
     const student = await studentsRepo.findById(req.params.id);
     if (!student) {
@@ -310,14 +301,14 @@ router.post('/charge/:id', async (req, res, next) => {
 
     const parsedAmount = parsePositiveNumber(amount);
     if (!isIsoMonth(month || '') || parsedAmount === null) {
-      return res.status(400).json({ error: 'Invalid month or amount' });
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(400).json({ error: 'Invalid month or amount' });
+      return res.redirect('/students/view/' + req.params.id);
     }
 
     await studentsRepo.addCharge({
       id: uuidv4(),
       studentId: req.params.id,
       groupId: groupId || null,
-      month,
       month: month || new Date().toISOString().slice(0, 7),
       amount: parsedAmount,
       description: description || ''
@@ -343,11 +334,9 @@ router.post('/charge/:studentId/delete/:chargeId', async (req, res, next) => {
 router.post('/skip-month/:id', async (req, res, next) => {
   try {
     const { month } = req.body;
-    if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+    if (!isIsoMonth(month || '')) {
       if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.status(400).json({ error: 'Invalid month format.' });
       return res.redirect('/students/view/' + req.params.id);
-    if (!isIsoMonth(month || '')) {
-      return res.status(400).json({ error: 'Invalid month format' });
     }
     await studentsRepo.skipMonth(req.params.id, month);
     if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') return res.json({ success: true });

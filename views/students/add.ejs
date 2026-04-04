@@ -32,8 +32,6 @@
           <p class="muted">No groups available. <a href="/groups/add">Create a group first.</a></p>
         <% } else { %>
           <div class="checkbox-group">
-          <select id="groupId" name="groupId">
-            <option value="">-- Select Group --</option>
             <% groups.forEach(g => { %>
               <label class="checkbox-label">
                 <input type="checkbox" name="groupIds" value="<%= g.id %>">

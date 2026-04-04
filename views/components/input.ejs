@@ -1,11 +1,11 @@
 <div class="form-group">
   <label for="<%= id %>"><%= label %></label>
   <input
-    type="<%= type || 'text' %>"
+    type="<%= typeof type !== 'undefined' ? type : 'text' %>"
     id="<%= id %>"
     name="<%= name %>"
-    <%= required ? 'required' : '' %>
+    <%= typeof required !== 'undefined' && required ? 'required' : '' %>
     value="<%= typeof value !== 'undefined' ? value : '' %>"
-    placeholder="<%= placeholder || '' %>"
+    placeholder="<%= typeof placeholder !== 'undefined' ? placeholder : '' %>"
   >
 </div>
