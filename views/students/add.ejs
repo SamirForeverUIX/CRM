@@ -39,16 +39,18 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="groupId">Assign to Group</label>
+        <label>Assign to Groups</label>
         <% if (groups.length === 0) { %>
           <p class="muted">No groups available. <a href="/groups/add">Create a group first.</a></p>
         <% } else { %>
-          <select id="groupId" name="groupIds">
-            <option value="">-- Select Group --</option>
+          <div class="checkbox-group">
             <% groups.forEach(g => { %>
-              <option value="<%= g.id %>"><%= g.name %></option>
+              <label class="checkbox-label">
+                <input type="checkbox" name="groupIds" value="<%= g.id %>">
+                <%= g.name %>
+              </label>
             <% }) %>
-          </select>
+          </div>
         <% } %>
       </div>
       <div class="form-actions">

@@ -1213,3 +1213,43 @@
 .sv-month-card {
   flex-shrink: 0;
 }
+
+/* === Charge UI === */
+.sv-charge-amount {
+  color: var(--danger);
+}
+.sv-charge-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--danger);
+  font-size: 12px;
+}
+
+/* Skip Month */
+.sv-skip-month-wrap {
+  margin-top: 8px;
+}
+.sv-skip-month-form {
+  justify-content: flex-start;
+  gap: 8px;
+}
+.sv-btn-warning {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+.sv-btn-warning:hover {
+  background: #fffbeb;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+/* Birthday info row */
+.sv-birthday-row {
+  margin-top: 12px;
+}
+.sv-birthday-row .sv-info-label {
+  display: inline;
+}
+.sv-birthday-row .sv-info-value {
+  margin-left: 6px;
+}
